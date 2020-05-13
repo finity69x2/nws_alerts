@@ -8,7 +8,7 @@ Clone the Repository and copy the "nws_alerts" directory to your custom_componen
 
 ```<config directory>/custom_components/nws_alerts/...```
   
-You will end up with two files in that directory - "sensor.py" and ```"__init__.py"```.
+You will end up with two files in that directory - ```"sensor.py"``` and ```"__init__.py"```.
 
 
 ## Configuration:
