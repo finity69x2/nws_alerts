@@ -20,7 +20,7 @@ USER_AGENT = 'Home Assistant'
 DEFAULT_ICON = 'mdi:alert'
 MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=1)
 _LOGGER = logging.getLogger(__name__)
-DEFAULT_NAME = 'NWS Alerts ID'
+DEFAULT_NAME = 'NWS Alerts'
 CONF_ZONE_ID = 'zone_id'
 ZONE_ID = ''
 
