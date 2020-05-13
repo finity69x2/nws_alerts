@@ -1,5 +1,5 @@
 # nws_alerts
-An updated version of the nws_alerts custom integration for Home Assistant
+An updated version of the nws_alerts custom integration for Home Assistant originally found at github.com/eracknaphobia/nws_custom_component
 
 Clone the Repository and copy the "nws_alerts" directory to your custom_components fold in your config directory
 
