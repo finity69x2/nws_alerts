@@ -38,3 +38,5 @@ You can overide the sensor default name ("sensor.nws_alerts") to one of your cho
   zone_id: 'INZ009,INC033'
   name: My NWS Alerts Sensor
 ```
+
+Using the configuration example above the sensor will then be called "sensor.my_nws_alerts_sensor"
