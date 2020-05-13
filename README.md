@@ -27,3 +27,12 @@ or comma separated valuesfor multiple zones:
   zone_id: 'PAC049,WVC031'
 ```
 
+After you restart Home Assistant then you should have a new sensor called "sensor.nws_alerts" in your system.
+
+You can overide the sensor default name ("sensor.nws_alerts") to one of your choosing by setting the "name:" option:
+
+```
+- platform: nws_alerts
+  zone_id: 'INZ009,INC033'
+  name: My NWS Alerts Sensor
+```
