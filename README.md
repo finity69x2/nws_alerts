@@ -4,7 +4,7 @@ An updated version of the nws_alerts custom integration for Home Assistant origi
 
 ## Installation:
 
-Clone the Repository and copy the "nws_alerts" directory to your custom_components fold in your config directory
+Clone the Repository and copy the "nws_alerts" directory to your "custom_components" directory in your config directory
 
 ```<config directory>/custom_components/nws_alerts/...```
   
