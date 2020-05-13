@@ -13,14 +13,16 @@ You will end up with two files in that directory - ```"sensor.py"``` and ```"__i
 
 ## Configuration:
 
-To create a sensor instance add to your sensor definitions:
+You can find your Zone or County ID by going to https://alerts.weather.gov/, scroll down to your state and click on the “zone list” and/or "county list" then look for the entry for your county.
+
+To create a sensor instance add the following configuration to your sensor definitions using the zone_id found above:
 
 ```
 - platform: nws_alerts
   zone_id: 'PAC049'
 ```
 
-or comma separated valuesfor multiple zones:
+or enter comma separated values for multiple zones:
 
 ```
 - platform: nws_alerts
