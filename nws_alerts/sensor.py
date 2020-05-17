@@ -20,7 +20,7 @@ USER_AGENT = 'Home Assistant'
 DEFAULT_ICON = 'mdi:alert'
 MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=1)
 _LOGGER = logging.getLogger(__name__)
-DEFAULT_NAME = 'NWS Alerts'
+DEFAULT_NAME = 'NWS Alerts ID'
 CONF_ZONE_ID = 'zone_id'
 ZONE_ID = ''
 
@@ -130,19 +130,19 @@ class NWSAlertIdSensor(Entity):
         _LOGGER.debug("getting alert for %s from %s" % (self._zone_id, url) )
         if r.status_code == 200:
             events = []
-            event_ids = []
             headlines = []
+            event_id = ''
             display_desc = ''
             spoken_desc = ''
             features = r.json()['features']
             for alert in features:
                 event = alert['properties']['event']
-                event_id = alert['id']
                 if 'NWSheadline' in alert['properties']['parameters']:
                     headline = alert['properties']['parameters']['NWSheadline'][0]
                 else:
                     headline = event
 
+                id = alert['id']
                 description = alert['properties']['description']
                 instruction = alert['properties']['instruction']
 
@@ -150,13 +150,17 @@ class NWSAlertIdSensor(Entity):
                     continue
 
                 events.append(event)
-                event_ids.append(event_id)
                 headlines.append(headline)
 
                 if display_desc != '':
                     display_desc += '\n\n-\n\n'
 
                 display_desc += '%s\n%s\n%s' % (headline, description, instruction)
+				
+                if event_id != '':
+                    event_id += '\n-\n'
+					
+                event_id += id
 
             if headlines:
                 num_headlines = len(headlines)
