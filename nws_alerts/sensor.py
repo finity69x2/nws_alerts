@@ -158,7 +158,7 @@ class NWSAlertIdSensor(Entity):
                 display_desc += '%s\n%s\n%s' % (headline, description, instruction)
 				
                 if event_id != '':
-                    event_id += '\n-\n'
+                    event_id += '\n---\n'
 					
                 event_id += id
 
