@@ -20,7 +20,7 @@ USER_AGENT = 'Home Assistant'
 DEFAULT_ICON = 'mdi:alert'
 MIN_TIME_BETWEEN_UPDATES = timedelta(minutes=1)
 _LOGGER = logging.getLogger(__name__)
-DEFAULT_NAME = 'NWS Alerts ID'
+DEFAULT_NAME = 'NWS Alerts'
 CONF_ZONE_ID = 'zone_id'
 ZONE_ID = ''
 
@@ -37,7 +37,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     add_devices([NWSAlertIdSensor(name, zone_id)])
 
 
-class NWSAlertIdSensor(Entity):
+class NWSAlertSensor(Entity):
     """Representation of a Sensor."""
 
     def __init__(self, name, zone_id):
@@ -71,7 +71,7 @@ class NWSAlertIdSensor(Entity):
     def device_state_attributes(self):
         """Return the state message."""
         attributes = {"title": self._event,
-		              "event_id": self._event_id,
+                      "event_id": self._event_id,
                       "display_desc": self._display_desc,
                       "spoken_desc": self._spoken_desc
 					  }
@@ -158,7 +158,7 @@ class NWSAlertIdSensor(Entity):
                 display_desc += '%s\n%s\n%s' % (headline, description, instruction)
 				
                 if event_id != '':
-                    event_id += '\n---\n'
+                    event_id += '---'
 					
                 event_id += id
 
@@ -187,7 +187,12 @@ class NWSAlertIdSensor(Entity):
                 values['event_id'] = event_id
                 values['display_desc'] = display_desc
                 values['spoken_desc'] = spoken_desc
-
+            
+        if r.status_code != 200:
+                values['state'] = "Unknown"
+                values['event'] = "Unknown"
+                values['event_id'] = "Unknown"
+                values['display_desc'] = "Unknown"
+                values['spoken_desc'] = "Unknown"				
+            			
         return values
-
-
