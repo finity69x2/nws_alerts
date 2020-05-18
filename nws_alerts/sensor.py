@@ -34,7 +34,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     """Setup the sensor platform."""
     name = config.get(CONF_NAME, DEFAULT_NAME)
     zone_id = config.get(CONF_ZONE_ID)
-    add_devices([NWSAlertIdSensor(name, zone_id)])
+    add_devices([NWSAlertSensor(name, zone_id)])
 
 
 class NWSAlertSensor(Entity):
