@@ -1,0 +1,9 @@
+{
+    "domain": "nws_alerts",
+    "name": "NWS Alerts",
+    "documentation": "https://github.com/finity69x2/nws_alerts/",
+    "dependencies": [],
+    "codeowners": ["@finity69x2"],
+    "config_flow": true,
+    "requirements": []
+  }
