@@ -38,17 +38,17 @@ async def async_setup_platform(
     """ Configuration from yaml """
     name = config.get(CONF_NAME, DEFAULT_NAME)
     zone_id = config.get(CONF_ZONE_ID)
-    async_add_entities([NWSAlertIdSensor(name, zone_id)], True)
+    async_add_entities([NWSAlertSensor(name, zone_id)], True)
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
     """ Setup the sensor platform. """
     name = entry.data[CONF_NAME]
     zone_id = entry.data[CONF_ZONE_ID]
-    async_add_entities([NWSAlertIdSensor(name, zone_id)], True)
+    async_add_entities([NWSAlertSensor(name, zone_id)], True)
 
 
-class NWSAlertIdSensor(Entity):
+class NWSAlertSensor(Entity):
     """Representation of a Sensor."""
 
     def __init__(self, name, zone_id):
@@ -150,19 +150,19 @@ class NWSAlertIdSensor(Entity):
         _LOGGER.debug("getting alert for %s from %s" % (self._zone_id, url))
         if r.status_code == 200:
             events = []
-            event_ids = []
             headlines = []
+            event_id = ''
             display_desc = ''
             spoken_desc = ''
             features = r.json()['features']
             for alert in features:
                 event = alert['properties']['event']
-                event_id = alert['id']
                 if 'NWSheadline' in alert['properties']['parameters']:
                     headline = alert['properties']['parameters']['NWSheadline'][0]
                 else:
                     headline = event
 
+                id = alert['id']
                 description = alert['properties']['description']
                 instruction = alert['properties']['instruction']
 
@@ -177,6 +177,11 @@ class NWSAlertIdSensor(Entity):
                     display_desc += '\n\n-\n\n'
 
                 display_desc += '%s\n%s\n%s' % (headline, description, instruction)
+                
+                if event_id != '':
+                    event_id += '---'
+					
+                event_id += id
 
             if headlines:
                 num_headlines = len(headlines)
@@ -203,5 +208,12 @@ class NWSAlertIdSensor(Entity):
                 values['event_id'] = event_id
                 values['display_desc'] = display_desc
                 values['spoken_desc'] = spoken_desc
+                
+        if r.status_code != 200:
+                values['state'] = "Unknown"
+                values['event'] = "Unknown"
+                values['event_id'] = "Unknown"
+                values['display_desc'] = "Unknown"
+                values['spoken_desc'] = "Unknown"          
 
         return values
