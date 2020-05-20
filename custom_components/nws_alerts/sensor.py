@@ -170,7 +170,6 @@ class NWSAlertSensor(Entity):
                     continue
 
                 events.append(event)
-                event_ids.append(event_id)
                 headlines.append(headline)
 
                 if display_desc != '':
