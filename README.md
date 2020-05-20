@@ -46,7 +46,9 @@ You can overide the sensor default name ("sensor.nws_alerts") to one of your cho
   name: My NWS Alerts Sensor
 ```
 
+Using the configuration example above the sensor will then be called "sensor.my_nws_alerts_sensor"
+
 Or you can configure the integration via the "Configuration->Integrations" section of the Home Assistant UI.
 
 Look for the integration labeled "NWS Alerts"
-Using the configuration example above the sensor will then be called "sensor.my_nws_alerts_sensor"
+
