@@ -1,4 +1,5 @@
-# nws_alerts
+# NWS Alerts (nws_alerts)
+
 An updated version of the nws_alerts custom integration for Home Assistant originally found at github.com/eracknaphobia/nws_custom_component
 
 
@@ -8,9 +9,6 @@ Clone the Repository and copy the "nws_alerts" directory to your "custom_compone
 
 ```<config directory>/custom_components/nws_alerts/...```
   
-You will end up with two files in that directory - ```"sensor.py"``` and ```"__init__.py"```.
-
-
 ## Configuration:
 
 You can find your Zone or County ID by going to https://alerts.weather.gov/, scroll down to your state and click on the “zone list” and/or "county list" then look for the entry for your county.
