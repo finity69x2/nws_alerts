@@ -18,6 +18,10 @@ Clone the Repository and copy the "nws_alerts" directory to your "custom_compone
 
 You can find your Zone or County ID by going to https://alerts.weather.gov/, scroll down to your state and click on the “zone list” and/or "county list" then look for the entry for your county.
 
+There are two ways to configure this integration.
+
+Manually via an entry in your configuration.yaml file:
+
 To create a sensor instance add the following configuration to your sensor definitions using the zone_id found above:
 
 ```
@@ -43,3 +47,7 @@ You can overide the sensor default name ("sensor.nws_alerts") to one of your cho
 ```
 
 Using the configuration example above the sensor will then be called "sensor.my_nws_alerts_sensor"
+
+Or you can configure the integration via the "Configuration->Integrations" section of the Home Assistant UI.
+
+Look for the integration labeled "NWS Alerts"
