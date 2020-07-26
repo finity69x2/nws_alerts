@@ -190,8 +190,8 @@ class NWSAlertSensor(Entity):
                 description = alert['properties']['description']
                 instruction = alert['properties']['instruction']
 
-                if event in events:
-                    continue
+                #if event in events:
+                #    continue
 
                 events.append(event)
                 headlines.append(headline)
