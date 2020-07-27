@@ -35,30 +35,6 @@ sensor:
           {% else %}
             mdi:weather-sunny
           {% endif %}
-          
-  - platform: weatheralerts
-    state: IN
-    zone: 9
-    county: 33
-  
-
-#### these are only used for the older rest sensor code #############################
-
-  - platform: rest
-    resource: https://api.weather.gov/alerts/active?zone=INZ009,INC033
-    name: NWS Alert Event Raw
-    value_template: >
-      {% if value_json.features[0] is defined %}
-        {{ value_json['features'][0]['properties'].event }}
-      {% else %}
-        None
-      {% endif %}
-    json_attributes:
-      - features
-    headers:
-      User-Agent: Homeassistant
-      Accept: application/geo+json
-    scan_interval: 60
 
 ######################## BINARY SENSOR  #########################################
 
@@ -76,17 +52,10 @@ binary_sensor:
           {% else %}
             mdi:weather-sunny
           {% endif %}
-      # nws_new_alert:
-        # friendly_name: NWS Alert is New
-        # entity_id: sensor.nws_alerts
-        # value_template: >
-          # {{ state_attr('sensor.nws_alerts', 'event_id').split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list }}
-
 
 ######################## INPUT BOOLEAN  #########################################
 
 input_boolean:
-  #bool_9:
   nws_dismiss_persistent_notification:
     name: Dismiss NWS Persistent Notification          
     
@@ -98,16 +67,11 @@ automation:
     trigger:
       - platform: state
         entity_id: sensor.nws_alerts
-      # - platform: homeassistant
-        # event: start
     condition:
       - condition: template
         value_template: "{{ states('sensor.nws_alerts') | int > 0 }}"
       - condition: template
         value_template: '{{ trigger.to_state.state|float > trigger.from_state.state|float }}'
-      # - condition: state
-        # entity_id: binary_sensor.nws_new_alert
-        # state: 'on'
       - condition: template
         value_template: "{{ (trigger.to_state.attributes.event_id).split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list }}"
     action:
@@ -130,9 +94,6 @@ automation:
         value_template: '{{ trigger.to_state.state|float > trigger.from_state.state|float }}'
       - condition: template
         value_template: "{{ state_attr('sensor.nws_alerts', 'event_id') != state_attr('variable.nws_alerts_event_ids', 'previous') }}"
-      # - condition: state
-        # entity_id: binary_sensor.nws_new_alert
-        # state: 'on'
       - condition: template
         value_template: "{{ (trigger.to_state.attributes.event_id).split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list }}"
     action:
@@ -140,13 +101,6 @@ automation:
         data_template:
           message: >
             "NWS: {{ state_attr('sensor.nws_alerts', 'title').split(' - ')[0] }}"
-      - service: notify.nws_alerts_record
-        data_template:
-          message: >
-            event: {{ states('sensor.nws_alert_event_raw' ) }}, 
-            id: {{ state_attr('sensor.nws_alert_event_raw', 'features' )[0].id }},
-            sent: {{ state_attr('sensor.nws_alert_event_raw', 'features' )[0].properties.sent }},
-            headline: {{ state_attr('sensor.nws_alert_event_raw', 'features' )[0].properties.headline }}
             
   - alias: NWS Announce Weather Alert
     initial_state: 'on'
@@ -162,9 +116,6 @@ automation:
           value_template: '{{ trigger.to_state.state|float > trigger.from_state.state|float }}'
         - condition: template
           value_template: "{{ ('Severe Thunderstorm Warning' in state_attr('sensor.nws_alerts', 'title')) or ('Tornado Warning' in state_attr('sensor.nws_alerts', 'title')) }}"
-        # - condition: state
-        # entity_id: binary_sensor.nws_new_alert
-        # state: 'on'
         - condition: template
           value_template: "{{ (trigger.to_state.attributes.event_id).split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list }}"
     action:
@@ -212,7 +163,7 @@ automation:
               Attention!,,,Attention!,,,The National Weather Service Has issued a tornado warning for our area
             {% endif %}
                   
-  - alias: NWS Announce Weather Alert for MBR
+  - alias: NWS Announce Weather Alert for Bedrooms
     initial_state: 'on'
     trigger:
       - platform: state
@@ -224,9 +175,6 @@ automation:
           value_template: "{{states('sensor.nws_alerts') | int > 0}}"
         - condition: template
           value_template: "{{ 'Tornado Warning' in state_attr('sensor.nws_alerts', 'title') }}"
-        # - condition: state
-        # entity_id: binary_sensor.nws_new_alert
-        # state: 'on'
         - condition: template
           value_template: "{{ (trigger.to_state.attributes.event_id).split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list }}"
     action:
@@ -271,9 +219,6 @@ automation:
           value_template: '{{ trigger.to_state.state|float > trigger.from_state.state|float }}'
         - condition: template
           value_template: "{{ ('Severe Thunderstorm Warning' in state_attr('sensor.nws_alerts', 'title')) or ('Tornado Warning' in state_attr('sensor.nws_alerts', 'title')) }}"
-        # - condition: state
-        # entity_id: binary_sensor.nws_new_alert
-        # state: 'on'
         - condition: template
           value_template: "{{ (trigger.to_state.attributes.event_id).split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list }}"
     action:
@@ -373,7 +318,6 @@ script:
         entity_id: input_boolean.nws_dismiss_persistent_notification
         
 ############################## VARIABLE  #####################################
-
 
 ## this uses the hass_variable custom component.
 ## you can install thru HACS or manually from https://github.com/rogro82/hass-variables
