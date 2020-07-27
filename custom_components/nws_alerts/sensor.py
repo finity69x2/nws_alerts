@@ -186,9 +186,11 @@ class NWSAlertSensor(Entity):
                 else:
                     headline = event
 
-                id = alert['id']
+                id = alert['id'][-7:]
                 description = alert['properties']['description']
                 instruction = alert['properties']['instruction']
+                severity = alert['properties']['severity']
+                certainty = alert['properties']['certainty']
 
                 #if event in events:
                 #    continue
@@ -199,10 +201,10 @@ class NWSAlertSensor(Entity):
                 if display_desc != '':
                     display_desc += '\n\n-\n\n'
 
-                display_desc += '%s\n%s\n%s' % (headline, description, instruction)
+                display_desc += '\n>\nHeadline: %s\nSeverity: %s\nCertainty: %s\nDescription: %s\nInstruction: %s' % (headline, severity, certainty, description, instruction)
                 
                 if event_id != '':
-                    event_id += '---'
+                    event_id += '-'
 					
                 event_id += id
 
