@@ -12,7 +12,7 @@
 
 ########################  SENSOR  ###############################################
 
-## the NWS Sensor can now be ionstalled using HACS. If you use HACS you can remove the nws_alerts sensor from here.
+## the NWS Sensor can now be installed using HACS. If you use HACS you can remove the nws_alerts sensor from here.
 
 sensor:
   # https://github.com/eracknaphobia/nws_custom_component
