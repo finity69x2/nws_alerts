@@ -1,5 +1,11 @@
 # Alerts from the US National Weather Service  (nws_alerts)
 
+## Possible Breaking Change
+
+Modified the format of the list of event_id in the attributes
+
+## Description
+
 An updated version of the nws_alerts custom integration for Home Assistant originally found at github.com/eracknaphobia/nws_custom_component
 
 This integration retrieves updated weather alerts every minute from the US NWS API.
