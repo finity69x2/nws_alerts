@@ -87,16 +87,11 @@ binary_sensor:
           {% else %}
             false
           {% endif %}
-        # value_template: >
-          # {{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list) 
-              # and (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] != states('variable.nws_alerts_event_ids')) }}
 
 
 ######################## INPUT BOOLEAN  #########################################
 
 input_boolean:
-  # nws_dismiss_persistent_notification:
-    # name: Dismiss NWS Persistent Notification   
   nws_multi_alert:
     name: NWS Multiple Alerts At Once    
     
@@ -109,17 +104,11 @@ automation:
       - platform: state
         entity_id: sensor.nws_alerts
     condition:
-      # - condition: template
-        # value_template: "{{ states('sensor.nws_alerts') | int > 0 }}"
-      # - condition: template
-        # value_template: '{{ trigger.to_state.state|int > trigger.from_state.state|int }}'
       - "{{ states('sensor.nws_alerts') | int > 0 }}"
       - '{{ trigger.to_state.state|int > trigger.from_state.state|int }}'
     action:
       - choose:
           - conditions:
-              # - condition: template
-                # value_template: '{{ (trigger.to_state.state | int - trigger.from_state.state|int) > 1 }}'
               - '{{ (trigger.to_state.state | int - trigger.from_state.state|int) > 1 }}'
             sequence:
               - service: input_boolean.turn_on
@@ -129,8 +118,6 @@ automation:
               - service: input_boolean.turn_on
                 entity_id: input_boolean.nws_multi_alert
           - conditions:
-            # - condition: template
-              # value_template: '{{ (trigger.to_state.state | int - trigger.from_state.state|int) == 1 }}'
             - '{{ (trigger.to_state.state | int - trigger.from_state.state|int) == 1 }}'
             sequence:
               - service: input_boolean.turn_off
@@ -142,14 +129,6 @@ automation:
       - platform: state
         entity_id: sensor.nws_alerts
     condition:
-      # - condition: template
-        # value_template: "{{ states('sensor.nws_alerts') | int > 0 }}"
-      # - condition: template
-        # value_template: '{{ trigger.to_state.state|int > trigger.from_state.state|int }}'
-      # - condition: template
-        # value_template: >
-          # {{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list) 
-              # and (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] != states('variable.nws_alerts_event_ids')) }}
       - "{{ states('sensor.nws_alerts') | int > 0 }}"
       - '{{ trigger.to_state.state|int > trigger.from_state.state|int }}'
       - "{{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list) and (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] != states('variable.nws_alerts_event_ids')) }}"
@@ -161,12 +140,6 @@ automation:
             - condition: state
               entity_id: input_boolean.nws_multi_alert
               state: 'on'
-            # - condition: template
-              # value_template: '{{ (trigger.to_state.state | int - trigger.from_state.state|int) == 2 }}'
-            # - condition: template
-              # value_template: >
-                # {{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[1] not in states.variable.nws_alerts_event_ids.attributes.values()|list) 
-                    # and (state_attr('sensor.nws_alerts', 'event_id').split('-')[1] != states('variable.nws_alerts_event_ids')) }}
             - '{{ (trigger.to_state.state | int - trigger.from_state.state|int) == 2 }}'
             - "{{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[1] not in states.variable.nws_alerts_event_ids.attributes.values()|list) and (state_attr('sensor.nws_alerts', 'event_id').split('-')[1] != states('variable.nws_alerts_event_ids')) }}"
           sequence:
@@ -186,16 +159,6 @@ automation:
             - condition: state
               entity_id: input_boolean.nws_multi_alert
               state: 'on'
-            # - condition: template
-              # value_template: '{{ (trigger.to_state.state | int - trigger.from_state.state|int) == 3 }}'
-            # - condition: template
-              # value_template: >
-                # {{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[1] not in states.variable.nws_alerts_event_ids.attributes.values()|list) 
-                    # and (state_attr('sensor.nws_alerts', 'event_id').split('-')[1] != states('variable.nws_alerts_event_ids')) }}
-            # - condition: template
-              # value_template: >
-                # {{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[2] not in states.variable.nws_alerts_event_ids.attributes.values()|list) 
-                    # and (state_attr('sensor.nws_alerts', 'event_id').split('-')[2] != states('variable.nws_alerts_event_ids')) }}
             - '{{ (trigger.to_state.state | int - trigger.from_state.state|int) == 3 }}'
             - "{{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[1] not in states.variable.nws_alerts_event_ids.attributes.values()|list) and (state_attr('sensor.nws_alerts', 'event_id').split('-')[1] != states('variable.nws_alerts_event_ids')) }}"
             - "{{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[2] not in states.variable.nws_alerts_event_ids.attributes.values()|list) and (state_attr('sensor.nws_alerts', 'event_id').split('-')[2] != states('variable.nws_alerts_event_ids')) }}"
@@ -240,13 +203,6 @@ automation:
         data:
           message: >
             "NWS: {{ state_attr('sensor.nws_alerts', 'title').split(' - ')[0] }}"
-      # - service: notify.nws_alerts_record
-        # data:
-          # message: >
-            # event: {{ states('sensor.nws_alert_event_raw' ) }}, 
-            # id: {{ state_attr('sensor.nws_alert_event_raw', 'features' )[0].id }},
-            # sent: {{ state_attr('sensor.nws_alert_event_raw', 'features' )[0].properties.sent }},
-            # headline: {{ state_attr('sensor.nws_alert_event_raw', 'features' )[0].properties.headline }}
             
   - alias: NWS Announce Weather Alert
     initial_state: 'on'
@@ -313,14 +269,6 @@ automation:
     condition:
       condition: and
       conditions:
-        # - condition: template
-          # value_template: "{{states('sensor.nws_alerts') | int > 0}}"
-        # - condition: template
-          # value_template: "{{ 'Tornado Warning' in state_attr('sensor.nws_alerts', 'title') }}"
-        # - condition: template
-          # value_template: >
-            # {{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list) 
-              # and (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] != states('variable.nws_alerts_event_ids')) }}
         - "{{states('sensor.nws_alerts') | int > 0}}"
         - "{{ 'Tornado Warning' in state_attr('sensor.nws_alerts', 'title') }}"
         - "{{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list)  (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] != states('variable.nws_alerts_event_ids')) }}"
@@ -360,16 +308,6 @@ automation:
     condition:
       condition: and
       conditions:
-        # - condition: template
-          # value_template: "{{states('sensor.nws_alerts') | int > 0}}"
-        # - condition: template
-          # value_template: '{{ trigger.to_state.state|int > trigger.from_state.state|int }}'
-        # - condition: template
-          # value_template: "{{ ('Severe Thunderstorm Warning' in state_attr('sensor.nws_alerts', 'title')) or ('Tornado Warning' in state_attr('sensor.nws_alerts', 'title')) }}"
-        # - condition: template
-          # value_template: >
-            # {{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list) 
-              # and (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] != states('variable.nws_alerts_event_ids')) }}
         - "{{states('sensor.nws_alerts') | int > 0}}"
         - '{{ trigger.to_state.state|int > trigger.from_state.state|int }}'
         - "{{ ('Severe Thunderstorm Warning' in state_attr('sensor.nws_alerts', 'title')) or ('Tornado Warning' in state_attr('sensor.nws_alerts', 'title')) }}"
@@ -406,17 +344,7 @@ automation:
               Attention!,,,Attention!,,,The National Weather Service Has issued a tornado warning for our area
             {% endif %}
 
-  # - alias: NWS Dismiss Persistent Notification
-    # initial_state: 'on'
-    # trigger:
-      # - platform: state
-        # entity_id: input_boolean.nws_dismiss_persistent_notification
-        # to: 'off'
-    # action:
-      # - service: persistent_notification.dismiss
-        # data:
-          # notification_id: "nwswxalert"
-          
+      
   - alias: NWS Update Event ID Variable
     initial_state: 'on'
     trigger:
@@ -439,22 +367,14 @@ automation:
           history_9: "{{ state_attr('variable.nws_alerts_event_ids', 'history_8') }}"
           history_10: "{{ state_attr('variable.nws_alerts_event_ids', 'history_9') }}"
           
-      
-            
-         
+        
 #################################  SCRIPT  ###################################
           
 script:
   nws_popup_on_wx_alert:
     alias: NWS Weather Alert Pop Up
     sequence:
-        ## Dismiss any current alert so the UI isn't filled 
-        ## up with these if there are more then one.
-        ## Only show the latest alert
-      # - service: persistent_notification.dismiss
-        # data:
-          # notification_id: "nwswxalert"
-        ## Create a new persistant notification in the UI for a new alert
+      ## Create a new persistant notification in the UI for a new alert
       - service: >
           {% if states('sensor.nws_alerts') != '0' %}
             persistent_notification.create
@@ -463,11 +383,8 @@ script:
           notification_id: "nwswxalert"
           message: "{{ message }}"
           title: '{{ title }}'
-      # - service: homeassistant.turn_on
-        # entity_id: input_boolean.nws_dismiss_persistent_notification
         
 ############################## VARIABLE  #####################################
-
 
 ## this uses the hass_variable custom component.
 ## you can install thru HACS or manually from https://github.com/Wibias/hass-variables
