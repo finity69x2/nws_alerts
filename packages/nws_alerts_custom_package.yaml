@@ -42,24 +42,6 @@ sensor:
     county: 33
   
 
-#### these are only used for the older rest sensor code #############################
-
-  - platform: rest
-    resource: https://api.weather.gov/alerts/active?zone=INZ009,INC033
-    name: NWS Alert Event Raw
-    value_template: >
-      {% if value_json.features[0] is defined %}
-        {{ value_json['features'][0]['properties'].event }}
-      {% else %}
-        None
-      {% endif %}
-    json_attributes:
-      - features
-    headers:
-      User-Agent: Homeassistant
-      Accept: application/geo+json
-    scan_interval: 60
-
 ######################## BINARY SENSOR  #########################################
 
 binary_sensor:
@@ -248,7 +230,6 @@ automation:
           target: 
             - media_player.computer_room_dot
             - media_player.kitchen_dot
-            - media_player.bedroom_2_dot
             - media_player.garage_dot
             - media_player.basement_dot
             - media_player.lg_webos_tv_echo
@@ -300,51 +281,7 @@ automation:
             type: tts
           message: "Attention!,,,Attention!,,,The National Weather Service Has issued a Tornado Warning for our area."
               
-  - alias: NWS Announce Weather Alert on CR Dot for testing
-    initial_state: 'off'
-    trigger:
-      - platform: state
-        entity_id: sensor.nws_alerts
-    condition:
-      condition: and
-      conditions:
-        - "{{states('sensor.nws_alerts') | int > 0}}"
-        - '{{ trigger.to_state.state|int > trigger.from_state.state|int }}'
-        - "{{ ('Severe Thunderstorm Warning' in state_attr('sensor.nws_alerts', 'title')) or ('Tornado Warning' in state_attr('sensor.nws_alerts', 'title')) }}"
-        - "{{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list) and (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] != states('variable.nws_alerts_event_ids')) }}"
-    action:
-      - service: media_player.volume_set
-        data:
-          entity_id:
-            - media_player.computer_room_dot
-          volume_level: 0.9
-      - service: notify.alexa_media
-        data:
-          target: 
-            - media_player.computer_room_dot
-          data:
-            type: tts
-          message: >
-            {% if 'Severe Thunderstorm Warning' in state_attr('sensor.nws_alerts', 'title') %}
-              Attention!,,,Attention!,,,The National Weather Service Has issued a severe thunderstorm warning for our area
-            {% elif 'Tornado Warning' in state_attr('sensor.nws_alerts', 'title') %}
-              Attention!,,,Attention!,,,The National Weather Service Has issued a tornado warning for our area
-            {% endif %}
-      - delay: '00:00:15'
-      - service: notify.alexa_media
-        data:
-          target: 
-            - media_player.computer_room_dot
-          data:
-            type: tts
-          message: >
-            {% if 'Severe Thunderstorm Warning' in state_attr('sensor.nws_alerts', 'title') %}
-              Attention!,,,Attention!,,,The National Weather Service Has issued a severe thunderstorm warning for our area
-            {% elif 'Tornado Warning' in state_attr('sensor.nws_alerts', 'title') %}
-              Attention!,,,Attention!,,,The National Weather Service Has issued a tornado warning for our area
-            {% endif %}
-
-      
+     
   - alias: NWS Update Event ID Variable
     initial_state: 'on'
     trigger:
