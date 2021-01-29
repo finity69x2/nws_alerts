@@ -125,12 +125,13 @@ class NWSAlertSensor(Entity):
         self._spoken_desc = values['spoken_desc']
 
     async def async_get_state(self):
-        values = {'state': 0,
-                  'event': None,
-                  'event_id': None,
-                  'display_desc': None,
-                  'spoken_desc': None
-                  }
+        values = {
+            'state': self._state,
+            'event': self._event,
+            'event_id': self._event_id,
+            'display_desc': self._display_desc,
+            'spoken_desc': self._spoken_desc
+        }
 
         headers = {'User-Agent': USER_AGENT,
                    'Accept': 'application/ld+json'
@@ -145,6 +146,14 @@ class NWSAlertSensor(Entity):
                     data = await r.json()
         
         if data is not None:
+            # Reset values before reassigning
+            values = {
+                'state': 0,
+                'event': None,
+                'event_id': None,
+                'display_desc': None,
+                'spoken_desc': None
+            }
             if 'zones' in data:
                 for zone in self._zone_id.split(','):
                     if zone in data['zones']:
@@ -154,12 +163,13 @@ class NWSAlertSensor(Entity):
         return values
 
     async def async_get_alerts(self):
-        values = {'state': 0,
-                  'event': None,
-                  'event_id': None,
-                  'display_desc': None,
-                  'spoken_desc': None
-                  }
+        values = {
+            'state': self._state,
+            'event': self._event,
+            'event_id': self._event_id,
+            'display_desc': self._display_desc,
+            'spoken_desc': self._spoken_desc
+        }
 
         headers = {'User-Agent': USER_AGENT,
                    'Accept': 'application/geo+json'
@@ -233,12 +243,13 @@ class NWSAlertSensor(Entity):
                 values['event_id'] = event_id
                 values['display_desc'] = display_desc
                 values['spoken_desc'] = spoken_desc
-                
-        if data is None:
-                values['state'] = "Unknown"
-                values['event'] = "Unknown"
-                values['event_id'] = "Unknown"
-                values['display_desc'] = "Unknown"
-                values['spoken_desc'] = "Unknown"          
+            else:
+                values = {
+                    'state': 0,
+                    'event': None,
+                    'event_id': None,
+                    'display_desc': None,
+                    'spoken_desc': None
+                }
 
         return values
