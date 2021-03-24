@@ -196,7 +196,7 @@ class NWSAlertSensor(Entity):
                 else:
                     headline = event
 
-                id = alert['id'][-7:]
+                id = alert['id']
                 description = alert['properties']['description']
                 instruction = alert['properties']['instruction']
                 severity = alert['properties']['severity']
