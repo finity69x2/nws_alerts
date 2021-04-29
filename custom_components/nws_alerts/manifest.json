@@ -1,11 +1,12 @@
 {
     "domain": "nws_alerts",
     "name": "NWS Alerts",
-    "version": "1.7.0",
+    "version": "1.7.1",
     "documentation": "https://github.com/finity69x2/nws_alerts/",
     "issue_tracker": "https://github.com/finity69x2/nws_alerts/issues",
     "dependencies": [],
     "codeowners": ["@finity69x2"],
     "config_flow": true,
-    "requirements": []
+    "requirements": [],
+    "iot_class": "cloud_polling"
   }
