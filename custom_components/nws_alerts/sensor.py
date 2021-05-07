@@ -59,6 +59,7 @@ class NWSAlertSensor(Entity):
         self._state = 0
         self._event = None
         self._event_id = None
+        self._message_type = None
         self._display_desc = None
         self._spoken_desc = None
         self._zone_id = zone_id.replace(' ', '')
@@ -93,6 +94,7 @@ class NWSAlertSensor(Entity):
         attrs[ATTR_ATTRIBUTION] = ATTRIBUTION
         attrs['title'] = self._event
         attrs['event_id'] = self._event_id
+        attrs['message_type'] = self._message_type
         attrs['display_desc'] = self._display_desc
         attrs['spoken_desc'] = self._spoken_desc
 
@@ -121,6 +123,7 @@ class NWSAlertSensor(Entity):
         self._state = values['state']
         self._event = values['event']
         self._event_id = values['event_id']
+        self._message_type = values['message_type']
         self._display_desc = values['display_desc']
         self._spoken_desc = values['spoken_desc']
 
@@ -129,6 +132,7 @@ class NWSAlertSensor(Entity):
             'state': self._state,
             'event': self._event,
             'event_id': self._event_id,
+            'message_type': self._message_type,
             'display_desc': self._display_desc,
             'spoken_desc': self._spoken_desc
         }
@@ -151,6 +155,7 @@ class NWSAlertSensor(Entity):
                 'state': 0,
                 'event': None,
                 'event_id': None,
+                'message_type': None,
                 'display_desc': None,
                 'spoken_desc': None
             }
@@ -167,6 +172,7 @@ class NWSAlertSensor(Entity):
             'state': self._state,
             'event': self._event,
             'event_id': self._event_id,
+            'message_type': self._message_type,
             'display_desc': self._display_desc,
             'spoken_desc': self._spoken_desc
         }
@@ -186,6 +192,7 @@ class NWSAlertSensor(Entity):
             events = []
             headlines = []
             event_id = ''
+            message_type = ''
             display_desc = ''
             spoken_desc = ''
             features = data['features']
@@ -197,6 +204,7 @@ class NWSAlertSensor(Entity):
                     headline = event
 
                 id = alert['id']
+                type = alert['properties']['messageType']
                 description = alert['properties']['description']
                 instruction = alert['properties']['instruction']
                 severity = alert['properties']['severity']
@@ -217,6 +225,8 @@ class NWSAlertSensor(Entity):
                     event_id += '-'
 					
                 event_id += id
+                
+                message_type += type
 
             if headlines:
                 num_headlines = len(headlines)
@@ -241,6 +251,7 @@ class NWSAlertSensor(Entity):
                 values['state'] = len(events)
                 values['event'] = event_str
                 values['event_id'] = event_id
+                values['message_type'] = message_type
                 values['display_desc'] = display_desc
                 values['spoken_desc'] = spoken_desc
             else:
@@ -248,8 +259,10 @@ class NWSAlertSensor(Entity):
                     'state': 0,
                     'event': None,
                     'event_id': None,
+                    'message_type': None,
                     'display_desc': None,
                     'spoken_desc': None
                 }
 
         return values
+
