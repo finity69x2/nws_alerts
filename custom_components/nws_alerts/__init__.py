@@ -48,6 +48,10 @@ async def async_setup(hass, config_entry):
     # Fetch initial data so we have data when entities subscribe
     await coordinator.async_refresh()
 
+    hass.data[DOMAIN][config_entry.entry_id] = {
+        COORDINATOR: coordinator,
+    }
+
     hass.async_create_task(
         hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_IMPORT}, data={}
