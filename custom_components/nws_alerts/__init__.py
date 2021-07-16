@@ -35,6 +35,18 @@ async def async_setup(hass, config_entry):
         VERSION,
         ISSUE_URL,
     )
+    hass.data.setdefault(DOMAIN, {})
+
+    # Setup the data coordinator
+    coordinator = AlertsDataUpdateCoordinator(
+        hass,
+        config_entry.data,
+        config_entry.data.get(CONF_TIMEOUT),
+        config_entry.data.get(CONF_INTERVAL),
+    )
+
+    # Fetch initial data so we have data when entities subscribe
+    await coordinator.async_refresh()
 
     hass.async_create_task(
         hass.config_entries.flow.async_init(
