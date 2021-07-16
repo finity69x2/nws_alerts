@@ -132,6 +132,8 @@ async def async_migrate_entry(hass, config_entry):
         config_entry.version = 2
         _LOGGER.debug("Migration to version %s complete", config_entry.version)
 
+    return True
+
 
 class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching NWS Alert data."""
