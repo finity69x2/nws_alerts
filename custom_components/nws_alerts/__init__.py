@@ -148,7 +148,6 @@ async def update_alerts(config) -> dict:
     """
 
     data = await async_get_state(config)
-    _LOGGER.debug("DATA: %s", data)
     return data
 
 
