@@ -11,9 +11,11 @@ from .const import (
     CONF_INTERVAL,
     CONF_TIMEOUT,
     DEFAULT_ICON,
+    DEFAULT_INTERVAL,
     DEFAULT_NAME,
     CONF_ZONE_ID,
     ATTRIBUTION,
+    DEFAULT_TIMEOUT,
     DOMAIN,
     COORDINATOR,
 )
@@ -31,8 +33,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_ZONE_ID): cv.string,
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-        vol.Optional(CONF_INTERVAL, default=5): int,
-        vol.Optional(CONF_TIMEOUT, default=90): int,
+        vol.Optional(CONF_INTERVAL, default=DEFAULT_INTERVAL): int,
+        vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): int,
     }
 )
 
