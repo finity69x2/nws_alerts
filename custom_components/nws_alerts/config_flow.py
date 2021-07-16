@@ -1,22 +1,25 @@
 """Adds config flow for NWS Alerts."""
-import aiohttp
+from __future__ import annotations
+
 import logging
 from typing import Any
 
+import aiohttp
 import voluptuous as vol
-
+from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
 from homeassistant.core import callback
-from homeassistant import config_entries
+from homeassistant.data_entry_flow import FlowResult
+
 from .const import (
     API_ENDPOINT,
     CONF_INTERVAL,
     CONF_TIMEOUT,
+    CONF_ZONE_ID,
     DEFAULT_INTERVAL,
+    DEFAULT_NAME,
     DEFAULT_TIMEOUT,
     DOMAIN,
-    CONF_ZONE_ID,
-    DEFAULT_NAME,
     USER_AGENT,
 )
 
@@ -86,6 +89,14 @@ class NWSAlertsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Initialize."""
         self._data = {}
         self._errors = {}
+
+    async def async_step_import(self, user_input: dict[str, Any]) -> FlowResult:
+        """Import a config entry."""
+
+        result: FlowResult = await self.async_step_user(user_input=user_input)
+        if errors := result.get("errors"):
+            return self.async_abort(reason=next(iter(errors.values())))
+        return result
 
     async def async_step_user(self, user_input={}):
         """Handle a flow initialized by the user."""

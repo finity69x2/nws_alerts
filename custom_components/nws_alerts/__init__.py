@@ -1,11 +1,15 @@
 """ NWS Alerts """
-import aiohttp
-from datetime import timedelta
 import logging
+from datetime import timedelta
+
+import aiohttp
 from async_timeout import timeout
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+
 from .const import (
     API_ENDPOINT,
     CONF_INTERVAL,
@@ -23,9 +27,11 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup(hass, config_entry):
+async def async_setup(hass: HomeAssistant, config_entry: ConfigType) -> bool:
     """Set up this component using YAML."""
-    if config_entry.get(DOMAIN) is None:
+    hass.data.setdefault(DOMAIN, {})
+
+    if DOMAIN not in config_entry:
         # We get here if the integration is set up using config flow
         return True
 
@@ -35,33 +41,19 @@ async def async_setup(hass, config_entry):
         VERSION,
         ISSUE_URL,
     )
-    hass.data.setdefault(DOMAIN, {})
-
-    # Setup the data coordinator
-    coordinator = AlertsDataUpdateCoordinator(
-        hass,
-        config_entry.data,
-        config_entry.data.get(CONF_TIMEOUT),
-        config_entry.data.get(CONF_INTERVAL),
-    )
-
-    # Fetch initial data so we have data when entities subscribe
-    await coordinator.async_refresh()
-
-    hass.data[DOMAIN][config_entry.entry_id] = {
-        COORDINATOR: coordinator,
-    }
 
     hass.async_create_task(
         hass.config_entries.flow.async_init(
-            DOMAIN, context={"source": config_entries.SOURCE_IMPORT}, data={}
+            DOMAIN,
+            context={"source": config_entries.SOURCE_IMPORT},
+            data=config_entry,
         )
     )
 
     return True
 
 
-async def async_setup_entry(hass, config_entry):
+async def async_setup_entry(hass, config_entry) -> bool:
     """Load the saved entities."""
     # Print startup message
     _LOGGER.info(
