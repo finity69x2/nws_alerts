@@ -1,7 +1,7 @@
 """Adds config flow for NWS Alerts."""
 import aiohttp
 import logging
-from collections import OrderedDict
+from typing import Any
 
 import voluptuous as vol
 
@@ -10,6 +10,10 @@ from homeassistant.core import callback
 from homeassistant import config_entries
 from .const import (
     API_ENDPOINT,
+    CONF_INTERVAL,
+    CONF_TIMEOUT,
+    DEFAULT_INTERVAL,
+    DEFAULT_TIMEOUT,
     DOMAIN,
     CONF_ZONE_ID,
     DEFAULT_NAME,
@@ -21,6 +25,25 @@ JSON_PROPERTIES = "properties"
 JSON_ID = "id"
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _get_schema(hass: Any, user_input: list, default_dict: list) -> Any:
+    """Gets a schema using the default_dict as a backup."""
+    if user_input is None:
+        user_input = {}
+
+    def _get_default(key):
+        """Gets default value for key."""
+        return user_input.get(key, default_dict.get(key))
+
+    return vol.Schema(
+        {
+            vol.Required(CONF_ZONE_ID, default=_get_default(CONF_ZONE_ID)): str,
+            vol.Optional(CONF_NAME, default=_get_default(CONF_NAME)): str,
+            vol.Optional(CONF_INTERVAL, default=_get_default(CONF_INTERVAL)): int,
+            vol.Optional(CONF_TIMEOUT, default=_get_default(CONF_TIMEOUT)): int,
+        }
+    )
 
 
 async def _get_zone_list(self):
@@ -56,7 +79,7 @@ async def _get_zone_list(self):
 class NWSAlertsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for NWS Alerts."""
 
-    VERSION = 1
+    VERSION = 2
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
     def __init__(self):
@@ -78,20 +101,17 @@ class NWSAlertsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Show the configuration form to edit location data."""
 
         # Defaults
-        name = DEFAULT_NAME
-        zone_id = self._zone_list
+        defaults = {
+            CONF_NAME: DEFAULT_NAME,
+            CONF_INTERVAL: DEFAULT_INTERVAL,
+            CONF_TIMEOUT: DEFAULT_TIMEOUT,
+            CONF_ZONE_ID: self._zone_list,
+        }
 
-        if user_input is not None:
-            if "name" in user_input:
-                name = user_input["name"]
-            if CONF_ZONE_ID in user_input:
-                zone_id = user_input[CONF_ZONE_ID]
-
-        data_schema = OrderedDict()
-        data_schema[vol.Optional("name", default=name)] = str
-        data_schema[vol.Required(CONF_ZONE_ID, default=zone_id)] = str
         return self.async_show_form(
-            step_id="user", data_schema=vol.Schema(data_schema), errors=self._errors
+            step_id="user",
+            data_schema=_get_schema(self.hass, user_input, defaults),
+            errors=self._errors,
         )
 
     @staticmethod
@@ -113,25 +133,14 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
         """Manage Mail and Packages options."""
         if user_input is not None:
             self._data.update(user_input)
-            return self.async_create_entry(title=self._data[CONF_NAME], data=self._data)
+            return self.async_create_entry(title="", data=self._data)
         return await self._show_options_form(user_input)
 
     async def _show_options_form(self, user_input):
         """Show the configuration form to edit location data."""
 
-        # Defaults
-        name = self.config.options.get(CONF_NAME)
-        zone_id = self.config.options.get(CONF_ZONE_ID)
-
-        if user_input is not None:
-            if "name" in user_input:
-                name = user_input["name"]
-            if CONF_ZONE_ID in user_input:
-                zone_id = user_input[CONF_ZONE_ID]
-
-        data_schema = OrderedDict()
-        data_schema[vol.Optional("name", default=name)] = str
-        data_schema[vol.Required("zone_id", default=zone_id)] = str
         return self.async_show_form(
-            step_id="init", data_schema=vol.Schema(data_schema), errors=self._errors
+            step_id="init",
+            data_schema=_get_schema(self.hass, user_input, self._data),
+            errors=self._errors,
         )
