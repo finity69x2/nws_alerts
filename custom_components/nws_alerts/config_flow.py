@@ -93,6 +93,7 @@ class NWSAlertsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_import(self, user_input: dict[str, Any]) -> FlowResult:
         """Import a config entry."""
 
+        user_input = user_input[DOMAIN]
         result: FlowResult = await self.async_step_user(user_input=user_input)
         if errors := result.get("errors"):
             return self.async_abort(reason=next(iter(errors.values())))
