@@ -1,23 +1,25 @@
 import logging
+
 import voluptuous as vol
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
-from homeassistant.const import CONF_NAME, ATTR_ATTRIBUTION
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.components.sensor import PLATFORM_SCHEMA
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
+
 from .const import (
+    ATTRIBUTION,
     CONF_INTERVAL,
     CONF_TIMEOUT,
+    CONF_ZONE_ID,
+    COORDINATOR,
     DEFAULT_ICON,
     DEFAULT_INTERVAL,
     DEFAULT_NAME,
-    CONF_ZONE_ID,
-    ATTRIBUTION,
     DEFAULT_TIMEOUT,
     DOMAIN,
-    COORDINATOR,
 )
 
 # ---------------------------------------------------------
@@ -40,12 +42,12 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """ Configuration from yaml """
+    """Configuration from yaml"""
     async_add_entities([NWSAlertSensor(hass, config)], True)
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    """ Setup the sensor platform. """
+    """Setup the sensor platform."""
     async_add_entities([NWSAlertSensor(hass, entry)], True)
 
 
