@@ -3,9 +3,10 @@ from tests.const import CONFIG_DATA
 from unittest.mock import patch
 import pytest
 from homeassistant import config_entries, data_entry_flow, setup
+from homeassistant.const import CONF_NAME
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.nws_alerts.const import DOMAIN
+from custom_components.nws_alerts.const import CONF_ZONE_ID, DOMAIN
 
 
 @pytest.mark.parametrize(
@@ -65,17 +66,28 @@ async def test_form(
         assert len(mock_setup_entry.mock_calls) == 1
 
 
-async def test_setup_user(hass):
-    """Test that the user setup works"""
-    with patch("custom_components.nws_alerts.async_setup", return_value=True), patch(
+@pytest.mark.parametrize(
+    "user_input",
+    [
+        {
+            DOMAIN: {
+                CONF_NAME: "NWS Alerts",
+                CONF_ZONE_ID: "AZZ540,AZC013",
+            },
+        },
+    ],
+)
+async def test_import(hass, user_input):
+    """Test importing a gateway."""
+    await setup.async_setup_component(hass, "persistent_notification", {})
+
+    with patch(
         "custom_components.nws_alerts.async_setup_entry",
         return_value=True,
     ):
         result = await hass.config_entries.flow.async_init(
-            DOMAIN, context={"source": config_entries.SOURCE_IMPORT}, data=CONFIG_DATA
+            DOMAIN, data=user_input, context={"source": config_entries.SOURCE_IMPORT}
         )
         await hass.async_block_till_done()
 
-    assert result["type"] == data_entry_flow.RESULT_TYPE_CREATE_ENTRY
-    assert result["title"] == "NWS Alerts"
-    assert result["data"] == CONFIG_DATA
+    assert result["type"] == "create_entry"
