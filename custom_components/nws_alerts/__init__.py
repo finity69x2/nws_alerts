@@ -6,6 +6,7 @@ import aiohttp
 from async_timeout import timeout
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
+from homeassistant.sensor.const import DOMAIN as SENSOR_DOMAIN
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -31,7 +32,8 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigType) -> bool:
     """Set up this component using YAML."""
     hass.data.setdefault(DOMAIN, {})
 
-    if DOMAIN not in config_entry:
+    # TODO: https://developers.home-assistant.io/docs/configuration_yaml_index
+    if hass.data[SENSOR_DOMAIN]["platform"][DOMAIN] is None:
         # We get here if the integration is set up using config flow
         return True
 
@@ -46,7 +48,7 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigType) -> bool:
         hass.config_entries.flow.async_init(
             DOMAIN,
             context={"source": config_entries.SOURCE_IMPORT},
-            data=config_entry,
+            data=hass.data[SENSOR_DOMAIN]["platform"][DOMAIN],
         )
     )
 
