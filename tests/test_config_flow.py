@@ -47,8 +47,6 @@ async def test_form(
     # assert result["title"] == title_1
 
     with patch(
-        "custom_components.nws_alerts.async_setup", return_value=True
-    ) as mock_setup, patch(
         "custom_components.nws_alerts.async_setup_entry",
         return_value=True,
     ) as mock_setup_entry:
@@ -62,32 +60,31 @@ async def test_form(
         assert result2["data"] == data
 
         await hass.async_block_till_done()
-        assert len(mock_setup.mock_calls) == 1
         assert len(mock_setup_entry.mock_calls) == 1
 
 
-@pytest.mark.parametrize(
-    "user_input",
-    [
-        {
-            DOMAIN: {
-                CONF_NAME: "NWS Alerts",
-                CONF_ZONE_ID: "AZZ540,AZC013",
-            },
-        },
-    ],
-)
-async def test_import(hass, user_input):
-    """Test importing a gateway."""
-    await setup.async_setup_component(hass, "persistent_notification", {})
+# @pytest.mark.parametrize(
+#     "user_input",
+#     [
+#         {
+#             DOMAIN: {
+#                 CONF_NAME: "NWS Alerts",
+#                 CONF_ZONE_ID: "AZZ540,AZC013",
+#             },
+#         },
+#     ],
+# )
+# async def test_import(hass, user_input):
+#     """Test importing a gateway."""
+#     await setup.async_setup_component(hass, "persistent_notification", {})
 
-    with patch(
-        "custom_components.nws_alerts.async_setup_entry",
-        return_value=True,
-    ):
-        result = await hass.config_entries.flow.async_init(
-            DOMAIN, data=user_input, context={"source": config_entries.SOURCE_IMPORT}
-        )
-        await hass.async_block_till_done()
+#     with patch(
+#         "custom_components.nws_alerts.async_setup_entry",
+#         return_value=True,
+#     ):
+#         result = await hass.config_entries.flow.async_init(
+#             DOMAIN, data=user_input, context={"source": config_entries.SOURCE_IMPORT}
+#         )
+#         await hass.async_block_till_done()
 
-    assert result["type"] == "create_entry"
+#     assert result["type"] == "create_entry"

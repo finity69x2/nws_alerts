@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from homeassistant.const import CONF_NAME
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
+from homeassistant.helpers.entity_registry import async_get
 from homeassistant.setup import async_setup_component
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -56,44 +57,25 @@ async def test_unload_entry(hass):
     assert len(hass.states.async_entity_ids(SENSOR_DOMAIN)) == 0
 
 
-@pytest.mark.parametrize(
-    "config, expected_config_entry, expected_calls, expected_to_succeed",
-    [
-        (
-            {
-                DOMAIN: {
-                    CONF_NAME: "NWS Alerts",
-                    CONF_ZONE_ID: "AZZ540,AZC013",
-                }
-            },
-            {
-                CONF_NAME: "NWS Alerts",
-                CONF_ZONE_ID: "AZZ540,AZC013",
-            },
-            1,
-            True,
-        )
-    ],
-)
-async def test_import(
-    hass,
-    config,
-    expected_config_entry,
-    expected_calls,
-    expected_to_succeed,
-):
-    """Test importing a gateway."""
-    await async_setup_component(hass, "persistent_notification", {})
-    with patch(
-        "custom_components.nws_alerts.async_setup_entry",
-        return_value=True,
-    ) as mock_setup_entry:
-        result = await async_setup_component(hass, DOMAIN, config)
-        assert result == expected_to_succeed
-        await hass.async_block_till_done()
+# async def test_import(hass):
+#     """Test importing a config."""
+#     entry = MockConfigEntry(
+#         domain=DOMAIN,
+#         title="NWS Alerts",
+#         data=CONFIG_DATA,
+#     )
+#     await async_setup_component(hass, "persistent_notification", {})
+#     with patch(
+#         "custom_components.nws_alerts.async_setup_entry",
+#         return_value=True,
+#     ) as mock_setup_entry:
 
-    assert len(mock_setup_entry.mock_calls) == expected_calls
-
-    config_entry = mock_setup_entry.mock_calls[0][1][1]
-    config_entry_data = dict(config_entry.data)
-    assert config_entry_data == expected_config_entry
+#         ent_reg = async_get(hass)
+#         ent_entry = ent_reg.async_get_or_create(
+#             "sensor", DOMAIN, unique_id="replaceable_unique_id", config_entry=entry
+#         )
+#         entity_id = ent_entry.entity_id
+#         entry.add_to_hass(hass)
+#         await hass.config_entries.async_setup(entry.entry_id)
+#         assert entry.unique_id is None
+#         assert ent_reg.async_get(entity_id).unique_id == entry.entry_id
