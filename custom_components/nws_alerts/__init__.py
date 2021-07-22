@@ -6,7 +6,7 @@ import aiohttp
 from async_timeout import timeout
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
-from homeassistant.sensor.const import DOMAIN as SENSOR_DOMAIN
+from homeassistant.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
