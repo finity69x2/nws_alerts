@@ -6,8 +6,12 @@ import aiohttp
 from async_timeout import timeout
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.typing import ConfigType
+from homeassistant.helpers.entity_registry import (
+    async_entries_for_config_entry,
+    async_get,
+)
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
@@ -20,6 +24,7 @@ from .const import (
     DEFAULT_TIMEOUT,
     DOMAIN,
     ISSUE_URL,
+    PLATFORMS,
     USER_AGENT,
     VERSION,
 )
@@ -27,33 +32,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup(hass: HomeAssistant, config_entry: ConfigType) -> bool:
-    """Set up this component using YAML."""
-    hass.data.setdefault(DOMAIN, {})
-
-    if DOMAIN not in config_entry:
-        # We get here if the integration is set up using config flow
-        return True
-
-    # Print startup message
-    _LOGGER.info(
-        "Version %s is starting, if you have any issues please report" " them here: %s",
-        VERSION,
-        ISSUE_URL,
-    )
-
-    hass.async_create_task(
-        hass.config_entries.flow.async_init(
-            DOMAIN,
-            context={"source": config_entries.SOURCE_IMPORT},
-            data=config_entry,
-        )
-    )
-
-    return True
-
-
-async def async_setup_entry(hass, config_entry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Load the saved entities."""
     # Print startup message
     _LOGGER.info(
@@ -62,28 +41,30 @@ async def async_setup_entry(hass, config_entry) -> bool:
         ISSUE_URL,
     )
     hass.data.setdefault(DOMAIN, {})
-    config_entry.options = config_entry.data
-    config_entry.add_update_listener(update_listener)
+
+    if entry.unique_id is not None:
+        hass.config_entries.async_update_entry(entry, unique_id=None)
+
+        ent_reg = async_get(hass)
+        for entity in async_entries_for_config_entry(ent_reg, entry.entry_id):
+            ent_reg.async_update_entity(entity.entity_id, new_unique_id=entry.entry_id)
 
     # Setup the data coordinator
     coordinator = AlertsDataUpdateCoordinator(
         hass,
-        config_entry.data,
-        config_entry.data.get(CONF_TIMEOUT),
-        config_entry.data.get(CONF_INTERVAL),
+        entry.data,
+        entry.data.get(CONF_TIMEOUT),
+        entry.data.get(CONF_INTERVAL),
     )
 
     # Fetch initial data so we have data when entities subscribe
     await coordinator.async_refresh()
 
-    hass.data[DOMAIN][config_entry.entry_id] = {
+    hass.data[DOMAIN][entry.entry_id] = {
         COORDINATOR: coordinator,
     }
 
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(config_entry, "sensor")
-    )
-
+    hass.config_entries.async_setup_platforms(entry, PLATFORMS)
     return True
 
 

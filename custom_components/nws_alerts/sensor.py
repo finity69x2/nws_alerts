@@ -1,13 +1,15 @@
 import logging
+import uuid
 
 import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
+from . import AlertsDataUpdateCoordinator
 
 from .const import (
     ATTRIBUTION,
@@ -43,6 +45,25 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Configuration from yaml"""
+    if DOMAIN not in hass.data.keys():
+        config.entry_id = uuid.uuid4().hex
+        config.data = config
+        hass.data.setdefault(DOMAIN, {})
+        # Setup the data coordinator
+        coordinator = AlertsDataUpdateCoordinator(
+            hass,
+            config,
+            config[CONF_TIMEOUT],
+            config[CONF_INTERVAL],
+        )
+
+        # Fetch initial data so we have data when entities subscribe
+        await coordinator.async_refresh()
+
+        hass.data[DOMAIN][config.entry_id] = {
+            COORDINATOR: coordinator,
+        }
+
     async_add_entities([NWSAlertSensor(hass, config)], True)
 
 

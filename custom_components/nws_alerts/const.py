@@ -21,3 +21,4 @@ DOMAIN = "nws_alerts"
 PLATFORM = "sensor"
 ATTRIBUTION = "Data provided by Weather.gov"
 COORDINATOR = "coordinator"
+PLATFORMS = ["sensor"]
