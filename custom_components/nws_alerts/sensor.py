@@ -46,7 +46,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Configuration from yaml"""
     if DOMAIN not in hass.data.keys():
-        config.entry_id = uuid.uuid5(uuid.NAMESPACE_URL, DOMAIN).hex
+        config.entry_id = uuid.uuid4().hex
         config.data = config
         hass.data.setdefault(DOMAIN, {})
         # Setup the data coordinator
