@@ -46,24 +46,27 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Configuration from yaml"""
     if DOMAIN not in hass.data.keys():
+        hass.data.setdefault(DOMAIN, {})
         config.entry_id = uuid.uuid4().hex
         config.data = config
-        hass.data.setdefault(DOMAIN, {})
-        # Setup the data coordinator
-        coordinator = AlertsDataUpdateCoordinator(
-            hass,
-            config,
-            config[CONF_TIMEOUT],
-            config[CONF_INTERVAL],
-        )
+    else:
+        config.entry_id = uuid.uuid4().hex
+        config.data = config
 
-        # Fetch initial data so we have data when entities subscribe
-        await coordinator.async_refresh()
+    # Setup the data coordinator
+    coordinator = AlertsDataUpdateCoordinator(
+        hass,
+        config,
+        config[CONF_TIMEOUT],
+        config[CONF_INTERVAL],
+    )
 
-        hass.data[DOMAIN][config.entry_id] = {
-            COORDINATOR: coordinator,
-        }
+    # Fetch initial data so we have data when entities subscribe
+    await coordinator.async_refresh()
 
+    hass.data[DOMAIN][config.entry_id] = {
+        COORDINATOR: coordinator,
+    }
     async_add_entities([NWSAlertSensor(hass, config)], True)
 
 
