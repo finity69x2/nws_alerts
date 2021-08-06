@@ -163,6 +163,7 @@ async def async_get_state(config) -> dict:
             "event": None,
             "event_id": None,
             "message_type": None,
+            "event_status": None,
             "display_desc": None,
             "spoken_desc": None,
         }
@@ -193,6 +194,7 @@ async def async_get_alerts(zone_id: str) -> dict:
         headlines = []
         event_id = ""
         message_type = ""
+        event_status = ""
         display_desc = ""
         spoken_desc = ""
         features = data["features"]
@@ -205,6 +207,7 @@ async def async_get_alerts(zone_id: str) -> dict:
 
             id = alert["id"]
             type = alert["properties"]["messageType"]
+            status = alert['properties']['status']
             description = alert["properties"]["description"]
             instruction = alert["properties"]["instruction"]
             severity = alert["properties"]["severity"]
@@ -220,16 +223,24 @@ async def async_get_alerts(zone_id: str) -> dict:
                 display_desc += "\n\n-\n\n"
 
             display_desc += (
-                "\n>\nHeadline: %s\nMessage Type: %s\nSeverity: %s\nCertainty: %s\nDescription: %s\nInstruction: %s"
-                % (headline, type, severity, certainty, description, instruction)
+                "\n>\nHeadline: %s\nStatus: %s\nMessage Type: %s\nSeverity: %s\nCertainty: %s\nDescription: %s\nInstruction: %s"
+                % (headline, status, type, severity, certainty, description, instruction)
             )
 
             if event_id != "":
                 event_id += "-"
 
             event_id += id
+            
+            if message_type != "":
+                   message_type += ' - '
 
             message_type += type
+            
+            if event_status != "":
+                   event_status += ' - '
+
+            event_status += status
 
         if headlines:
             num_headlines = len(headlines)
@@ -255,6 +266,7 @@ async def async_get_alerts(zone_id: str) -> dict:
             values["event"] = event_str
             values["event_id"] = event_id
             values["message_type"] = message_type
+            values["event_status"] = event_status
             values["display_desc"] = display_desc
             values["spoken_desc"] = spoken_desc
         else:
@@ -263,6 +275,7 @@ async def async_get_alerts(zone_id: str) -> dict:
                 "event": None,
                 "event_id": None,
                 "message_type": None,
+                "event_status": None,
                 "display_desc": None,
                 "spoken_desc": None,
             }
