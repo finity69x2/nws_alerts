@@ -10,7 +10,7 @@ CONF_ZONE_ID = "zone_id"
 # Defaults
 DEFAULT_ICON = "mdi:alert"
 DEFAULT_NAME = "NWS Alerts"
-DEFAULT_INTERVAL = 5
+DEFAULT_INTERVAL = 1
 DEFAULT_TIMEOUT = 120
 
 # Misc
