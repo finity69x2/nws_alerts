@@ -10,9 +10,23 @@ The sensor that is created is used in my "NWS Alerts Custom" package - https://g
 
 ## Installation:
 
+<b>Manually:</b>
+
 Clone the Repository and copy the "nws_alerts" directory to your "custom_components" directory in your config directory
 
 ```<config directory>/custom_components/nws_alerts/...```
+  
+<b>HACS:</b>
+
+open the HACS section of Home Assistant.
+
+Click the "+ Explore & Add New repositories" button in the bottom right corner.
+
+In the window that opens search for "NWS Alerts".
+
+In the window that opens when you select it click om "Install This Repository in HACS"
+
+After installing the integration you can then configure it using the instructions in the following section.
   
 ## Configuration:
 
@@ -20,7 +34,7 @@ You can find your Zone or County ID by going to https://alerts.weather.gov/, scr
 
 There are two ways to configure this integration.
 
-Manually via an entry in your configuration.yaml file:
+<b>Manually via an entry in your configuration.yaml file:</b>
 
 To create a sensor instance add the following configuration to your sensor definitions using the zone_id found above:
 
@@ -48,7 +62,7 @@ You can overide the sensor default name ("sensor.nws_alerts") to one of your cho
 
 Using the configuration example above the sensor will then be called "sensor.my_nws_alerts_sensor"
 
-Or you can configure the integration via the "Configuration->Integrations" section of the Home Assistant UI.
+<b>Or you can configure the integration via the "Configuration->Integrations" section of the Home Assistant UI.</b>
 
 Look for the integration labeled "NWS Alerts"
 
