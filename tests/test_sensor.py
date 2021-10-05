@@ -1,7 +1,6 @@
 """Test NWS Alerts Sensors"""
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from homeassistant.util import slugify
-from homeassistant.const import CONF_NAME
 from homeassistant.helpers import entity_registry as er
 
 from custom_components.nws_alerts.const import DOMAIN
