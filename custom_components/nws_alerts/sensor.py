@@ -50,6 +50,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         config.entry_id = uuid.uuid4().hex
         config.data = config
     else:
+        config.entry_id = uuid.uuid4().hex
         config.data = config
 
     # Setup the data coordinator
