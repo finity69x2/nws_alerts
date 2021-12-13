@@ -49,7 +49,7 @@ def _get_schema(hass: Any, user_input: list, default_dict: list) -> Any:
     )
 
 
-async def _get_zone_list(self):
+async def _get_zone_list(self) -> list | None:
     """Return list of zone by lat/lon"""
 
     data = None
