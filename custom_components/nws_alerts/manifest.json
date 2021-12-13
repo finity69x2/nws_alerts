@@ -1,7 +1,7 @@
 {
     "domain": "nws_alerts",
     "name": "NWS Alerts",
-    "version": "2.1",
+    "version": "2.3",
     "documentation": "https://github.com/finity69x2/nws_alerts/",
     "issue_tracker": "https://github.com/finity69x2/nws_alerts/issues",
     "dependencies": [],
