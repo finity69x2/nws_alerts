@@ -39,17 +39,23 @@ async def test_form(
 ):
     """Test we get the form."""
     await setup.async_setup_component(hass, "persistent_notification", {})
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": config_entries.SOURCE_USER}
-    )
-    assert result["type"] == "form"
-    assert result["errors"] == {}
-    # assert result["title"] == title_1
+    with patch(
+        "custom_components.nws_alerts.config_flow._get_zone_list",
+        return_value=None):
+
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": config_entries.SOURCE_USER}
+        )
+        assert result["type"] == "form"
+        assert result["errors"] == {}
+        # assert result["title"] == title_1
 
     with patch(
         "custom_components.nws_alerts.async_setup_entry",
         return_value=True,
-    ) as mock_setup_entry:
+    ) as mock_setup_entry, patch(
+        "custom_components.nws_alerts.config_flow._get_zone_list",
+        return_value=None):
 
         result2 = await hass.config_entries.flow.async_configure(
             result["flow_id"], input
