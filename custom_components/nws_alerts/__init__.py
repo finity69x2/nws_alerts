@@ -164,6 +164,7 @@ async def async_get_state(config) -> dict:
             "event_id": None,
             "message_type": None,
             "event_status": None,
+            "event_severity": None,
             "display_desc": None,
             "spoken_desc": None,
         }
@@ -195,6 +196,7 @@ async def async_get_alerts(zone_id: str) -> dict:
         event_id = ""
         message_type = ""
         event_status = ""
+        event_severity = ""
         display_desc = ""
         spoken_desc = ""
         features = data["features"]
@@ -241,6 +243,11 @@ async def async_get_alerts(zone_id: str) -> dict:
                    event_status += ' - '
 
             event_status += status
+            
+            if event_severity != "":
+                   event_severity += ' - '
+
+            event_severity += severity
 
         if headlines:
             num_headlines = len(headlines)
@@ -267,6 +274,7 @@ async def async_get_alerts(zone_id: str) -> dict:
             values["event_id"] = event_id
             values["message_type"] = message_type
             values["event_status"] = event_status
+            values["event_severity"] = event_severity
             values["display_desc"] = display_desc
             values["spoken_desc"] = spoken_desc
         else:
@@ -276,6 +284,7 @@ async def async_get_alerts(zone_id: str) -> dict:
                 "event_id": None,
                 "message_type": None,
                 "event_status": None,
+                "event_severity": None,
                 "display_desc": None,
                 "spoken_desc": None,
             }
