@@ -8,6 +8,8 @@ The integration presents the number of currently active alerts as the state of t
 
 The sensor that is created is used in my "NWS Alerts Custom" package - https://github.com/finity69x2/nws_alerts/blob/master/packages/nws_alerts_custom_package.yaml
 
+You can also display the generated alerts in your frontend - https://github.com/finity69x2/nws_alerts/blob/master/lovelace/alerts_tab
+
 ## Installation:
 
 <b>Manually:</b>
