@@ -6,7 +6,7 @@ This integration retrieves updated weather alerts every minute from the US NWS A
 
 The integration presents the number of currently active alerts as the state of the sensor and lists many alert details as a list in the attributes of the sensor.
 
-The sensor that is created is used in my "NWS Alerts Custom" package - https://github.com/finity69x2/NWS-Alerts-Custom-Package
+The sensor that is created is used in my "NWS Alerts Custom" package - https://github.com/finity69x2/nws_alerts/blob/master/packages/nws_alerts_custom_package.yaml
 
 ## Installation:
 
