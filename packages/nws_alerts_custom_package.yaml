@@ -1,6 +1,6 @@
 #################################################################################
 #
-#   This is the package for NWS ALERTS USING THE CUSTOM COMPONENT
+#   This is the package for NWS ALERTS USING THE CUSTOM INTEGRATION
 #
 #################################################################################
 
@@ -12,35 +12,11 @@
 
 ########################  SENSOR  ###############################################
 
-## the NWS Sensor can now be ionstalled using HACS. If you use HACS you can remove the nws_alerts sensor from here.
-
 sensor:
-  # https://github.com/eracknaphobia/nws_custom_component
-  - platform: nws_alerts
-    zone_id: 'INZ009,INC033'
-  - platform: template
-    sensors:
-      nws_alerts_are_active:
-        friendly_name: NWS Alerts Are Active
-        #entity_id: sensor.nws_alerts
-        value_template: >
-          {% if states('sensor.nws_alerts') | int > 0 %}
-            on
-          {% else %}
-            off
-          {% endif %}
-        icon_template: >-
-          {% if states('sensor.nws_alerts') | int > 0 %}
-            mdi:weather-lightning
-          {% else %}
-            mdi:weather-sunny
-          {% endif %}
-          
   - platform: weatheralerts
     state: IN
     zone: 9
     county: 33
-  
 
 ######################## BINARY SENSOR  #########################################
 
@@ -49,33 +25,21 @@ binary_sensor:
     sensors:
       nws_alerts_are_active:
         friendly_name: NWS Alerts Are Active
-        entity_id: sensor.nws_alerts
+        #entity_id: sensor.nws_alerts
         value_template: >
-          {{ states('sensor.nws_alerts') | int > 0 }}
+          {{ states('sensor.nws_alerts') | int(0) > 0 }}
         icon_template: >-
-          {% if states('sensor.nws_alerts') | int > 0 %}
+          {% if states('sensor.nws_alerts') | int(0) > 0 %}
             mdi:weather-lightning
           {% else %}
             mdi:weather-sunny
           {% endif %}
-      ## NOT USING THIS SENSOR IN AUTOMATIONS...YET?
-      nws_new_alert:
-        friendly_name: NWS Alert is New
-        entity_id: sensor.nws_alerts
-        value_template: >
-          {% if  state_attr('sensor.nws_alerts', 'event_id') != None %}
-            {{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list) 
-            and (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] != states('variable.nws_alerts_event_ids')) }}
-          {% else %}
-            false
-          {% endif %}
-
-
+ 
 ######################## INPUT BOOLEAN  #########################################
 
 input_boolean:
   nws_multi_alert:
-    name: NWS Multiple Alerts At Once    
+    name: NWS Multiple Alerts At Once
     
 ########################  AUTOMATION  ###########################################
 
@@ -197,7 +161,8 @@ automation:
         - "{{states('sensor.nws_alerts') | int > 0}}"
         - '{{ trigger.to_state.state|int > trigger.from_state.state|int }}'
         - "{{ ('Severe Thunderstorm Warning' in state_attr('sensor.nws_alerts', 'title')) or ('Tornado Warning' in state_attr('sensor.nws_alerts', 'title')) }}"
-        - "{{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list) and (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] != states('variable.nws_alerts_event_ids')) }}"
+        - "{{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list) }}"
+        - "{{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] != states('variable.nws_alerts_event_ids')) }}"
     action:
       - service: media_player.volume_set
         data:
@@ -206,7 +171,8 @@ automation:
             - media_player.kitchen_dot
             - media_player.garage_dot
             - media_player.basement_dot
-            - media_player.lg_webos_tv_echo
+            - media_player.sunroom_dot
+            - media_player.livingroom_dot
           volume_level: 0.9
       - service: notify.alexa_media
         data:
@@ -215,7 +181,8 @@ automation:
             - media_player.kitchen_dot
             - media_player.garage_dot
             - media_player.basement_dot
-            - media_player.lg_webos_tv_echo
+            - media_player.sunroom_dot
+            - media_player.livingroom_dot
           data:
             type: tts
           message: >
@@ -227,12 +194,27 @@ automation:
       - delay: '00:00:15'
       - service: notify.alexa_media
         data:
+          message: "<audio src='https://h7a3u8r0lt405rwrar1rcgi8ep9a1gez.ui.nabu.casa/local/mp3/nws_alert_tone.mp3' />"
           target: 
             - media_player.computer_room_dot
             - media_player.kitchen_dot
             - media_player.garage_dot
             - media_player.basement_dot
-            - media_player.lg_webos_tv_echo
+            - media_player.sunroom_dot
+            - media_player.livingroom_dot
+          data:
+            type: tts
+      - delay: '00:00:25'
+      - service: notify.alexa_media
+        data:
+          target: 
+            - media_player.computer_room_dot
+            - media_player.kitchen_dot
+            - media_player.bedroom_2_dot
+            - media_player.garage_dot
+            - media_player.basement_dot
+            - media_player.sunroom_dot
+            - media_player.livingroom_dot
           data:
             type: tts
           message: >
@@ -252,7 +234,10 @@ automation:
       conditions:
         - "{{states('sensor.nws_alerts') | int > 0}}"
         - "{{ 'Tornado Warning' in state_attr('sensor.nws_alerts', 'title') }}"
-        - "{{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list)  (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] != states('variable.nws_alerts_event_ids')) }}"
+        - "{{ 'TEST' not in state_attr('sensor.nws_alerts', 'title') }}"
+        - "{{ 'Test' not in state_attr('sensor.nws_alerts', 'status') }}"
+        - "{{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list) }}"
+        - "{{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] != states('variable.nws_alerts_event_ids')) }}"
     action:
       - service: media_player.volume_set
         data:
@@ -273,6 +258,16 @@ automation:
       - delay: '00:00:15'
       - service: notify.alexa_media
         data:
+          message: "<audio src='https://h7a3u8r0lt405rwrar1rcgi8ep9a1gez.ui.nabu.casa/local/mp3/nws_alert_tone.mp3' />"
+          target: 
+            - media_player.bedroom_2_dot
+            - media_player.master_bedroom_dot
+            - media_player.big_room_dot
+          data:
+            type: tts
+      - delay: '00:00:25'
+      - service: notify.alexa_media
+        data:
           target: 
             - media_player.bedroom_2_dot
             - media_player.master_bedroom_dot
@@ -280,38 +275,38 @@ automation:
           data:
             type: tts
           message: "Attention!,,,Attention!,,,The National Weather Service Has issued a Tornado Warning for our area."
-              
-     
+       
   - alias: NWS Update Event ID Variable
     initial_state: 'on'
     trigger:
       - platform: state
         entity_id: sensor.nws_alerts
     action:
-      service: variable.set_variable
-      data:
-        variable: nws_alerts_event_ids
-        value: "{{ (trigger.to_state.attributes.event_id).split('-')[0] }}"
-        attributes: 
-          history_1: "{{ states('variable.nws_alerts_event_ids') }}"
-          history_2: "{{ state_attr('variable.nws_alerts_event_ids', 'history_1') }}"
-          history_3: "{{ state_attr('variable.nws_alerts_event_ids', 'history_2') }}"
-          history_4: "{{ state_attr('variable.nws_alerts_event_ids', 'history_3') }}"
-          history_5: "{{ state_attr('variable.nws_alerts_event_ids', 'history_4') }}"
-          history_6: "{{ state_attr('variable.nws_alerts_event_ids', 'history_5') }}"
-          history_7: "{{ state_attr('variable.nws_alerts_event_ids', 'history_6') }}"
-          history_8: "{{ state_attr('variable.nws_alerts_event_ids', 'history_7') }}"
-          history_9: "{{ state_attr('variable.nws_alerts_event_ids', 'history_8') }}"
-          history_10: "{{ state_attr('variable.nws_alerts_event_ids', 'history_9') }}"
+      - service: variable.set_variable
+        data:
+          variable: nws_alerts_event_ids
+          attributes: 
+            history_1: "{{ states('variable.nws_alerts_event_ids') }}"
+            history_2: "{{ state_attr('variable.nws_alerts_event_ids', 'history_1') }}"
+            history_3: "{{ state_attr('variable.nws_alerts_event_ids', 'history_2') }}"
+            history_4: "{{ state_attr('variable.nws_alerts_event_ids', 'history_3') }}"
+            history_5: "{{ state_attr('variable.nws_alerts_event_ids', 'history_4') }}"
+            history_6: "{{ state_attr('variable.nws_alerts_event_ids', 'history_5') }}"
+            history_7: "{{ state_attr('variable.nws_alerts_event_ids', 'history_6') }}"
+            history_8: "{{ state_attr('variable.nws_alerts_event_ids', 'history_7') }}"
+            history_9: "{{ state_attr('variable.nws_alerts_event_ids', 'history_8') }}"
+            history_10: "{{ state_attr('variable.nws_alerts_event_ids', 'history_9') }}"
+      - service: variable.set_variable
+        data:
+          variable: nws_alerts_event_ids
+          value: "{{ (trigger.to_state.attributes.event_id).split('-')[0] }}"
           
-        
-#################################  SCRIPT  ###################################
+############################  SCRIPT  ###################################
           
 script:
   nws_popup_on_wx_alert:
     alias: NWS Weather Alert Pop Up
     sequence:
-      ## Create a new persistant notification in the UI for a new alert
       - service: >
           {% if states('sensor.nws_alerts') != '0' %}
             persistent_notification.create
@@ -322,6 +317,7 @@ script:
           title: '{{ title }}'
         
 ############################## VARIABLE  #####################################
+
 
 ## this uses the hass_variable custom component.
 ## you can install thru HACS or manually from https://github.com/Wibias/hass-variables
