@@ -12,12 +12,12 @@
 
 ########################  SENSOR  ###############################################
 
-sensor:
-  - platform: weatheralerts
-    state: IN
-    zone: 9
-    county: 33
+## the NWS Sensor can now be installed using HACS. If you aren't using HACS you can uncomment the nws_alerts sensor here and configure it manually.
 
+  # - platform: nws_alerts
+    # zone_id: 'INZ009,INC033'
+    # name: nws alerts yaml
+    
 ######################## BINARY SENSOR  #########################################
 
 binary_sensor:
