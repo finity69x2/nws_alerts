@@ -8,8 +8,20 @@
           "interval": "Update Interval (in minutes)",
           "timeout": "Update Timeout (in seconds)"
         },
-        "description": "You can find your Zone or County ID by going to https://alerts.weather.gov/,\nscroll down to your state and click on the 'zone list' and/or 'county list' then look for the entry for your county.\n\nSeperate multiple zones with commas ie: PAC049,WVC031\n\nZones closest to you will be populated automatically.",
-        "title": "NWS Alerts"
+        "description": "You can find your Zone or County ID by going to https://alerts.weather.gov/,\nscroll down to your state and click on the 'zone list' and/or 'county list' then look for the entry for your county.\nSeperate multiple zones with commas ie: PAC049,WVC031\n\nZones closest to you will be populated automatically."
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "name": "Friendly Name",
+          "zone_id": "Zone ID(s)",
+          "interval": "Update Interval (in minutes)",
+          "timeout": "Update Timeout (in seconds)"
+        },
+        "description": "You can find your Zone or County ID by going to https://alerts.weather.gov/,\nscroll down to your state and click on the 'zone list' and/or 'county list' then look for the entry for your county.\nSeperate multiple zones with commas ie: PAC049,WVC031"
       }
     }
   }

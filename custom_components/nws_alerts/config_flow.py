@@ -74,6 +74,7 @@ async def _get_zone_list(self) -> list | None:
                 zone_list.append(data[JSON_FEATURES][x][JSON_PROPERTIES][JSON_ID])
                 x += 1
             _LOGGER.debug("Zones list: %s", zone_list)
+            zone_list = ",".join(str(x) for x in zone_list) # convert list to str
             return zone_list
     return None
 
