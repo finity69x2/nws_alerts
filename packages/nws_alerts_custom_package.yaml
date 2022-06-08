@@ -46,7 +46,7 @@ input_boolean:
 
 automation:
   - alias: 'NWS Check for Multi Alerts'
-    initial_state: 'on'
+    initial_state: true
     trigger:
       - platform: state
         entity_id: sensor.nws_alerts
@@ -71,7 +71,7 @@ automation:
                 entity_id: input_boolean.nws_multi_alert
   
   - alias: 'NWS Weather Alert Pop Up Control'
-    initial_state: 'on'
+    initial_state: true
     trigger:
       - platform: state
         entity_id: sensor.nws_alerts
@@ -137,7 +137,7 @@ automation:
               "{{ state_attr('sensor.nws_alerts', 'display_desc').split('\n\n-\n\n')[0] }}"
           
   - alias: NWS Notification Weather Alert
-    initial_state: 'on'
+    initial_state: true
     trigger:
       platform: state
       entity_id: sensor.nws_alerts
@@ -152,7 +152,7 @@ automation:
             "NWS: {{ state_attr('sensor.nws_alerts', 'title').split(' - ')[0] }}"
             
   - alias: NWS Announce Weather Alert
-    initial_state: 'on'
+    initial_state: true
     trigger:
       - platform: state
         entity_id: sensor.nws_alerts
@@ -226,7 +226,7 @@ automation:
             {% endif %}
                   
   - alias: NWS Announce Weather Alert for MBR
-    initial_state: 'on'
+    initial_state: true
     trigger:
       - platform: state
         entity_id: sensor.nws_alerts
@@ -278,7 +278,7 @@ automation:
           message: "Attention!,,,Attention!,,,The National Weather Service Has issued a Tornado Warning for our area."
        
   - alias: NWS Update Event ID Variable
-    initial_state: 'on'
+    initial_state: true
     trigger:
       - platform: state
         entity_id: sensor.nws_alerts
