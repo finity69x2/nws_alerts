@@ -90,6 +90,7 @@ class NWSAlertSensor(CoordinatorEntity):
         self._message_type = None
         self._event_status = None
         self._event_severity = None
+        self._event_expires = None
         self._display_desc = None
         self._spoken_desc = None
         self._zone_id = entry.data[CONF_ZONE_ID].replace(" ", "")
@@ -136,6 +137,7 @@ class NWSAlertSensor(CoordinatorEntity):
         attrs["message_type"] = self.coordinator.data["message_type"]
         attrs["event_status"] = self.coordinator.data["event_status"]
         attrs["event_severity"] = self.coordinator.data["event_severity"]
+        attrs["event_expires"] = self.coordinator.data["event_expires"]
         attrs["display_desc"] = self.coordinator.data["display_desc"]
         attrs["spoken_desc"] = self.coordinator.data["spoken_desc"]
 
