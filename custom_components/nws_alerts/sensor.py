@@ -7,23 +7,15 @@ from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.device_registry import DeviceEntryType
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
-from . import AlertsDataUpdateCoordinator
 
-from .const import (
-    ATTRIBUTION,
-    CONF_GPS_LOC,
-    CONF_INTERVAL,
-    CONF_TIMEOUT,
-    CONF_ZONE_ID,
-    COORDINATOR,
-    DEFAULT_ICON,
-    DEFAULT_INTERVAL,
-    DEFAULT_NAME,
-    DEFAULT_TIMEOUT,
-    DOMAIN,
-)
+from . import AlertsDataUpdateCoordinator
+from .const import (ATTRIBUTION, CONF_GPS_LOC, CONF_INTERVAL, CONF_TIMEOUT,
+                    CONF_ZONE_ID, COORDINATOR, DEFAULT_ICON, DEFAULT_INTERVAL,
+                    DEFAULT_NAME, DEFAULT_TIMEOUT, DOMAIN)
 
 # ---------------------------------------------------------
 # API Documentation
@@ -148,3 +140,13 @@ class NWSAlertSensor(CoordinatorEntity):
     def available(self) -> bool:
         """Return if entity is available."""
         return self.coordinator.last_update_success
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device registry information."""
+        return DeviceInfo(
+            entry_type=DeviceEntryType.SERVICE,
+            identifiers={(DOMAIN, self._config.entry_id)},
+            manufacturer="NWS",
+            name="NWS Alerts",
+        )
