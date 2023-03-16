@@ -13,6 +13,7 @@ from . import AlertsDataUpdateCoordinator
 
 from .const import (
     ATTRIBUTION,
+    CONF_GPS_LOC,
     CONF_INTERVAL,
     CONF_TIMEOUT,
     CONF_ZONE_ID,
@@ -35,7 +36,8 @@ _LOGGER = logging.getLogger(__name__)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
-        vol.Required(CONF_ZONE_ID): cv.string,
+        vol.Optional(CONF_ZONE_ID): cv.string,
+        vol.Optional(CONF_GPS_LOC): cv.string,
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
         vol.Optional(CONF_INTERVAL, default=DEFAULT_INTERVAL): int,
         vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): int,
@@ -47,10 +49,20 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     """Configuration from yaml"""
     if DOMAIN not in hass.data.keys():
         hass.data.setdefault(DOMAIN, {})
-        config.entry_id = slugify(f"{config.get(CONF_ZONE_ID)}")
+        if CONF_ZONE_ID in config:
+            config.entry_id = slugify(f"{config.get(CONF_ZONE_ID)}")
+        elif CONF_GPS_LOC in config:
+            config.entry_id = slugify(f"{config.get(CONF_GPS_LOC)}")
+        elif CONF_GPS_LOC and CONF_ZONE_ID not in config:
+            raise ValueError("GPS or Zone needs to be configured.")
         config.data = config
     else:
-        config.entry_id = slugify(f"{config.get(CONF_ZONE_ID)}")
+        if CONF_ZONE_ID in config:
+            config.entry_id = slugify(f"{config.get(CONF_ZONE_ID)}")
+        elif CONF_GPS_LOC in config:
+            config.entry_id = slugify(f"{config.get(CONF_GPS_LOC)}")
+        elif CONF_GPS_LOC and CONF_ZONE_ID not in config:
+            raise ValueError("GPS or Zone needs to be configured.")            
         config.data = config
 
     # Setup the data coordinator
@@ -84,16 +96,6 @@ class NWSAlertSensor(CoordinatorEntity):
         self._config = entry
         self._name = entry.data[CONF_NAME]
         self._icon = DEFAULT_ICON
-        self._state = 0
-        self._event = None
-        self._event_id = None
-        self._message_type = None
-        self._event_status = None
-        self._event_severity = None
-        self._event_expires = None
-        self._display_desc = None
-        self._spoken_desc = None
-        self._zone_id = entry.data[CONF_ZONE_ID].replace(" ", "")
         self.coordinator = hass.data[DOMAIN][entry.entry_id][COORDINATOR]
 
     @property
@@ -120,8 +122,7 @@ class NWSAlertSensor(CoordinatorEntity):
             return None
         elif "state" in self.coordinator.data.keys():
             return self.coordinator.data["state"]
-        else:
-            return None
+        return None
 
     @property
     def extra_state_attributes(self):

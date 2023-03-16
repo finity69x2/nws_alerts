@@ -2,6 +2,22 @@
   "config": {
     "step": {
       "user": {
+        "description": "Please select your NWS lookup method.",
+        "menu_options": {
+          "zone": "Zone ID (old method)",
+          "gps_loc": "GPS Location (new method)"
+        }
+      },
+      "gps_loc": {
+        "description": "Please enter your latitude and longitude, by default your coordinates from Home Assistant are used.",
+        "data": {
+          "name": "Friendly Name",
+          "gps_loc": "Your GPS coordinates",
+          "interval": "Update Interval (in minutes)",
+          "timeout":"Update Timeout (in seconds)"
+        }
+      },
+      "zone": {
         "data": {
           "name": "Friendly Name",
           "zone_id": "Zone ID(s)",
@@ -14,7 +30,23 @@
   },
   "options": {
     "step": {
-      "init": {
+      "user": {
+        "description": "Please select your NWS lookup method.",
+        "menu_options": {
+          "zone": "Zone ID (old method)",
+          "gps_loc": "GPS Location (new method)"
+        }
+      },
+      "gps_loc": {
+        "description": "Please enter your latitude and longitude, by default your coordinates from Home Assistant are used.",
+        "data": {
+          "name": "Friendly Name",
+          "gps_loc": "Your GPS coordinates",
+          "interval": "Update Interval (in minutes)",
+          "timeout":"Update Timeout (in seconds)"
+        }
+      },      
+      "zone": {
         "data": {
           "name": "Friendly Name",
           "zone_id": "Zone ID(s)",

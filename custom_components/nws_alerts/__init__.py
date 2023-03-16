@@ -17,6 +17,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .const import (
     API_ENDPOINT,
+    CONF_GPS_LOC,
     CONF_INTERVAL,
     CONF_TIMEOUT,
     CONF_ZONE_ID,
@@ -146,14 +147,22 @@ async def update_alerts(config) -> dict:
 async def async_get_state(config) -> dict:
     """Query API for status."""
 
+    zone_id = ""
+    gps_loc = ""
+    url = "%s/alerts/active/count" % API_ENDPOINT
     values = {}
     headers = {"User-Agent": USER_AGENT, "Accept": "application/ld+json"}
     data = None
-    url = "%s/alerts/active/count" % API_ENDPOINT
-    zone_id = config[CONF_ZONE_ID]
+
+    if CONF_ZONE_ID in config:
+        zone_id = config[CONF_ZONE_ID]
+        _LOGGER.debug("getting state for %s from %s" % (zone_id, url))
+    elif CONF_GPS_LOC in config:
+        gps_loc = config[CONF_GPS_LOC]
+        _LOGGER.debug("getting state for %s from %s" % (gps_loc, url))        
+
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as r:
-            _LOGGER.debug("getting state for %s from %s" % (zone_id, url))
             if r.status == 200:
                 data = await r.json()
 
@@ -173,22 +182,29 @@ async def async_get_state(config) -> dict:
         if "zones" in data:
             for zone in zone_id.split(","):
                 if zone in data["zones"]:
-                    values = await async_get_alerts(zone_id)
+                    values = await async_get_alerts(zone_id, gps_loc)
                     break
 
     return values
 
 
-async def async_get_alerts(zone_id: str) -> dict:
+async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
     """Query API for Alerts."""
 
+    url = ""
     values = {}
     headers = {"User-Agent": USER_AGENT, "Accept": "application/geo+json"}
     data = None
-    url = "%s/alerts/active?zone=%s" % (API_ENDPOINT, zone_id)
+
+    if zone_id != "":
+        url = "%s/alerts/active?zone=%s" % (API_ENDPOINT, zone_id)
+        _LOGGER.debug("getting alert for %s from %s" % (zone_id, url))
+    elif gps_loc != "":
+        url = '%s/alerts/active?point=%s' % (API_ENDPOINT, gps_loc)
+        _LOGGER.debug("getting alert for %s from %s" % (gps_loc, url))
+
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as r:
-            _LOGGER.debug("getting alert for %s from %s" % (zone_id, url))
             if r.status == 200:
                 data = await r.json()
 

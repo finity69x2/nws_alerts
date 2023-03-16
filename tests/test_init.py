@@ -9,8 +9,9 @@ from homeassistant.setup import async_setup_component
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.nws_alerts.const import CONF_ZONE_ID, DOMAIN
-from tests.const import CONFIG_DATA
+from tests.const import CONFIG_DATA, CONFIG_DATA_3
 
+pytestmark = pytest.mark.asyncio
 
 async def test_setup_entry(
     hass,
@@ -36,7 +37,7 @@ async def test_unload_entry(hass):
     entry = MockConfigEntry(
         domain=DOMAIN,
         title="NWS Alerts",
-        data=CONFIG_DATA,
+        data=CONFIG_DATA_3,
     )
 
     entry.add_to_hass(hass)

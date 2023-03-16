@@ -1,10 +1,13 @@
 """Test NWS Alerts Sensors"""
+import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from homeassistant.util import slugify
 from homeassistant.helpers import entity_registry as er
 
 from custom_components.nws_alerts.const import DOMAIN
-from tests.const import CONFIG_DATA, CONFIG_DATA_2
+from tests.const import CONFIG_DATA, CONFIG_DATA_2, CONFIG_DATA_BAD
+
+pytestmark = pytest.mark.asyncio
 
 NWS_SENSOR = "sensor.nws_alerts"
 NWS_SENSOR_2 = "sensor.nws_alerts_yaml"
