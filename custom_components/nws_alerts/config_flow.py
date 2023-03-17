@@ -184,7 +184,7 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
     def __init__(self, config_entry):
         """Initialize."""
         self.config = config_entry
-        self._data = dict(config_entry.options)
+        self._data = dict(config_entry.data)
         self._errors = {}
 
     async def async_step_init(self, user_input=None):
@@ -197,8 +197,15 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
     async def _show_options_form(self, user_input):
         """Show the configuration form to edit location data."""
 
-        return self.async_show_form(
-            step_id="init",
-            data_schema=_get_schema_zone(self.hass, user_input, self._data),
-            errors=self._errors,
-        )
+        if CONF_GPS_LOC in self.config.data:
+            return self.async_show_form(
+                step_id="gps_loc",
+                data_schema=_get_schema_gps(self.hass, user_input, self._data),
+                errors=self._errors,
+            )
+        elif CONF_ZONE_ID in self.config.data:
+            return self.async_show_form(
+                step_id="zone",
+                data_schema=_get_schema_zone(self.hass, user_input, self._data),
+                errors=self._errors,
+            )
