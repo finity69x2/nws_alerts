@@ -54,7 +54,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         COORDINATOR: coordinator,
     }
 
-    hass.config_entries.async_setup_platforms(entry, PLATFORMS)
+    for platform in PLATFORMS:
+        hass.async_create_task(
+            hass.config_entries.async_forward_entry_setup(entry, platform)
+        )
     return True
 
 
@@ -167,11 +170,13 @@ async def async_get_state(config) -> dict:
             "display_desc": None,
             "spoken_desc": None,
         }
-        if "zones" in data:
+        if "zones" in data and zone_id != "":
             for zone in zone_id.split(","):
                 if zone in data["zones"]:
-                    values = await async_get_alerts(zone_id, gps_loc)
+                    values = await async_get_alerts(zone_id=zone_id)
                     break
+        else:
+            values = await async_get_alerts(gps_loc=gps_loc)
 
     return values
 
