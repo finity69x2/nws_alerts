@@ -1,4 +1,3 @@
-
 """ NWS Alerts """
 import logging
 from datetime import timedelta
@@ -10,14 +9,26 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_registry import (
-    async_entries_for_config_entry, async_get)
-from homeassistant.helpers.update_coordinator import (DataUpdateCoordinator,
-                                                      UpdateFailed)
+    async_entries_for_config_entry,
+    async_get,
+)
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import (API_ENDPOINT, CONF_GPS_LOC, CONF_INTERVAL, CONF_TIMEOUT,
-                    CONF_ZONE_ID, COORDINATOR, DEFAULT_INTERVAL,
-                    DEFAULT_TIMEOUT, DOMAIN, ISSUE_URL, PLATFORMS, USER_AGENT,
-                    VERSION)
+from .const import (
+    API_ENDPOINT,
+    CONF_GPS_LOC,
+    CONF_INTERVAL,
+    CONF_TIMEOUT,
+    CONF_ZONE_ID,
+    COORDINATOR,
+    DEFAULT_INTERVAL,
+    DEFAULT_TIMEOUT,
+    DOMAIN,
+    ISSUE_URL,
+    PLATFORMS,
+    USER_AGENT,
+    VERSION,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -150,7 +161,7 @@ async def async_get_state(config) -> dict:
         _LOGGER.debug("getting state for %s from %s" % (zone_id, url))
     elif CONF_GPS_LOC in config:
         gps_loc = config[CONF_GPS_LOC]
-        _LOGGER.debug("getting state for %s from %s" % (gps_loc, url))        
+        _LOGGER.debug("getting state for %s from %s" % (gps_loc, url))
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as r:
@@ -193,7 +204,7 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
         url = "%s/alerts/active?zone=%s" % (API_ENDPOINT, zone_id)
         _LOGGER.debug("getting alert for %s from %s" % (zone_id, url))
     elif gps_loc != "":
-        url = '%s/alerts/active?point=%s' % (API_ENDPOINT, gps_loc)
+        url = "%s/alerts/active?point=%s" % (API_ENDPOINT, gps_loc)
         _LOGGER.debug("getting alert for %s from %s" % (gps_loc, url))
 
     async with aiohttp.ClientSession() as session:
@@ -221,7 +232,7 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
 
             id = alert["id"]
             type = alert["properties"]["messageType"]
-            status = alert['properties']['status']
+            status = alert["properties"]["status"]
             description = alert["properties"]["description"]
             instruction = alert["properties"]["instruction"]
             severity = alert["properties"]["severity"]
@@ -239,34 +250,43 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
 
             display_desc += (
                 "\n>\nHeadline: %s\nStatus: %s\nMessage Type: %s\nSeverity: %s\nCertainty: %s\nExpires: %s\nDescription: %s\nInstruction: %s"
-                % (headline, status, type, severity, certainty, expires, description, instruction)
+                % (
+                    headline,
+                    status,
+                    type,
+                    severity,
+                    certainty,
+                    expires,
+                    description,
+                    instruction,
+                )
             )
 
             if event_id != "":
-                event_id += ' - '
+                event_id += " - "
 
             event_id += id
-            
+
             if message_type != "":
-                   message_type += ' - '
+                message_type += " - "
 
             message_type += type
-            
+
             if event_status != "":
-                   event_status += ' - '
+                event_status += " - "
 
             event_status += status
-            
+
             if event_severity != "":
-                   event_severity += ' - '
+                event_severity += " - "
 
             event_severity += severity
-            
+
             if event_expires != "":
-                   event_expires += ' - '
+                event_expires += " - "
 
             event_expires += expires
-            
+
         if headlines:
             num_headlines = len(headlines)
             i = 0

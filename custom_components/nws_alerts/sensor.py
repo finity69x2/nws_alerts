@@ -13,9 +13,19 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
 
 from . import AlertsDataUpdateCoordinator
-from .const import (ATTRIBUTION, CONF_GPS_LOC, CONF_INTERVAL, CONF_TIMEOUT,
-                    CONF_ZONE_ID, COORDINATOR, DEFAULT_ICON, DEFAULT_INTERVAL,
-                    DEFAULT_NAME, DEFAULT_TIMEOUT, DOMAIN)
+from .const import (
+    ATTRIBUTION,
+    CONF_GPS_LOC,
+    CONF_INTERVAL,
+    CONF_TIMEOUT,
+    CONF_ZONE_ID,
+    COORDINATOR,
+    DEFAULT_ICON,
+    DEFAULT_INTERVAL,
+    DEFAULT_NAME,
+    DEFAULT_TIMEOUT,
+    DOMAIN,
+)
 
 # ---------------------------------------------------------
 # API Documentation
@@ -54,7 +64,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         elif CONF_GPS_LOC in config:
             config.entry_id = slugify(f"{config.get(CONF_GPS_LOC)}")
         elif CONF_GPS_LOC and CONF_ZONE_ID not in config:
-            raise ValueError("GPS or Zone needs to be configured.")            
+            raise ValueError("GPS or Zone needs to be configured.")
         config.data = config
 
     # Setup the data coordinator

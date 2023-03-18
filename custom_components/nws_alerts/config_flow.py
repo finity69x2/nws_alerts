@@ -11,9 +11,18 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 
-from .const import (API_ENDPOINT, CONF_GPS_LOC, CONF_INTERVAL, CONF_TIMEOUT,
-                    CONF_ZONE_ID, DEFAULT_INTERVAL, DEFAULT_NAME,
-                    DEFAULT_TIMEOUT, DOMAIN, USER_AGENT)
+from .const import (
+    API_ENDPOINT,
+    CONF_GPS_LOC,
+    CONF_INTERVAL,
+    CONF_TIMEOUT,
+    CONF_ZONE_ID,
+    DEFAULT_INTERVAL,
+    DEFAULT_NAME,
+    DEFAULT_TIMEOUT,
+    DOMAIN,
+    USER_AGENT,
+)
 
 JSON_FEATURES = "features"
 JSON_PROPERTIES = "properties"
@@ -41,6 +50,7 @@ def _get_schema_zone(hass: Any, user_input: list, default_dict: list) -> Any:
         }
     )
 
+
 def _get_schema_gps(hass: Any, user_input: list, default_dict: list) -> Any:
     """Gets a schema using the default_dict as a backup."""
     if user_input is None:
@@ -58,6 +68,7 @@ def _get_schema_gps(hass: Any, user_input: list, default_dict: list) -> Any:
             vol.Optional(CONF_TIMEOUT, default=_get_default(CONF_TIMEOUT)): int,
         }
     )
+
 
 async def _get_zone_list(self) -> list | None:
     """Return list of zone by lat/lon"""
@@ -84,7 +95,7 @@ async def _get_zone_list(self) -> list | None:
                 zone_list.append(data[JSON_FEATURES][x][JSON_PROPERTIES][JSON_ID])
                 x += 1
             _LOGGER.debug("Zones list: %s", zone_list)
-            zone_list = ",".join(str(x) for x in zone_list) # convert list to str
+            zone_list = ",".join(str(x) for x in zone_list)  # convert list to str
             return zone_list
     return None
 
@@ -115,7 +126,7 @@ class NWSAlertsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> FlowResult:
         """Handle the flow initialized by the user."""
         return self.async_show_menu(step_id="user", menu_options=MENU_OPTIONS)
-    
+
     async def async_step_gps_loc(self, user_input={}):
         """Handle a flow initialized by the user."""
         lat = self.hass.config.latitude
@@ -126,7 +137,7 @@ class NWSAlertsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             self._data.update(user_input)
             return self.async_create_entry(title=self._data[CONF_NAME], data=self._data)
-        return await self._show_config_gps_loc(user_input)   
+        return await self._show_config_gps_loc(user_input)
 
     async def _show_config_gps_loc(self, user_input):
         """Show the configuration form to edit location data."""
@@ -143,7 +154,7 @@ class NWSAlertsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="gps_loc",
             data_schema=_get_schema_gps(self.hass, user_input, defaults),
             errors=self._errors,
-        )     
+        )
 
     async def async_step_zone(self, user_input={}):
         """Handle a flow initialized by the user."""
@@ -192,6 +203,24 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             self._data.update(user_input)
             return self.async_create_entry(title="", data=self._data)
+        return await self._show_options_form(user_input)
+
+    async def async_step_gps_loc(self, user_input={}):
+        """Handle a flow initialized by the user."""
+        self._errors = {}
+
+        if user_input is not None:
+            self._data.update(user_input)
+            return self.async_create_entry(title=self._data[CONF_NAME], data=self._data)
+        return await self._show_options_form(user_input)
+
+    async def async_step_zone(self, user_input={}):
+        """Handle a flow initialized by the user."""
+        self._errors = {}
+
+        if user_input is not None:
+            self._data.update(user_input)
+            return self.async_create_entry(title=self._data[CONF_NAME], data=self._data)
         return await self._show_options_form(user_input)
 
     async def _show_options_form(self, user_input):
