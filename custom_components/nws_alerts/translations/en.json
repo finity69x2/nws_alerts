@@ -2,10 +2,10 @@
   "config": {
     "step": {
       "user": {
-        "description": "Please select your NWS lookup method.",
+        "description": "Please select your NWS lookup method.\nFor a brief explanation of the advantages and disadvantages of each method please see [here](https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.txt).\nIf you don't know which is better for your situation, you should probably select the Zone ID version.",
         "menu_options": {
-          "zone": "Zone ID (old method)",
-          "gps_loc": "GPS Location (new method)"
+          "zone": "Zone ID (more generalized location)",
+          "gps_loc": "GPS Location (precise location)"
         }
       },
       "gps_loc": {
@@ -31,10 +31,10 @@
   "options": {
     "step": {
       "user": {
-        "description": "Please select your NWS lookup method.",
+        "description": "Please select your NWS lookup method.\nFor a brief explanation of the advantages and disadvantages of each method please see [here](https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.txt).\nIf you don't know which is better for your situation, you should probably select the Zone ID version.",
         "menu_options": {
-          "zone": "Zone ID (old method)",
-          "gps_loc": "GPS Location (new method)"
+          "zone": "Zone ID (more generalized location)",
+          "gps_loc": "GPS Location (precise location)"
         }
       },
       "gps_loc": {
