@@ -11,5 +11,5 @@ The final method, zone-based alert lookup, relies on geographic boundaries defin
 On the other hand, the point-based alert lookup uses the user's precise location (based on provided coordinates) to provide weather alerts for your specific location. This method provides more accurate and targeted information, particularly useful for users who live or work in areas with microclimates or complex topography. However, this method may delay awareness of severe weather developing in the user's region.
 
 ## Source:
-https://www.weather.gov/media/documentation/docs/NWS_Geolocation.pdf
-https://www.weather.gov/gis/PublicZones
+- https://www.weather.gov/media/documentation/docs/NWS_Geolocation.pdf
+- https://www.weather.gov/gis/PublicZones
