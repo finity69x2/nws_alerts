@@ -8,7 +8,7 @@ The county-based alert lookup relies on geographic boundaries defined by county 
 The final method, zone-based alert lookup, relies on geographic boundaries defined by the NWS based on weather patterns and conditions. Zones can vary in size and shape and are often used in areas with complex topography or microclimates where weather conditions can differ significantly over short distances. By defining zones based on weather patterns, the NWS can issue more targeted and precise alerts that consider each zone's unique conditions. <b>Zone-based queries are the recommended method for most users.</b>
 
 ## Coordinate (most precise)
-On the other hand, the point-based alert lookup uses the user's precise location (based on provided coordinates) to provide weather alerts for your specific location. This method provides more accurate and targeted information, particularly useful for users who live or work in areas with microclimates or complex topography. However, this method may delay awareness of severe weather developing in the user's region.
+On the other hand, the point-based alert lookup uses the user's precise location (based on submitted coordinates) to query weather alerts for your specific location. This method provides more accurate and targeted information, particularly useful for users who live or work in areas with microclimates or complex topography. However, this method may delay awareness of severe weather developing in the user's region.
 
 ## Source:
 - https://www.weather.gov/media/documentation/docs/NWS_Geolocation.pdf
