@@ -84,7 +84,17 @@ async def async_unload_entry(hass, config_entry):
 
 async def update_listener(hass, entry):
     """Update listener."""
-    entry.data = entry.options
+    if not entry.options:
+        return
+    
+    new_data = entry.options.copy()
+    hass.config_entries.async_update_entry(
+        entry=entry,
+        unique_id=entry.options[CONF_NAME],
+        data=new_data,
+        options={},
+    )
+
     await hass.config_entries.async_forward_entry_unload(entry, "sensor")
     hass.async_add_job(hass.config_entries.async_forward_entry_setup(entry, "sensor"))
 
