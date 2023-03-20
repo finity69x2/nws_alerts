@@ -33,7 +33,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Load the saved entities."""
     # Print startup message
     _LOGGER.info(
@@ -43,36 +43,38 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     hass.data.setdefault(DOMAIN, {})
 
-    if entry.unique_id is not None:
-        hass.config_entries.async_update_entry(entry, unique_id=None)
+    if config_entry.unique_id is not None:
+        hass.config_entries.async_update_entry(config_entry, unique_id=None)
 
         ent_reg = async_get(hass)
-        for entity in async_entries_for_config_entry(ent_reg, entry.entry_id):
-            ent_reg.async_update_entity(entity.entity_id, new_unique_id=entry.entry_id)
+        for entity in async_entries_for_config_entry(ent_reg, config_entry.entry_id):
+            ent_reg.async_update_entity(entity.entity_id, new_unique_id=config_entry.entry_id)
+
+    config_entry.add_update_listener(update_listener)            
 
     # Setup the data coordinator
     coordinator = AlertsDataUpdateCoordinator(
         hass,
-        entry.data,
-        entry.data.get(CONF_TIMEOUT),
-        entry.data.get(CONF_INTERVAL),
+        config_entry.data,
+        config_entry.data.get(CONF_TIMEOUT),
+        config_entry.data.get(CONF_INTERVAL),
     )
 
     # Fetch initial data so we have data when entities subscribe
     await coordinator.async_refresh()
 
-    hass.data[DOMAIN][entry.entry_id] = {
+    hass.data[DOMAIN][config_entry.entry_id] = {
         COORDINATOR: coordinator,
     }
 
     for platform in PLATFORMS:
         hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(entry, platform)
+            hass.config_entries.async_forward_entry_setup(config_entry, platform)
         )
     return True
 
 
-async def async_unload_entry(hass, config_entry):
+async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     """Handle removal of an entry."""
     try:
         await hass.config_entries.async_forward_entry_unload(config_entry, "sensor")
@@ -82,24 +84,22 @@ async def async_unload_entry(hass, config_entry):
     return True
 
 
-async def update_listener(hass, entry):
+async def update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
     """Update listener."""
-    if not entry.options:
+    if config_entry.data == config_entry.options:
+        _LOGGER.debug("No changes detected not reloading sensors.")
         return
     
-    new_data = entry.options.copy()
+    new_data = config_entry.options.copy()
     hass.config_entries.async_update_entry(
-        entry=entry,
-        unique_id=entry.options[CONF_NAME],
+        entry=config_entry,
         data=new_data,
-        options={},
     )
 
-    await hass.config_entries.async_forward_entry_unload(entry, "sensor")
-    hass.async_add_job(hass.config_entries.async_forward_entry_setup(entry, "sensor"))
+    await hass.config_entries.async_reload(config_entry.entry_id)
 
 
-async def async_migrate_entry(hass, config_entry):
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     """Migrate an old config entry."""
     version = config_entry.version
 

@@ -211,7 +211,7 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
 
         if user_input is not None:
             self._data.update(user_input)
-            return self.async_create_entry(title=self._data[CONF_NAME], data=self._data)
+            return self.async_create_entry(title="", data=self._data)
         return await self._show_options_form(user_input)
 
     async def async_step_zone(self, user_input={}):
@@ -220,7 +220,7 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
 
         if user_input is not None:
             self._data.update(user_input)
-            return self.async_create_entry(title=self._data[CONF_NAME], data=self._data)
+            return self.async_create_entry(title="", data=self._data)
         return await self._show_options_form(user_input)
 
     async def _show_options_form(self, user_input):
