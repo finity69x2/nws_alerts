@@ -1,6 +1,6 @@
 #################################################################################
 #
-#   This is the package for NWS ALERTS USING THE CUSTOM INTEGRATION
+#   This is the package for NWS ALERTS USING THE CUSTOM COMPONENT
 #
 #################################################################################
 
@@ -8,17 +8,13 @@
 
 # https://api.weather.gov/alerts/active/count
 
-# https://api.weather.gov/alerts/active?zone=INZ009,INC033
+# https://api.weather.gov/alerts/active?zone=<some_zone>
+
 
 ########################  SENSOR  ###############################################
 
-## the NWS Sensor can now be installed using HACS. If you aren't using HACS you can uncomment the nws_alerts sensor here and configure it manually.
+sensor:
 
-# sensor:
-  # - platform: nws_alerts
-    # zone_id: 'INZ009,INC033'
-    # name: nws alerts yaml
-    
 ######################## BINARY SENSOR  #########################################
 
 binary_sensor:
@@ -26,7 +22,6 @@ binary_sensor:
     sensors:
       nws_alerts_are_active:
         friendly_name: NWS Alerts Are Active
-        #entity_id: sensor.nws_alerts
         value_template: >
           {{ states('sensor.nws_alerts') | int(0) > 0 }}
         icon_template: >-
@@ -35,18 +30,28 @@ binary_sensor:
           {% else %}
             mdi:weather-sunny
           {% endif %}
- 
+
 ######################## INPUT BOOLEAN  #########################################
 
 input_boolean:
   nws_multi_alert:
     name: NWS Multiple Alerts At Once
-    
+
+############################## VARIABLE  #####################################
+
+## this uses the hass_variable custom component.
+## you can install thru HACS or manually from https://github.com/Wibias/hass-variables
+
+variable:
+  nws_alerts_event_ids:
+    value: 'none'
+    restore: true
+
 ########################  AUTOMATION  ###########################################
 
 automation:
   - alias: 'NWS Check for Multi Alerts'
-    initial_state: true
+    initial_state: 'on'
     trigger:
       - platform: state
         entity_id: sensor.nws_alerts
@@ -71,7 +76,7 @@ automation:
                 entity_id: input_boolean.nws_multi_alert
   
   - alias: 'NWS Weather Alert Pop Up Control'
-    initial_state: true
+    initial_state: 'on'
     trigger:
       - platform: state
         entity_id: sensor.nws_alerts
@@ -137,7 +142,7 @@ automation:
               "{{ state_attr('sensor.nws_alerts', 'display_desc').split('\n\n-\n\n')[0] }}"
           
   - alias: NWS Notification Weather Alert
-    initial_state: true
+    initial_state: 'on'
     trigger:
       platform: state
       entity_id: sensor.nws_alerts
@@ -146,13 +151,13 @@ automation:
       - '{{ trigger.to_state.state|int > trigger.from_state.state|int }}'
       - "{{ (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] not in states.variable.nws_alerts_event_ids.attributes.values()|list) and (state_attr('sensor.nws_alerts', 'event_id').split('-')[0] != states('variable.nws_alerts_event_ids')) }}"
     action:
-      - service: notify.pushbullet_notify
+      - service: notify.pushbullet
         data:
           message: >
             "NWS: {{ state_attr('sensor.nws_alerts', 'title').split(' - ')[0] }}"
             
   - alias: NWS Announce Weather Alert
-    initial_state: true
+    initial_state: 'on'
     trigger:
       - platform: state
         entity_id: sensor.nws_alerts
@@ -195,7 +200,7 @@ automation:
       - delay: '00:00:15'
       - service: notify.alexa_media
         data:
-          message: "<audio src='https://h7a3u8r0lt405rwrar1rcgi8ep9a1gez.ui.nabu.casa/local/mp3/nws_alert_tone.mp3' />"
+          message: "<audio src='https://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.ui.nabu.casa/local/mp3/nws_alert_tone.mp3' />"
           target: 
             - media_player.computer_room_dot
             - media_player.kitchen_dot
@@ -226,7 +231,7 @@ automation:
             {% endif %}
                   
   - alias: NWS Announce Weather Alert for MBR
-    initial_state: true
+    initial_state: 'on'
     trigger:
       - platform: state
         entity_id: sensor.nws_alerts
@@ -259,7 +264,7 @@ automation:
       - delay: '00:00:15'
       - service: notify.alexa_media
         data:
-          message: "<audio src='https://h7a3u8r0lt405rwrar1rcgi8ep9a1gez.ui.nabu.casa/local/mp3/nws_alert_tone.mp3' />"
+          message: "<audio src='https://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.ui.nabu.casa/local/mp3/nws_alert_tone.mp3' />"
           target: 
             - media_player.bedroom_2_dot
             - media_player.master_bedroom_dot
@@ -276,9 +281,9 @@ automation:
           data:
             type: tts
           message: "Attention!,,,Attention!,,,The National Weather Service Has issued a Tornado Warning for our area."
-       
+              
   - alias: NWS Update Event ID Variable
-    initial_state: true
+    initial_state: 'on'
     trigger:
       - platform: state
         entity_id: sensor.nws_alerts
@@ -302,7 +307,7 @@ automation:
           variable: nws_alerts_event_ids
           value: "{{ (trigger.to_state.attributes.event_id).split('-')[0] }}"
           
-############################  SCRIPT  ###################################
+###############################  SCRIPT  ###################################
           
 script:
   nws_popup_on_wx_alert:
@@ -317,13 +322,3 @@ script:
           message: "{{ message }}"
           title: '{{ title }}'
         
-############################## VARIABLE  #####################################
-
-
-## this uses the hass_variable custom component.
-## you can install thru HACS or manually from https://github.com/Wibias/hass-variables
-
-variable:
-  nws_alerts_event_ids:
-    value: 'none'
-    restore: true
