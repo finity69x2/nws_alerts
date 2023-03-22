@@ -2,6 +2,22 @@
   "config": {
     "step": {
       "user": {
+        "description": "Please select your NWS lookup method.\n\nFor a brief explanation of the advantages and disadvantages of each method please see [here](https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.txt).\n\nIf you don't know which is better for your situation, you should probably select the County/Zone ID version.",
+        "menu_options": {
+          "zone": "County/Zone ID (more generalized location)",
+          "gps_loc": "GPS Location (precise location)"
+        }
+      },
+      "gps_loc": {
+        "description": "Please enter your latitude and longitude, by default your coordinates from Home Assistant are used.",
+        "data": {
+          "name": "Friendly Name",
+          "gps_loc": "Your GPS coordinates",
+          "interval": "Update Interval (in minutes)",
+          "timeout":"Update Timeout (in seconds)"
+        }
+      },
+      "zone": {
         "data": {
           "name": "Friendly Name",
           "zone_id": "Zone ID(s)",
@@ -14,7 +30,23 @@
   },
   "options": {
     "step": {
-      "init": {
+      "user": {
+        "description": "Please select your NWS lookup method.\n\nFor a brief explanation of the advantages and disadvantages of each method please see [here](https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.txt).\n\nIf you don't know which is better for your situation, you should probably select the County/Zone ID version.",
+        "menu_options": {
+          "zone": "County/Zone ID (more generalized location)",
+          "gps_loc": "GPS Location (precise location)"
+        }
+      },
+      "gps_loc": {
+        "description": "Please enter your latitude and longitude, by default your coordinates from Home Assistant are used.",
+        "data": {
+          "name": "Friendly Name",
+          "gps_loc": "Your GPS coordinates",
+          "interval": "Update Interval (in minutes)",
+          "timeout":"Update Timeout (in seconds)"
+        }
+      },      
+      "zone": {
         "data": {
           "name": "Friendly Name",
           "zone_id": "Zone ID(s)",
