@@ -2,7 +2,7 @@
 The National Weather Service (NWS) provides different methods to query weather alerts and warnings: county/zone-based alert lookup and GPS point-based alert lookup. In the NWS Alert Intergration, County and Zone configurations are grouped. Overall, County, Zone, and Coordinate location alert lookup each has strengths and limitations. The choice between the methods depends on the user's location, the complexity of the local weather patterns, and the level of detail and precision required for the specific situation.
 
 ## Coordinate (most precise)
-The point-based alert lookup uses the user's precise location (based on submitted coordinates) to query weather alerts for your specific location. This method provides more accurate and targeted information, particularly useful for users who live or work in areas with microclimates or complex topography. However, this method may delay awareness of severe weather developing in the user's region.
+The point-based alert lookup uses the user's precise location (based on submitted coordinates) to query weather alerts for your specific location. This method provides more accurate and targeted information, particularly useful for users who live or work in areas with microclimates or complex topography. <b>However, this method may delay awareness of severe weather developing in the user's region.</b>
 
 **NOTE: The NWS Alerts integration will use both of the following methods (both County and Zone) if you select the "Zone ID" lookup method in the integration configuration.
 
