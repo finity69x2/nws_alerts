@@ -14,7 +14,6 @@ NWS_SENSOR_2 = "sensor.nws_alerts_yaml"
 
 
 async def test_sensor(hass):
-
     entry = MockConfigEntry(
         domain=DOMAIN,
         title="NWS Alerts",

@@ -13,6 +13,7 @@ from tests.const import CONFIG_DATA, CONFIG_DATA_3
 
 pytestmark = pytest.mark.asyncio
 
+
 async def test_setup_entry(
     hass,
 ):
