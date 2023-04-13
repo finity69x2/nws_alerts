@@ -78,13 +78,13 @@ def _get_schema_tracker(hass: Any, user_input: list, default_dict: list) -> Any:
     if user_input is None:
         user_input = {}
 
-    def _get_default(key):
+    def _get_default(key: str, fallback_default: Any = None) -> None:
         """Gets default value for key."""
-        return user_input.get(key, default_dict.get(key))
+        return user_input.get(key, default_dict.get(key, fallback_default))
 
     return vol.Schema(
         {
-            vol.Required(CONF_TRACKER, default=_get_default(CONF_TRACKER)): vol.In(
+            vol.Required(CONF_TRACKER, default=_get_default(CONF_TRACKER, "(none)")): vol.In(
                 _get_entities(hass, TRACKER_DOMAIN)
             ),
             vol.Optional(CONF_NAME, default=_get_default(CONF_NAME)): str,
@@ -100,7 +100,7 @@ def _get_entities(
     search: List[str] = None,
     extra_entities: List[str] = None,
 ) -> List[str]:
-    data = []
+    data = ["(none)"]
     if domain not in hass.data:
         return data
 
