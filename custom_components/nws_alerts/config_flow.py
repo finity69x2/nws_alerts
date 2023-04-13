@@ -288,6 +288,15 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
             self._data.update(user_input)
             return self.async_create_entry(title="", data=self._data)
         return await self._show_options_form(user_input)
+    
+    async def async_step_gps_tracker(self, user_input={}):
+        """Handle a flow initialized by the user."""
+        self._errors = {}
+
+        if user_input is not None:
+            self._data.update(user_input)
+            return self.async_create_entry(title="", data=self._data)
+        return await self._show_options_form(user_input)    
 
     async def async_step_zone(self, user_input={}):
         """Handle a flow initialized by the user."""
@@ -313,3 +322,9 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
                 data_schema=_get_schema_zone(self.hass, user_input, self._data),
                 errors=self._errors,
             )
+        elif CONF_TRACKER in self.config.data:
+            return self.async_show_form(
+                step_id="gps_tracker",
+                data_schema=_get_schema_tracker(self.hass, user_input, self._data),
+                errors=self._errors,
+            )            
