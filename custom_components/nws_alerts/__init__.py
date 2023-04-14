@@ -144,7 +144,7 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
         """Fetch data"""
         coords = None
         if CONF_TRACKER in self.config:
-            coords = await self._get_tracker_gps
+            coords = await self._get_tracker_gps()
         async with timeout(self.timeout):
             try:
                 data = await update_alerts(self.config, coords)
