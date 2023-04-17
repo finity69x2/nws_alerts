@@ -155,7 +155,7 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
     async def _get_tracker_gps(self):
         """Return device tracker GPS data."""
         tracker = self.config[CONF_TRACKER]
-        entity = self.hass.get(tracker)
+        entity = self.hass.states.get(tracker)
         if entity and "source_type" in entity.attributes:
             return f"{entity.attributes['latitude']},{entity.attributes['longitude']}"
         return None
