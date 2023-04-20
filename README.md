@@ -6,9 +6,11 @@ This integration retrieves updated weather alerts every minute from the US NWS A
 
 The integration presents the number of currently active alerts as the state of the sensor and lists many alert details as a list in the attributes of the sensor.
 
-The sensor that is created is used in my "NWS Alerts Custom" package - https://github.com/finity69x2/nws_alerts/blob/master/packages/nws_alerts_custom_package.yaml
+The sensor that is created is used in my "NWS Alerts" package: https://github.com/finity69x2/nws_alerts/blob/master/packages/nws_alerts_package.yaml
 
-You can also display the generated alerts in your frontend - https://github.com/finity69x2/nws_alerts/blob/master/lovelace/alerts_tab
+You can also display the generated alerts in your frontend. For example usage see: https://github.com/finity69x2/nws_alerts/blob/master/lovelace/alerts_tab
+
+(note: this frontend example uses a custom card but it's not necessary for it's use in the frontend. it's only an example and how I currently use it in my HA)
 
 ## Installation:
 
