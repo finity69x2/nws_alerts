@@ -4,6 +4,8 @@ An updated version of the nws_alerts custom integration for Home Assistant origi
 
 This integration retrieves updated weather alerts every minute from the US NWS API (by default but it can be changed in the config options).
 
+You can configure the integration to use your NWS Zone, your precise location via GPS coordinates or you can get dynamic location alerts by configuring the integration to use a device_tracker entity from HA as long as that device tracker provides GPS coordinates.
+
 The integration presents the number of currently active alerts as the state of the sensor and lists many alert details as a list in the attributes of the sensor.
 
 The sensor that is created is used in my "NWS Alerts" package: https://github.com/finity69x2/nws_alerts/blob/master/packages/nws_alerts_package.yaml
@@ -36,9 +38,22 @@ After installing the integration you can then configure it using the instruction
 
 There are two ways to configure this integration.
 
-<b>Manually via an entry in your configuration.yaml file:</b>
+<b>You can configure the integration via the "Configuration->Integrations" section of the Home Assistant UI:</b>
+
+Click on "+ Add Integration" buuton in the bottom right corner.
+
+Search for "NWS Alerts" in the list of integrations and follow the UI prompts to configure the sensor.
 
 You can find your Zone or County ID by going to https://alerts.weather.gov/, scroll down to your state and click on the “zone list” and/or "county list" then look for the entry for your county.
+
+There are a few configuration method options to select from. 
+
+Please see the following link to help you decide which option to use:
+
+https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.md
+
+
+<b>Or manually via an entry in your configuration.yaml file:</b>
 
 To create a sensor instance add the following configuration to your sensor definitions using the zone_id found above:
 
@@ -66,14 +81,4 @@ You can overide the sensor default name ("sensor.nws_alerts") to one of your cho
 
 Using the configuration example above the sensor will then be called "sensor.my_nws_alerts_sensor"
 
-<b>Or you can configure the integration via the "Configuration->Integrations" section of the Home Assistant UI.</b>
 
-Click on "+ Add Integration" buuton in the bottom right corner.
-
-Search for "NWS Alerts" in the list of integrations and follow the UI prompts to configure the sensor.
-
-There are a few configuration method options to select from. 
-
-Please see the followimg link to help you decide which option to use:
-
-https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.md
