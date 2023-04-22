@@ -2,7 +2,7 @@
 
 An updated version of the nws_alerts custom integration for Home Assistant originally found at github.com/eracknaphobia/nws_custom_component
 
-This integration retrieves updated weather alerts every minute from the US NWS API.
+This integration retrieves updated weather alerts every minute from the US NWS API (by default but it can be changed in the config options).
 
 The integration presents the number of currently active alerts as the state of the sensor and lists many alert details as a list in the attributes of the sensor.
 
@@ -24,7 +24,7 @@ Clone the Repository and copy the "nws_alerts" directory to your "custom_compone
 
 open the HACS section of Home Assistant.
 
-Click the "+ Explore & Add New repositories" button in the bottom right corner.
+Click the "+ Explore & Download Repositories" button in the bottom right corner.
 
 In the window that opens search for "NWS Alerts".
 
@@ -34,11 +34,11 @@ After installing the integration you can then configure it using the instruction
   
 ## Configuration:
 
-You can find your Zone or County ID by going to https://alerts.weather.gov/, scroll down to your state and click on the “zone list” and/or "county list" then look for the entry for your county.
-
 There are two ways to configure this integration.
 
 <b>Manually via an entry in your configuration.yaml file:</b>
+
+You can find your Zone or County ID by going to https://alerts.weather.gov/, scroll down to your state and click on the “zone list” and/or "county list" then look for the entry for your county.
 
 To create a sensor instance add the following configuration to your sensor definitions using the zone_id found above:
 
@@ -68,5 +68,6 @@ Using the configuration example above the sensor will then be called "sensor.my_
 
 <b>Or you can configure the integration via the "Configuration->Integrations" section of the Home Assistant UI.</b>
 
-Look for the integration labeled "NWS Alerts"
+Click on "+ Add Integration" buuton in the bottom right corner.
 
+Search for "NWS Alerts" in the list of integrations and follow the UI prompts to configure the sensor.
