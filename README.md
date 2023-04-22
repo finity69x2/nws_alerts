@@ -52,6 +52,7 @@ Please see the following link to help you decide which option to use:
 
 https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.md
 
+If you select the "Using a device tracker" option under the "GPS Location" option then HA will use the GPS coordinates provided by that tracker to query for alerts so you should follow the same recommendations for using GPS coordinates when using that option.
 
 <b>Or manually via an entry in your configuration.yaml file:</b>
 
