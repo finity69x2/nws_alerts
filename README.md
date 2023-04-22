@@ -71,3 +71,9 @@ Using the configuration example above the sensor will then be called "sensor.my_
 Click on "+ Add Integration" buuton in the bottom right corner.
 
 Search for "NWS Alerts" in the list of integrations and follow the UI prompts to configure the sensor.
+
+There are a few configuration method options to select from. 
+
+Please see the followimg link to help you decide which option to use:
+
+https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.md
