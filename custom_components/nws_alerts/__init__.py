@@ -176,7 +176,17 @@ async def async_get_state(config, coords) -> dict:
     zone_id = ""
     gps_loc = ""
     url = "%s/alerts/active/count" % API_ENDPOINT
-    values = {}
+    values = {
+        "state": 0,
+        "event": None,
+        "event_id": None,
+        "message_type": None,
+        "event_status": None,
+        "event_severity": None,
+        "event_expires": None,
+        "display_desc": None,
+        "spoken_desc": None,
+    }
     headers = {"User-Agent": USER_AGENT, "Accept": "application/ld+json"}
     data = None
 
@@ -184,7 +194,7 @@ async def async_get_state(config, coords) -> dict:
         zone_id = config[CONF_ZONE_ID]
         _LOGGER.debug("getting state for %s from %s" % (zone_id, url))
     elif CONF_GPS_LOC in config or CONF_TRACKER in config:
-        if coords:
+        if coords is not None:
             gps_loc = coords
         else:
             gps_loc = config[CONF_GPS_LOC]
@@ -194,20 +204,11 @@ async def async_get_state(config, coords) -> dict:
         async with session.get(url, headers=headers) as r:
             if r.status == 200:
                 data = await r.json()
+            else:
+                _LOGGER.error("Problem updating NWS data: (%s) - %s", r.status, r.body)
 
     if data is not None:
         # Reset values before reassigning
-        values = {
-            "state": 0,
-            "event": None,
-            "event_id": None,
-            "message_type": None,
-            "event_status": None,
-            "event_severity": None,
-            "event_expires": None,
-            "display_desc": None,
-            "spoken_desc": None,
-        }
         if "zones" in data and zone_id != "":
             for zone in zone_id.split(","):
                 if zone in data["zones"]:
@@ -223,7 +224,17 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
     """Query API for Alerts."""
 
     url = ""
-    values = {}
+    values = {
+        "state": 0,
+        "event": None,
+        "event_id": None,
+        "message_type": None,
+        "event_status": None,
+        "event_severity": None,
+        "event_expires": None,
+        "display_desc": None,
+        "spoken_desc": None,
+    }
     headers = {"User-Agent": USER_AGENT, "Accept": "application/geo+json"}
     data = None
 
@@ -238,6 +249,8 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
         async with session.get(url, headers=headers) as r:
             if r.status == 200:
                 data = await r.json()
+            else:
+                _LOGGER.error("Problem updating NWS data: (%s) - %s", r.status, r.body)
 
     if data is not None:
         events = []
@@ -343,17 +356,5 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
             values["event_expires"] = event_expires
             values["display_desc"] = display_desc
             values["spoken_desc"] = spoken_desc
-        else:
-            values = {
-                "state": 0,
-                "event": None,
-                "event_id": None,
-                "message_type": None,
-                "event_status": None,
-                "event_severity": None,
-                "event_expires": None,
-                "display_desc": None,
-                "spoken_desc": None,
-            }
 
     return values

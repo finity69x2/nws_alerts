@@ -84,9 +84,9 @@ def _get_schema_tracker(hass: Any, user_input: list, default_dict: list) -> Any:
 
     return vol.Schema(
         {
-            vol.Required(CONF_TRACKER, default=_get_default(CONF_TRACKER, "(none)")): vol.In(
-                _get_entities(hass, TRACKER_DOMAIN)
-            ),
+            vol.Required(
+                CONF_TRACKER, default=_get_default(CONF_TRACKER, "(none)")
+            ): vol.In(_get_entities(hass, TRACKER_DOMAIN)),
             vol.Optional(CONF_NAME, default=_get_default(CONF_NAME)): str,
             vol.Optional(CONF_INTERVAL, default=_get_default(CONF_INTERVAL)): int,
             vol.Optional(CONF_TIMEOUT, default=_get_default(CONF_TIMEOUT)): int,
@@ -288,7 +288,7 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
             self._data.update(user_input)
             return self.async_create_entry(title="", data=self._data)
         return await self._show_options_form(user_input)
-    
+
     async def async_step_gps_tracker(self, user_input={}):
         """Handle a flow initialized by the user."""
         self._errors = {}
@@ -296,7 +296,7 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             self._data.update(user_input)
             return self.async_create_entry(title="", data=self._data)
-        return await self._show_options_form(user_input)    
+        return await self._show_options_form(user_input)
 
     async def async_step_zone(self, user_input={}):
         """Handle a flow initialized by the user."""
@@ -327,4 +327,4 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
                 step_id="gps_tracker",
                 data_schema=_get_schema_tracker(self.hass, user_input, self._data),
                 errors=self._errors,
-            )            
+            )
