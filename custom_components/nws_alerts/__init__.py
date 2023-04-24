@@ -53,6 +53,15 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                 entity.entity_id, new_unique_id=config_entry.entry_id
             )
 
+    updated_config = config_entry.data.copy()
+
+    # Strip spaces from manually entered GPS locations
+    if CONF_GPS_LOC in updated_config:
+        updated_config[CONF_GPS_LOC].replace(" ", "")
+
+    if updated_config != config_entry.data:
+        hass.config_entries.async_update_entry(config_entry, data=updated_config)
+
     config_entry.add_update_listener(update_listener)
 
     # Setup the data coordinator
