@@ -197,7 +197,7 @@ async def async_get_state(config, coords) -> dict:
         if coords is not None:
             gps_loc = coords
         else:
-            gps_loc = config[CONF_GPS_LOC]
+            gps_loc = config[CONF_GPS_LOC].replace(" ", "")
         _LOGGER.debug("getting state for %s from %s" % (gps_loc, url))
 
     async with aiohttp.ClientSession() as session:
