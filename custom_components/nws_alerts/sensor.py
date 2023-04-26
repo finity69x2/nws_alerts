@@ -59,7 +59,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             config.entry_id = slugify(f"{config.get(CONF_GPS_LOC)}")
         elif CONF_TRACKER in config:
             config.entry_id = slugify(f"{config.get(CONF_TRACKER)}")            
-        elif all(key in config for key in [CONF_GPS_LOC, CONF_ZONE_ID, CONF_TRACKER]):
+        else:
             raise ValueError("GPS, Zone or Device Tracker needs to be configured.")
         config.data = config
     else:
@@ -69,7 +69,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
             config.entry_id = slugify(f"{config.get(CONF_GPS_LOC)}")
         elif CONF_TRACKER in config:
             config.entry_id = slugify(f"{config.get(CONF_TRACKER)}")
-        elif all(key in config for key in [CONF_GPS_LOC, CONF_ZONE_ID, CONF_TRACKER]):
+        else:
             raise ValueError("GPS, Zone or Device Tracker needs to be configured.")
         config.data = config
 
