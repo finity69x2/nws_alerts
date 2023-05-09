@@ -74,7 +74,7 @@ or by entering in specific GPS coordinates:
 
 ```
 - platform: nws_alerts
-  gps_loc:  39.52, -119.81
+  gps_loc: 39.52, -119.81
 ```
 
 or, finally, by adding a device_tracker entity:
