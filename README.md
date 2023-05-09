@@ -70,6 +70,20 @@ or enter comma separated values for multiple zones:
   zone_id: 'PAC049,WVC031'
 ```
 
+or by entering in specific GPS coordinates:
+
+```
+- platform: nws_alerts
+  gps_loc:  39.52, -119.81
+```
+
+or, finally, by adding a device_tracker entity:
+
+```
+- platform: nws_alerts
+  tracker: 'device_tracker.your_tracker_entity'
+```
+
 After you restart Home Assistant then you should have a new sensor called "sensor.nws_alerts" in your system.
 
 You can overide the sensor default name ("sensor.nws_alerts") to one of your choosing by setting the "name:" option:
@@ -80,6 +94,4 @@ You can overide the sensor default name ("sensor.nws_alerts") to one of your cho
   name: My NWS Alerts Sensor
 ```
 
-Using the configuration example above the sensor will then be called "sensor.my_nws_alerts_sensor"
-
-
+Using the configuration example above the sensor will then be called "sensor.my_nws_alerts_sensor".
