@@ -11,6 +11,7 @@ from custom_components.nws_alerts.const import CONF_ZONE_ID, DOMAIN
 
 pytestmark = pytest.mark.asyncio
 
+
 @pytest.mark.parametrize(
     "input,step_id,title,data",
     [
@@ -42,9 +43,8 @@ async def test_form_zone(
     """Test we get the form."""
     await setup.async_setup_component(hass, "persistent_notification", {})
     with patch(
-        "custom_components.nws_alerts.config_flow._get_zone_list",
-        return_value=None):
-
+        "custom_components.nws_alerts.config_flow._get_zone_list", return_value=None
+    ):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
@@ -55,9 +55,8 @@ async def test_form_zone(
         "custom_components.nws_alerts.async_setup_entry",
         return_value=True,
     ) as mock_setup_entry, patch(
-        "custom_components.nws_alerts.config_flow._get_zone_list",
-        return_value=None):
-
+        "custom_components.nws_alerts.config_flow._get_zone_list", return_value=None
+    ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], {"next_step_id": "zone"}
         )
@@ -108,9 +107,8 @@ async def test_form_gps(
     """Test we get the form."""
     await setup.async_setup_component(hass, "persistent_notification", {})
     with patch(
-        "custom_components.nws_alerts.config_flow._get_zone_list",
-        return_value=None):
-
+        "custom_components.nws_alerts.config_flow._get_zone_list", return_value=None
+    ):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": config_entries.SOURCE_USER}
         )
@@ -121,13 +119,17 @@ async def test_form_gps(
         "custom_components.nws_alerts.async_setup_entry",
         return_value=True,
     ) as mock_setup_entry, patch(
-        "custom_components.nws_alerts.config_flow._get_zone_list",
-        return_value=None):
+        "custom_components.nws_alerts.config_flow._get_zone_list", return_value=None
+    ):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {"next_step_id": "gps"}
+        )
+        await hass.async_block_till_done()
 
+        assert result["type"] == FlowResultType.MENU
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], {"next_step_id": "gps_loc"}
         )
-        await hass.async_block_till_done()
 
         assert result["type"] == FlowResultType.FORM
 
@@ -141,6 +143,7 @@ async def test_form_gps(
 
         await hass.async_block_till_done()
         assert len(mock_setup_entry.mock_calls) == 1
+
 
 # @pytest.mark.parametrize(
 #     "user_input",
