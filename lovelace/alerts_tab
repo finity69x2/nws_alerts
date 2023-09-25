@@ -1,8 +1,10 @@
-theme: Backend-selected
-title: Alerts
-path: nws-alerts
-badges: []
+title: "Alerts"
+visible: false
+type: custom:vertical-layout
+layout:
+  max_cols: 4
 cards:
+
   - type: custom:stack-in-card
     cards:
       - type: entities
@@ -28,25 +30,26 @@ cards:
               none
               {% endif %}
             {% endfor %}
+
       - type: entities
         title: NWS Alerts History
         show_header_toggle: false
         state_color: true
         entities:
-          - variable.nws_alerts_event_ids
+          - sensor.nws_alerts_event_ids
           - type: custom:entity-attributes-card
             heading_name: Name
             heading_state: State
-            entity: variable.nws_alerts_event_ids
+            entity: sensor.nws_alerts_event_ids
             filter:
               include:
-                - variable.nws_alerts_event_ids.history_1
-                - variable.nws_alerts_event_ids.history_2
-                - variable.nws_alerts_event_ids.history_3
-                - variable.nws_alerts_event_ids.history_4
-                - variable.nws_alerts_event_ids.history_5
-                - variable.nws_alerts_event_ids.history_6
-                - variable.nws_alerts_event_ids.history_7
-                - variable.nws_alerts_event_ids.history_8
-                - variable.nws_alerts_event_ids.history_9
-                - variable.nws_alerts_event_ids.history_10
+                - sensor.nws_alerts_event_ids.history_1
+                - sensor.nws_alerts_event_ids.history_2
+                - sensor.nws_alerts_event_ids.history_3
+                - sensor.nws_alerts_event_ids.history_4
+                - sensor.nws_alerts_event_ids.history_5
+                - sensor.nws_alerts_event_ids.history_6
+                - sensor.nws_alerts_event_ids.history_7
+                - sensor.nws_alerts_event_ids.history_8
+                - sensor.nws_alerts_event_ids.history_9
+                - sensor.nws_alerts_event_ids.history_10          
