@@ -157,6 +157,9 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
         async with timeout(self.timeout):
             try:
                 data = await update_alerts(self.config, coords)
+            except AttributeError:
+                _LOGGER.debug("Error fetching most recent data from NWS Alerts API; will continue trying")
+                data = "AttributeError"
             except Exception as error:
                 raise UpdateFailed(error) from error
             return data
