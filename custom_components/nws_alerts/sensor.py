@@ -1,9 +1,8 @@
 import logging
-import uuid
 
 import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
@@ -49,7 +48,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+async def async_setup_platform(
+    hass, config, async_add_entities, discovery_info=None
+):
     """Configuration from yaml"""
     if DOMAIN not in hass.data.keys():
         hass.data.setdefault(DOMAIN, {})
@@ -58,9 +59,11 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         elif CONF_GPS_LOC in config:
             config.entry_id = slugify(f"{config.get(CONF_GPS_LOC)}")
         elif CONF_TRACKER in config:
-            config.entry_id = slugify(f"{config.get(CONF_TRACKER)}")            
+            config.entry_id = slugify(f"{config.get(CONF_TRACKER)}")
         else:
-            raise ValueError("GPS, Zone or Device Tracker needs to be configured.")
+            raise ValueError(
+                "GPS, Zone or Device Tracker needs to be configured."
+            )
         config.data = config
     else:
         if CONF_ZONE_ID in config:
@@ -70,7 +73,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         elif CONF_TRACKER in config:
             config.entry_id = slugify(f"{config.get(CONF_TRACKER)}")
         else:
-            raise ValueError("GPS, Zone or Device Tracker needs to be configured.")
+            raise ValueError(
+                "GPS, Zone or Device Tracker needs to be configured."
+            )
         config.data = config
 
     # Setup the data coordinator
@@ -128,7 +133,7 @@ class NWSAlertSensor(CoordinatorEntity):
         """Return the state of the sensor."""
         if self.coordinator.data is None:
             return None
-        elif "state" in self.coordinator.data.keys():
+        if "state" in self.coordinator.data.keys():
             return self.coordinator.data["state"]
         return None
 

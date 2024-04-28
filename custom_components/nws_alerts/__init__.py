@@ -1,6 +1,8 @@
 """ NWS Alerts """
+
 import logging
 from datetime import timedelta
+from typing import Any
 
 import aiohttp
 from async_timeout import timeout
@@ -12,7 +14,10 @@ from homeassistant.helpers.entity_registry import (
     async_entries_for_config_entry,
     async_get,
 )
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.update_coordinator import (
+    DataUpdateCoordinator,
+    UpdateFailed,
+)
 
 from .const import (
     API_ENDPOINT,
@@ -34,11 +39,14 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+async def async_setup_entry(
+    hass: HomeAssistant, config_entry: ConfigEntry
+) -> bool:
     """Load the saved entities."""
     # Print startup message
     _LOGGER.info(
-        "Version %s is starting, if you have any issues please report" " them here: %s",
+        "Version %s is starting, if you have any issues please report"
+        " them here: %s",
         VERSION,
         ISSUE_URL,
     )
@@ -48,7 +56,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         hass.config_entries.async_update_entry(config_entry, unique_id=None)
 
         ent_reg = async_get(hass)
-        for entity in async_entries_for_config_entry(ent_reg, config_entry.entry_id):
+        for entity in async_entries_for_config_entry(
+            ent_reg, config_entry.entry_id
+        ):
             ent_reg.async_update_entity(
                 entity.entity_id, new_unique_id=config_entry.entry_id
             )
@@ -60,7 +70,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         updated_config[CONF_GPS_LOC].replace(" ", "")
 
     if updated_config != config_entry.data:
-        hass.config_entries.async_update_entry(config_entry, data=updated_config)
+        hass.config_entries.async_update_entry(
+            config_entry, data=updated_config
+        )
 
     config_entry.add_update_listener(update_listener)
 
@@ -81,7 +93,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
     for platform in PLATFORMS:
         hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(config_entry, platform)
+            hass.config_entries.async_forward_entry_setup(
+                config_entry, platform
+            )
         )
     return True
 
@@ -89,8 +103,12 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     """Handle removal of an entry."""
     try:
-        await hass.config_entries.async_forward_entry_unload(config_entry, "sensor")
-        _LOGGER.info("Successfully removed sensor from the " + DOMAIN + " integration")
+        await hass.config_entries.async_forward_entry_unload(
+            config_entry, "sensor"
+        )
+        _LOGGER.info(
+            "Successfully removed sensor from the %s integration", DOMAIN
+        )
     except ValueError:
         pass
     return True
@@ -126,7 +144,9 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
             updated_config[CONF_TIMEOUT] = DEFAULT_TIMEOUT
 
         if updated_config != config_entry.data:
-            hass.config_entries.async_update_entry(config_entry, data=updated_config)
+            hass.config_entries.async_update_entry(
+                config_entry, data=updated_config
+            )
 
         config_entry.version = 2
         _LOGGER.debug("Migration to version %s complete", config_entry.version)
@@ -137,9 +157,13 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching NWS Alert data."""
 
-    def __init__(self, hass, config, the_timeout: int, interval: int):
+    def __init__(
+        self, hass, config, the_timeout: int | None, interval: int | None
+    ):
         """Initialize."""
-        self.interval = timedelta(minutes=interval)
+        self.interval = (
+            None if interval is None else timedelta(minutes=interval)
+        )
         self.name = config[CONF_NAME]
         self.timeout = the_timeout
         self.config = config
@@ -147,7 +171,9 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
 
         _LOGGER.debug("Data will be update every %s", self.interval)
 
-        super().__init__(hass, _LOGGER, name=self.name, update_interval=self.interval)
+        super().__init__(
+            hass, _LOGGER, name=self.name, update_interval=self.interval
+        )
 
     async def _async_update_data(self):
         """Fetch data"""
@@ -166,7 +192,9 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
         tracker = self.config[CONF_TRACKER]
         entity = self.hass.states.get(tracker)
         if entity and "source_type" in entity.attributes:
-            return f"{entity.attributes['latitude']},{entity.attributes['longitude']}"
+            lat = entity.attributes["latitude"]
+            lon = entity.attributes["longitude"]
+            return f"{lat},{lon}"
         return None
 
 
@@ -184,7 +212,7 @@ async def async_get_state(config, coords) -> dict:
 
     zone_id = ""
     gps_loc = ""
-    url = "%s/alerts/active/count" % API_ENDPOINT
+    url = f"{API_ENDPOINT}/alerts/active/count"
     values = {
         "state": 0,
         "event": None,
@@ -201,20 +229,24 @@ async def async_get_state(config, coords) -> dict:
 
     if CONF_ZONE_ID in config:
         zone_id = config[CONF_ZONE_ID]
-        _LOGGER.debug("getting state for %s from %s" % (zone_id, url))
+        _LOGGER.debug("getting state for %s from %s", zone_id, url)
     elif CONF_GPS_LOC in config or CONF_TRACKER in config:
         if coords is not None:
             gps_loc = coords
         else:
             gps_loc = config[CONF_GPS_LOC].replace(" ", "")
-        _LOGGER.debug("getting state for %s from %s" % (gps_loc, url))
+        _LOGGER.debug("getting state for %s from %s", gps_loc, url)
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as r:
             if r.status == 200:
                 data = await r.json()
             else:
-                _LOGGER.error("Problem updating NWS data: (%s) - %s", r.status, r.body)
+                _LOGGER.error(
+                    "Problem updating NWS data: (%s) - %s",
+                    r.status,
+                    r._body,  # pylint: disable=protected-access
+                )
 
     if data is not None:
         # Reset values before reassigning
@@ -229,11 +261,13 @@ async def async_get_state(config, coords) -> dict:
     return values
 
 
-async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
+async def async_get_alerts(
+    zone_id: str = "", gps_loc: str = ""
+) -> dict[str, Any]:
     """Query API for Alerts."""
 
     url = ""
-    values = {
+    values: dict[str, Any] = {
         "state": 0,
         "event": None,
         "event_id": None,
@@ -248,23 +282,27 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
     data = None
 
     if zone_id != "":
-        url = "%s/alerts/active?zone=%s" % (API_ENDPOINT, zone_id)
-        _LOGGER.debug("getting alert for %s from %s" % (zone_id, url))
+        url = f"{API_ENDPOINT}/alerts/active?zone={zone_id}"
+        _LOGGER.debug("getting alert for %s from %s", zone_id, url)
     elif gps_loc != "":
-        url = "%s/alerts/active?point=%s" % (API_ENDPOINT, gps_loc)
-        _LOGGER.debug("getting alert for %s from %s" % (gps_loc, url))
+        url = f"{API_ENDPOINT}/alerts/active?point={gps_loc}"
+        _LOGGER.debug("getting alert for %s from %s", gps_loc, url)
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as r:
             if r.status == 200:
                 data = await r.json()
             else:
-                _LOGGER.error("Problem updating NWS data: (%s) - %s", r.status, r.body)
+                _LOGGER.error(
+                    "Problem updating NWS data: (%s) - %s",
+                    r.status,
+                    r._body,  # pylint: disable=protected-access
+                )
 
     if data is not None:
-        events = []
         headlines = []
         event_id = ""
+        event_str = ""
         message_type = ""
         event_status = ""
         event_severity = ""
@@ -273,90 +311,56 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
         spoken_desc = ""
         features = data["features"]
         for alert in features:
-            event = alert["properties"]["event"]
-            if "NWSheadline" in alert["properties"]["parameters"]:
-                headline = alert["properties"]["parameters"]["NWSheadline"][0]
+            properties = alert["properties"]
+            event = properties["event"]
+            if "NWSheadline" in properties["parameters"]:
+                headline = properties["parameters"]["NWSheadline"][0]
             else:
                 headline = event
 
-            id = alert["id"]
-            type = alert["properties"]["messageType"]
-            status = alert["properties"]["status"]
-            description = alert["properties"]["description"]
-            instruction = alert["properties"]["instruction"]
-            severity = alert["properties"]["severity"]
-            certainty = alert["properties"]["certainty"]
-            expires = alert["properties"]["expires"]
+            # _LOGGER.info("Properties: %s", properties)
+            alert_type = properties["messageType"]
+            status = properties["status"]
+            description = properties["description"]
+            instruction = properties["instruction"]
+            severity = properties["severity"]
+            certainty = properties["certainty"]
+            expires = properties["expires"]
 
-            # if event in events:
-            #    continue
-
-            events.append(event)
             headlines.append(headline)
 
-            if display_desc != "":
-                display_desc += "\n\n-\n\n"
+            def append_short(item, value):
+                if item != "":
+                    item += " - "
+                item += value
+                return item
 
-            display_desc += (
-                "\n>\nHeadline: %s\nStatus: %s\nMessage Type: %s\nSeverity: %s\nCertainty: %s\nExpires: %s\nDescription: %s\nInstruction: %s"
-                % (
-                    headline,
-                    status,
-                    type,
-                    severity,
-                    certainty,
-                    expires,
-                    description,
-                    instruction,
-                )
+            def append_long(item, value):
+                if item != "":
+                    item += "\n\n-\n\n"
+                item += value
+                return item
+
+            event_display_desc = (
+                f"\n>\nHeadline: {headline}\nStatus: {status}\n"
+                f"Message Type: {alert_type}\nSeverity: {severity}\n"
+                f"Certainty: {certainty}\nExpires: {expires}\n"
+                f"Description: {description}\nInstruction: {instruction}"
             )
 
-            if event_id != "":
-                event_id += " - "
+            display_desc = append_long(display_desc, event_display_desc)
+            event_id = append_short(event_id, alert["id"])
+            event_str = append_short(event_str, event)
+            message_type = append_short(message_type, alert_type)
+            event_status = append_short(event_status, status)
+            event_severity = append_short(event_severity, severity)
+            event_expires = append_short(event_expires, expires)
 
-            event_id += id
+        for headline in headlines:
+            spoken_desc = append_long(spoken_desc, headline)
 
-            if message_type != "":
-                message_type += " - "
-
-            message_type += type
-
-            if event_status != "":
-                event_status += " - "
-
-            event_status += status
-
-            if event_severity != "":
-                event_severity += " - "
-
-            event_severity += severity
-
-            if event_expires != "":
-                event_expires += " - "
-
-            event_expires += expires
-
-        if headlines:
-            num_headlines = len(headlines)
-            i = 0
-            for headline in headlines:
-                i += 1
-                if spoken_desc != "":
-                    if i == num_headlines:
-                        spoken_desc += "\n\n-\n\n"
-                    else:
-                        spoken_desc += "\n\n-\n\n"
-
-                spoken_desc += headline
-
-        if len(events) > 0:
-            event_str = ""
-            for item in events:
-                if event_str != "":
-                    event_str += " - "
-                event_str += item
-
-            values["state"] = len(events)
+        if len(features) > 0:
+            values["state"] = len(features)
             values["event"] = event_str
             values["event_id"] = event_id
             values["message_type"] = message_type
