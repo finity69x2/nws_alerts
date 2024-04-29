@@ -4,10 +4,18 @@ import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
-from homeassistant.core import HomeAssistant
+from homeassistant.core import (
+    HomeAssistant,
+    SupportsResponse,
+    ServiceResponse,
+)
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.device_registry import DeviceEntryType
 from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity_platform import (
+    AddEntitiesCallback,
+    async_get_current_platform,
+)
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
 
@@ -25,6 +33,7 @@ from .const import (
     DEFAULT_NAME,
     DEFAULT_TIMEOUT,
     DOMAIN,
+    LIST_ALERTS_SERVICE_NAME,
 )
 
 # ---------------------------------------------------------
@@ -46,6 +55,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): int,
     }
 )
+
+LIST_ALERTS_SCHEMA = vol.Schema({})
 
 
 async def async_setup_platform(
@@ -95,9 +106,28 @@ async def async_setup_platform(
     async_add_entities([NWSAlertSensor(hass, config)], True)
 
 
-async def async_setup_entry(hass, entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+):
     """Setup the sensor platform."""
-    async_add_entities([NWSAlertSensor(hass, entry)], True)
+
+    platform = async_get_current_platform()
+    platform.async_register_entity_service(
+        LIST_ALERTS_SERVICE_NAME,
+        LIST_ALERTS_SCHEMA,
+        "async_get_alerts",
+        None,
+        SupportsResponse.ONLY,
+    )
+
+    _LOGGER.info(
+        "Registering service %s.%s",
+        platform.platform_name,
+        LIST_ALERTS_SERVICE_NAME,
+    )
+    async_add_entities([NWSAlertSensor(hass, config_entry)], True)
 
 
 class NWSAlertSensor(CoordinatorEntity):
@@ -146,7 +176,7 @@ class NWSAlertSensor(CoordinatorEntity):
             return attrs
 
         attrs[ATTR_ATTRIBUTION] = ATTRIBUTION
-        attrs["title"] = self.coordinator.data["event"]
+        attrs["title"] = self.coordinator.data["title"]
         attrs["event_id"] = self.coordinator.data["event_id"]
         attrs["message_type"] = self.coordinator.data["message_type"]
         attrs["event_status"] = self.coordinator.data["event_status"]
@@ -171,3 +201,8 @@ class NWSAlertSensor(CoordinatorEntity):
             manufacturer="NWS",
             name="NWS Alerts",
         )
+
+    async def async_get_alerts(self) -> ServiceResponse:
+        """Gets the alerts associated with this sensor."""
+
+        return self.coordinator.data["alerts"]

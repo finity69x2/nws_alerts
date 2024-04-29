@@ -6,7 +6,6 @@ from typing import Any
 
 import aiohttp
 from async_timeout import timeout
-from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
@@ -35,6 +34,9 @@ from .const import (
     USER_AGENT,
     VERSION,
 )
+
+SHORT_SEPARATOR = " - "
+LONG_SEPARATOR = "\n\n-\n\n"
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -177,65 +179,31 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self):
         """Fetch data"""
-        coords = None
-        if CONF_TRACKER in self.config:
-            coords = await self._get_tracker_gps()
         async with timeout(self.timeout):
             try:
-                data = await update_alerts(self.config, coords)
+                data = await async_get_state(self.hass, self.config)
             except Exception as error:
                 raise UpdateFailed(error) from error
             return data
 
-    async def _get_tracker_gps(self):
-        """Return device tracker GPS data."""
-        tracker = self.config[CONF_TRACKER]
-        entity = self.hass.states.get(tracker)
-        if entity and "source_type" in entity.attributes:
-            lat = entity.attributes["latitude"]
-            lon = entity.attributes["longitude"]
-            return f"{lat},{lon}"
-        return None
+
+async def _get_tracker_gps(hass: HomeAssistant, tracker: str) -> str | None:
+    """Return device tracker GPS data."""
+    entity = hass.states.get(tracker)
+    if entity and "source_type" in entity.attributes:
+        lat = entity.attributes["latitude"]
+        lon = entity.attributes["longitude"]
+        return f"{lat},{lon}"
+    return None
 
 
-async def update_alerts(config, coords) -> dict:
-    """Fetch new state data for the sensor.
-    This is the only method that should fetch new data for Home Assistant.
-    """
-
-    data = await async_get_state(config, coords)
-    return data
-
-
-async def async_get_state(config, coords) -> dict:
+async def async_get_state(hass: HomeAssistant, config: dict[str, Any]) -> dict:
     """Query API for status."""
-
-    zone_id = ""
-    gps_loc = ""
     url = f"{API_ENDPOINT}/alerts/active/count"
-    values = {
-        "state": 0,
-        "event": None,
-        "event_id": None,
-        "message_type": None,
-        "event_status": None,
-        "event_severity": None,
-        "event_expires": None,
-        "display_desc": None,
-        "spoken_desc": None,
-    }
     headers = {"User-Agent": USER_AGENT, "Accept": "application/ld+json"}
-    data = None
+    data: dict[str, Any] | None = None
 
-    if CONF_ZONE_ID in config:
-        zone_id = config[CONF_ZONE_ID]
-        _LOGGER.debug("getting state for %s from %s", zone_id, url)
-    elif CONF_GPS_LOC in config or CONF_TRACKER in config:
-        if coords is not None:
-            gps_loc = coords
-        else:
-            gps_loc = config[CONF_GPS_LOC].replace(" ", "")
-        _LOGGER.debug("getting state for %s from %s", gps_loc, url)
+    _LOGGER.debug("getting state from %s", url)
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as r:
@@ -248,45 +216,44 @@ async def async_get_state(config, coords) -> dict:
                     r._body,  # pylint: disable=protected-access
                 )
 
+    alerts: list[dict[str, Any]] = []
     if data is not None:
         # Reset values before reassigning
-        if "zones" in data and zone_id != "":
-            for zone in zone_id.split(","):
-                if zone in data["zones"]:
-                    values = await async_get_alerts(zone_id=zone_id)
-                    break
-        else:
-            values = await async_get_alerts(gps_loc=gps_loc)
+        if CONF_ZONE_ID in config:
+            if "zones" in data:
+                zone_id = config[CONF_ZONE_ID]
+                for zone in zone_id.split(","):
+                    if zone in data["zones"]:
+                        alerts = await async_get_alerts(zone_id=zone_id)
+                        break
+        elif CONF_GPS_LOC in config:
+            gps_loc = config[CONF_GPS_LOC].replace(" ", "")
+            alerts = await async_get_alerts(gps_loc=gps_loc)
+        elif CONF_TRACKER in config:
+            gps_loc = await _get_tracker_gps(hass, config[CONF_TRACKER])
+            alerts = await async_get_alerts(gps_loc=gps_loc)
 
+    values = join_alerts(alerts)
+    values['alerts'] = alerts
     return values
 
 
 async def async_get_alerts(
-    zone_id: str = "", gps_loc: str = ""
-) -> dict[str, Any]:
+    zone_id: str | None = None, gps_loc: str | None = None
+) -> list[dict[str, Any]]:
     """Query API for Alerts."""
-
     url = ""
-    values: dict[str, Any] = {
-        "state": 0,
-        "event": None,
-        "event_id": None,
-        "message_type": None,
-        "event_status": None,
-        "event_severity": None,
-        "event_expires": None,
-        "display_desc": None,
-        "spoken_desc": None,
-    }
     headers = {"User-Agent": USER_AGENT, "Accept": "application/geo+json"}
     data = None
-
-    if zone_id != "":
+    if zone_id is not None and zone_id != "":
         url = f"{API_ENDPOINT}/alerts/active?zone={zone_id}"
         _LOGGER.debug("getting alert for %s from %s", zone_id, url)
-    elif gps_loc != "":
+    elif gps_loc is not None and gps_loc != "":
         url = f"{API_ENDPOINT}/alerts/active?point={gps_loc}"
         _LOGGER.debug("getting alert for %s from %s", gps_loc, url)
+    else:
+        _LOGGER.error("Problem updating NWS data from config")
+        return []
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as r:
@@ -299,75 +266,72 @@ async def async_get_alerts(
                     r._body,  # pylint: disable=protected-access
                 )
 
+    alerts = []
     if data is not None:
-        headlines = []
-        event_id = ""
-        event_str = ""
-        message_type = ""
-        event_status = ""
-        event_severity = ""
-        event_expires = ""
-        display_desc = ""
-        spoken_desc = ""
-        features = data["features"]
-        for alert in features:
+        for alert in data["features"]:
             properties = alert["properties"]
-            event = properties["event"]
+
             if "NWSheadline" in properties["parameters"]:
-                headline = properties["parameters"]["NWSheadline"][0]
+                spoken_desc = properties["parameters"]["NWSheadline"][0]
             else:
-                headline = event
+                spoken_desc = properties["event"]
 
-            # _LOGGER.info("Properties: %s", properties)
-            alert_type = properties["messageType"]
-            status = properties["status"]
-            description = properties["description"]
-            instruction = properties["instruction"]
-            severity = properties["severity"]
-            certainty = properties["certainty"]
-            expires = properties["expires"]
-
-            headlines.append(headline)
-
-            def append_short(item, value):
-                if item != "":
-                    item += " - "
-                item += value
-                return item
-
-            def append_long(item, value):
-                if item != "":
-                    item += "\n\n-\n\n"
-                item += value
-                return item
-
-            event_display_desc = (
-                f"\n>\nHeadline: {headline}\nStatus: {status}\n"
-                f"Message Type: {alert_type}\nSeverity: {severity}\n"
-                f"Certainty: {certainty}\nExpires: {expires}\n"
-                f"Description: {description}\nInstruction: {instruction}"
+            display_desc = (
+                f"Headline: {spoken_desc}\n"
+                f"Status: {properties["status"]}\n"
+                f"Message Type: {properties["messageType"]}\n"
+                f"Severity: {properties["severity"]}\n"
+                f"Certainty: {properties["certainty"]}\n"
+                f"Expires: {properties["expires"]}\n"
+                f"Description: {properties["description"]}\n"
+                f"Instruction: {properties["instruction"]}"
             )
 
-            display_desc = append_long(display_desc, event_display_desc)
-            event_id = append_short(event_id, alert["id"])
-            event_str = append_short(event_str, event)
-            message_type = append_short(message_type, alert_type)
-            event_status = append_short(event_status, status)
-            event_severity = append_short(event_severity, severity)
-            event_expires = append_short(event_expires, expires)
+            alerts.append(
+                {
+                    "title": properties["event"],
+                    "event_id": alert["id"],
+                    "message_type": properties["messageType"],
+                    "event_status": properties["status"],
+                    "event_severity": properties["severity"],
+                    "event_expires": properties["expires"],
+                    "event_certainty": properties["certainty"],
+                    "event_instruction": properties["instruction"],
+                    "event_description": properties["description"],
+                    "display_desc": display_desc,
+                    "spoken_desc": spoken_desc,
+                }
+            )
 
-        for headline in headlines:
-            spoken_desc = append_long(spoken_desc, headline)
+    return alerts
 
-        if len(features) > 0:
-            values["state"] = len(features)
-            values["event"] = event_str
-            values["event_id"] = event_id
-            values["message_type"] = message_type
-            values["event_status"] = event_status
-            values["event_severity"] = event_severity
-            values["event_expires"] = event_expires
-            values["display_desc"] = display_desc
-            values["spoken_desc"] = spoken_desc
+
+def join_alerts(alerts: list[dict[str, Any]]) -> dict[str, Any]:
+    """Joins multiple alerts into a single concatenated alert."""
+
+    values: dict[str, Any] = {
+        "state": len(alerts),
+        "title": None,
+        "event_id": None,
+        "message_type": None,
+        "event_status": None,
+        "event_severity": None,
+        "event_expires": None,
+        "display_desc": None,
+        "spoken_desc": None,
+    }
+
+    if len(alerts) > 0:
+        v = {k: [dic[k] for dic in alerts] for k in alerts[0]}
+
+        values["title"] = SHORT_SEPARATOR.join(v["title"])
+        values["event_id"] = SHORT_SEPARATOR.join(v['event_id'])
+        values["message_type"] = SHORT_SEPARATOR.join(v['message_type'])
+        values["event_status"] = SHORT_SEPARATOR.join(v['event_status'])
+        values["event_severity"] = SHORT_SEPARATOR.join(v['event_severity'])
+        values["event_expires"] = SHORT_SEPARATOR.join(v['event_expires'])
+        values["display_desc"] = LONG_SEPARATOR.join(
+            ["\n>\n" + d for d in v['display_desc']])
+        values["spoken_desc"] = LONG_SEPARATOR.join(v['spoken_desc'])
 
     return values
