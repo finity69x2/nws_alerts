@@ -56,8 +56,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
-LIST_ALERTS_SCHEMA = vol.Schema({})
-
 
 async def async_setup_platform(
     hass, config, async_add_entities, discovery_info=None
@@ -116,7 +114,7 @@ async def async_setup_entry(
     platform = async_get_current_platform()
     platform.async_register_entity_service(
         LIST_ALERTS_SERVICE_NAME,
-        LIST_ALERTS_SCHEMA,
+        cv.BASE_ENTITY_SCHEMA,
         "async_get_alerts",
         None,
         SupportsResponse.ONLY,

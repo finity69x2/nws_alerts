@@ -82,6 +82,7 @@ async def test_sensor_service(hass: HomeAssistant, mocker):
         return_response=True,
     )
     assert response
+    assert response[NWS_SENSOR] is list[dict[str, Any]]
     alerts: list[dict[str, Any]] = response[NWS_SENSOR]
     assert len(alerts) == 2
     assert alerts[0]["title"] == "Flood Advisory"

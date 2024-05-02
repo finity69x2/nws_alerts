@@ -1,0 +1,4 @@
+list:
+  target:
+    entity:
+      integration: nws_alerts
