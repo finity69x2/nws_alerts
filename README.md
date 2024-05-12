@@ -36,7 +36,9 @@ After installing the integration you can then configure it using the instruction
   
 ## Configuration:
 
-There are two ways to configure this integration.
+<b>NOTE: As of HA versoin 2024.5.x the yaml configuration option is broken. I don't know if it will ever be fixed so the only viable config option is via the UI</b>
+
+<s>There are two ways to configure this integration.</s>
 
 <b>You can configure the integration via the "Configuration->Integrations" section of the Home Assistant UI:</b>
 
@@ -54,7 +56,7 @@ https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.md
 
 If you select the "Using a device tracker" option under the "GPS Location" option then HA will use the GPS coordinates provided by that tracker to query for alerts so you should follow the same recommendations for using GPS coordinates when using that option.
 
-<b>Or manually via an entry in your configuration.yaml file:</b>
+<s><b>Or manually via an entry in your configuration.yaml file:</b>
 
 To create a sensor instance add the following configuration to your sensor definitions using the zone_id found above:
 
@@ -83,6 +85,7 @@ or, finally, by adding a device_tracker entity:
 - platform: nws_alerts
   tracker: 'device_tracker.your_tracker_entity'
 ```
+</s>
 
 After you restart Home Assistant then you should have a new sensor called "sensor.nws_alerts" in your system.
 
