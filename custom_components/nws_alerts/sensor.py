@@ -146,6 +146,7 @@ class NWSAlertSensor(CoordinatorEntity):
         attrs["message_type"] = self.coordinator.data["message_type"]
         attrs["event_status"] = self.coordinator.data["event_status"]
         attrs["event_severity"] = self.coordinator.data["event_severity"]
+        attrs["event_onset"] = self.coordinator.data["event_onset"]
         attrs["event_expires"] = self.coordinator.data["event_expires"]
         attrs["display_desc"] = self.coordinator.data["display_desc"]
         attrs["spoken_desc"] = self.coordinator.data["spoken_desc"]
