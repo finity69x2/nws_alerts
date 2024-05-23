@@ -1,14 +1,21 @@
 import logging
-import uuid
 
 import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
-from homeassistant.core import HomeAssistant
+from homeassistant.core import (
+    HomeAssistant,
+    SupportsResponse,
+    ServiceResponse,
+)
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.device_registry import DeviceEntryType
 from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity_platform import (
+    AddEntitiesCallback,
+    async_get_current_platform,
+)
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
 
@@ -26,6 +33,7 @@ from .const import (
     DEFAULT_NAME,
     DEFAULT_TIMEOUT,
     DOMAIN,
+    LIST_ALERTS_SERVICE_NAME,
 )
 
 # ---------------------------------------------------------
@@ -49,7 +57,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+async def async_setup_platform(
+    hass, config, async_add_entities, discovery_info=None
+):
     """Configuration from yaml"""
     if DOMAIN not in hass.data.keys():
         hass.data.setdefault(DOMAIN, {})
@@ -58,9 +68,11 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         elif CONF_GPS_LOC in config:
             config.entry_id = slugify(f"{config.get(CONF_GPS_LOC)}")
         elif CONF_TRACKER in config:
-            config.entry_id = slugify(f"{config.get(CONF_TRACKER)}")            
+            config.entry_id = slugify(f"{config.get(CONF_TRACKER)}")
         else:
-            raise ValueError("GPS, Zone or Device Tracker needs to be configured.")
+            raise ValueError(
+                "GPS, Zone or Device Tracker needs to be configured."
+            )
         config.data = config
     else:
         if CONF_ZONE_ID in config:
@@ -70,7 +82,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         elif CONF_TRACKER in config:
             config.entry_id = slugify(f"{config.get(CONF_TRACKER)}")
         else:
-            raise ValueError("GPS, Zone or Device Tracker needs to be configured.")
+            raise ValueError(
+                "GPS, Zone or Device Tracker needs to be configured."
+            )
         config.data = config
 
     # Setup the data coordinator
@@ -90,9 +104,28 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     async_add_entities([NWSAlertSensor(hass, config)], True)
 
 
-async def async_setup_entry(hass, entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+):
     """Setup the sensor platform."""
-    async_add_entities([NWSAlertSensor(hass, entry)], True)
+
+    platform = async_get_current_platform()
+    platform.async_register_entity_service(
+        LIST_ALERTS_SERVICE_NAME,
+        cv.BASE_ENTITY_SCHEMA,
+        "async_get_alerts",
+        None,
+        SupportsResponse.ONLY,
+    )
+
+    _LOGGER.info(
+        "Registering service %s.%s",
+        platform.platform_name,
+        LIST_ALERTS_SERVICE_NAME,
+    )
+    async_add_entities([NWSAlertSensor(hass, config_entry)], True)
 
 
 class NWSAlertSensor(CoordinatorEntity):
@@ -128,7 +161,7 @@ class NWSAlertSensor(CoordinatorEntity):
         """Return the state of the sensor."""
         if self.coordinator.data is None:
             return None
-        elif "state" in self.coordinator.data.keys():
+        if "state" in self.coordinator.data.keys():
             return self.coordinator.data["state"]
         return None
 
@@ -141,7 +174,7 @@ class NWSAlertSensor(CoordinatorEntity):
             return attrs
 
         attrs[ATTR_ATTRIBUTION] = ATTRIBUTION
-        attrs["title"] = self.coordinator.data["event"]
+        attrs["title"] = self.coordinator.data["title"]
         attrs["event_id"] = self.coordinator.data["event_id"]
         attrs["message_type"] = self.coordinator.data["message_type"]
         attrs["event_status"] = self.coordinator.data["event_status"]
@@ -166,3 +199,8 @@ class NWSAlertSensor(CoordinatorEntity):
             manufacturer="NWS",
             name="NWS Alerts",
         )
+
+    async def async_get_alerts(self) -> ServiceResponse:
+        """Gets the alerts associated with this sensor."""
+
+        return self.coordinator.data["alerts"]

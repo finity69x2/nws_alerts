@@ -24,3 +24,5 @@ PLATFORM = "sensor"
 ATTRIBUTION = "Data provided by Weather.gov"
 COORDINATOR = "coordinator"
 PLATFORMS = ["sensor"]
+
+LIST_ALERTS_SERVICE_NAME = "list"
