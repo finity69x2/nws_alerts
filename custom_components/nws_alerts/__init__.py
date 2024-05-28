@@ -1,10 +1,10 @@
 """ NWS Alerts """
+
 import logging
 from datetime import timedelta
 
 import aiohttp
 from async_timeout import timeout
-from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
@@ -30,6 +30,7 @@ from .const import (
     USER_AGENT,
     VERSION,
 )
+from .send_nwsalerts import Send_NWSAlerts
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -144,6 +145,7 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
         self.timeout = the_timeout
         self.config = config
         self.hass = hass
+        self._send_nwsalerts = Send_NWSAlerts(hass, config)
 
         _LOGGER.debug("Data will be update every %s", self.interval)
 
@@ -159,6 +161,8 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
                 data = await update_alerts(self.config, coords)
             except Exception as error:
                 raise UpdateFailed(error) from error
+            else:
+                await self._send_nwsalerts.async_send(data)
             return data
 
     async def _get_tracker_gps(self):
@@ -215,7 +219,7 @@ async def async_get_state(config, coords) -> dict:
                 data = await r.json()
             else:
                 _LOGGER.error("Problem updating NWS data: (%s) - %s", r.status, r.body)
-
+    # _LOGGER.debug(f"state data: {data}")
     if data is not None:
         # Reset values before reassigning
         if "zones" in data and zone_id != "":
@@ -226,6 +230,7 @@ async def async_get_state(config, coords) -> dict:
         else:
             values = await async_get_alerts(gps_loc=gps_loc)
 
+    # _LOGGER.debug(f"values: {values}")
     return values
 
 

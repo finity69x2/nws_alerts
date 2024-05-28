@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "description": "Please select your NWS lookup method.\n\nFor a brief explanation of the advantages and disadvantages of each method please see [here](https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.md).\n\nIf you don't know which is better for your situation, you should probably select the Zone ID version.",
+        "description": "Please select your NWS lookup method.\n\nFor a brief explanation of the advantages and disadvantages of each method please see [here](https://github.com/finity69x2/nws_alert_types/blob/master/lookup_options.md).\n\nIf you don't know which is better for your situation, you should probably select the Zone ID version.",
         "menu_options": {
           "zone": "Zone ID (more generalized location - includes County ID if applicable)",
           "gps": "GPS Location (precise location)"
@@ -21,16 +21,18 @@
           "name": "Friendly Name",
           "tracker": "Device to track",
           "interval": "Update Interval (in minutes)",
-          "timeout":"Update Timeout (in seconds)"
+          "timeout":"Update Timeout (in seconds)",
+          "send_alerts": "Send Alerts"
         }
-      },      
+      },
       "gps_loc": {
         "description": "Please enter your latitude and longitude, by default your coordinates from Home Assistant are used.",
         "data": {
           "name": "Friendly Name",
           "gps_loc": "Your GPS coordinates",
           "interval": "Update Interval (in minutes)",
-          "timeout":"Update Timeout (in seconds)"
+          "timeout":"Update Timeout (in seconds)",
+          "send_alerts": "Send Alerts"
         }
       },
       "zone": {
@@ -38,16 +40,35 @@
           "name": "Friendly Name",
           "zone_id": "Zone ID(s)",
           "interval": "Update Interval (in minutes)",
-          "timeout": "Update Timeout (in seconds)"
+          "timeout": "Update Timeout (in seconds)",
+          "send_alerts": "Send Alerts"
         },
         "description": "You can find your Zone or County ID by going to https://alerts.weather.gov/,\nscroll down to your state and click on the 'zone list' and/or 'county list' then look for the entry for your county.\nSeperate multiple zones with commas ie: PAC049,WVC031\n\nZones closest to you will be populated automatically."
+      },
+      "alerts": {
+        "data": {
+          "display_persistent_notifictions": "Display Persistent Notifications",
+          "announce_critical_alert_types": "Select Critical Alert Types to Announce",
+          "announce_critical_alert_services": "What Services to Call to Announce Critical Alerts",
+          "announce_alert_types": "Select Alert Types to Announce",
+          "announce_alert_services": "What Services to Call to Announce Alerts",
+          "announce_alert_start_time": "Start Time to Announce Alerts",
+          "announce_alert_end_time": "End Time to Announce Alerts",
+          "send_critical_alert_types": "Select Critical Alert Types to Send",
+          "send_critical_alert_services": "What Services to Call to Send Critical Alerts",
+          "send_alert_types": "Select Alert Types to Send",
+          "send_alert_services": "What Services to Call to Send Alerts",
+          "send_alert_start_time": "Start Time to Send Alerts",
+          "send_alert_end_time": "End Time to Send Alerts"
+        },
+        "description": "Select what alerts and notifications to send."
       }
     }
   },
   "options": {
     "step": {
       "user": {
-        "description": "Please select your NWS lookup method.\n\nFor a brief explanation of the advantages and disadvantages of each method please see [here](https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.md).\n\nIf you don't know which is better for your situation, you should probably select the Zone ID version.",
+        "description": "Please select your NWS lookup method.\n\nFor a brief explanation of the advantages and disadvantages of each method please see [here](https://github.com/finity69x2/nws_alert_types/blob/master/lookup_options.md).\n\nIf you don't know which is better for your situation, you should probably select the Zone ID version.",
         "menu_options": {
           "zone": "Zone ID (more generalized location - includes County ID if applicable)",
           "gps": "GPS Location (precise location)"
@@ -59,31 +80,34 @@
           "gps_loc": "Using your Home Assistant location",
           "gps_tracker": "Using a device tracker"
         }
-      },      
+      },
       "gps_tracker": {
         "description": "Select the device you'd like to track for alerts.",
         "data": {
           "name": "Friendly Name",
           "tracker": "Device to track",
           "interval": "Update Interval (in minutes)",
-          "timeout":"Update Timeout (in seconds)"
+          "timeout":"Update Timeout (in seconds)",
+          "send_alerts": "Send Alerts"
         }
-      },        
+      },
       "gps_loc": {
         "description": "Please enter your latitude and longitude, by default your coordinates from Home Assistant are used.",
         "data": {
           "name": "Friendly Name",
           "gps_loc": "Your GPS coordinates",
           "interval": "Update Interval (in minutes)",
-          "timeout":"Update Timeout (in seconds)"
+          "timeout":"Update Timeout (in seconds)",
+          "send_alerts": "Send Alerts"
         }
-      },      
+      },
       "zone": {
         "data": {
           "name": "Friendly Name",
           "zone_id": "Zone ID(s)",
           "interval": "Update Interval (in minutes)",
-          "timeout": "Update Timeout (in seconds)"
+          "timeout": "Update Timeout (in seconds)",
+          "send_alerts": "Send Alerts"
         },
         "description": "You can find your Zone or County ID by going to https://alerts.weather.gov/,\nscroll down to your state and click on the 'zone list' and/or 'county list' then look for the entry for your county.\nSeperate multiple zones with commas ie: PAC049,WVC031"
       }

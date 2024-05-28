@@ -8,12 +8,32 @@ CONF_INTERVAL = "interval"
 CONF_ZONE_ID = "zone_id"
 CONF_GPS_LOC = "gps_loc"
 CONF_TRACKER = "tracker"
+CONF_SEND_ALERTS = "send_alerts"
+CONF_PERSISTENT_NOTIFICATIONS = "display_persistent_notifictions"
+CONF_ANNOUNCE_CRITICAL_TYPES = "announce_critical_alert_types"
+CONF_ANNOUNCE_CRITICAL_SERVICES = "announce_critical_alert_services"
+CONF_ANNOUNCE_TYPES = "announce_alert_types"
+CONF_ANNOUNCE_SERVICES = "announce_alert_services"
+CONF_ANNOUNCE_START_TIME = "announce_alert_start_time"
+CONF_ANNOUNCE_END_TIME = "announce_alert_end_time"
+CONF_SEND_CRITICAL_TYPES = "send_critical_alert_types"
+CONF_SEND_CRITICAL_SERVICES = "send_critical_alert_services"
+CONF_SEND_TYPES = "send_alert_types"
+CONF_SEND_SERVICES = "send_alert_services"
+CONF_SEND_START_TIME = "send_alert_start_time"
+CONF_SEND_END_TIME = "send_alert_end_time"
 
 # Defaults
 DEFAULT_ICON = "mdi:alert"
 DEFAULT_NAME = "NWS Alerts"
 DEFAULT_INTERVAL = 1
 DEFAULT_TIMEOUT = 120
+DEFAULT_SEND_ALERTS = False
+DEFAULT_PERSISTENT_NOTIFICATIONS = False
+DEFAULT_ANNOUNCE_START_TIME = "08:00:00"
+DEFAULT_ANNOUNCE_END_TIME = "20:00:00"
+DEFAULT_SEND_START_TIME = "08:00:00"
+DEFAULT_SEND_END_TIME = "20:00:00"
 
 # Misc
 ZONE_ID = ""
