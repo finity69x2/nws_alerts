@@ -173,6 +173,11 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
             return f"{entity.attributes['latitude']},{entity.attributes['longitude']}"
         return None
 
+    async def _removing_from_hass(self):
+        await self._hass.async_add_executor_job(
+            self._send_nwsalerts.async_removing_from_hass
+        )
+
 
 async def update_alerts(config, coords) -> dict:
     """Fetch new state data for the sensor.

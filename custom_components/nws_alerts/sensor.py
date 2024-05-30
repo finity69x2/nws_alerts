@@ -149,3 +149,7 @@ class NWSAlertSensor(CoordinatorEntity):
             manufacturer="NWS",
             name="NWS Alerts",
         )
+
+    async def async_will_remove_from_hass(self) -> None:
+        """Run when entity will be removed from hass."""
+        await self.coordinator.async_removing_from_hass()

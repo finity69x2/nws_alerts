@@ -56,17 +56,48 @@ _LOGGER = logging.getLogger(__name__)
 MENU_OPTIONS = ["zone", "gps"]
 MENU_GPS = ["gps_loc", "gps_tracker"]
 ALERT_TYPES_LIST = [
-    "Red Flag Warning",
-    "Severe Thunderstorm Warning",
-    "Tornado Watch",
-    "Severe Thunderstorm Watch",
-    "Special Weather Statement",
-    "Tropical Cyclone Statement",
-    "Snow Squall Warning",
-    "Winter Storm Watch",
-    "Winter Storm Warning",
-    "Winter Weather Advisory",
+    "Blizzard Warning",
+    "Coastal Flood Advisory",
+    "Coastal Flood Warning",
+    "Coastal Flood Watch",
+    "Dense Fog Advisory",
+    "Excessive Heat Warning",
+    "Excessive Heat Watch",
+    "Extreme Wind Warning",
+    "Fire Weather Watch",
     "Flash Flood Warning",
+    "Flood Warning",
+    "Flood Watch",
+    "Freeze Warning",
+    "Freeze Watch",
+    "Frost Advisory",
+    "Gale Warning",
+    "Hazardous Weather Outlook",
+    "Heat Advisory",
+    "High Wind Warning",
+    "High Wind Watch",
+    "Hurricane Force Wind Warning",
+    "Hurricane Warning",
+    "Hurricane Watch",
+    "Ice Storm Warning",
+    "Red Flag Warning",
+    "River Flood Warning",
+    "River Flood Watch",
+    "Severe Thunderstorm Warning",
+    "Severe Thunderstorm Watch",
+    "Small Craft Advisory",
+    "Special Marine Warning",
+    "Storm Warning",
+    "Tornado Warning",
+    "Tornado Watch",
+    "Tropical Storm Warning",
+    "Tropical Storm Watch",
+    "Wind Advisory",
+    "Wind Chill Advisory",
+    "Wind Chill Warning",
+    "Winter Storm Warning",
+    "Winter Storm Watch",
+    "Winter Weather Advisory",
 ]
 ALERT_TYPES_LIST.sort()
 
@@ -185,7 +216,7 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
                 selector.SelectSelectorConfig(
                     options=ALERT_TYPES_LIST,
                     multiple=True,
-                    custom_value=False,
+                    custom_value=True,
                     mode=selector.SelectSelectorMode.DROPDOWN,
                 )
             ),
@@ -206,7 +237,7 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
                 selector.SelectSelectorConfig(
                     options=ALERT_TYPES_LIST,
                     multiple=True,
-                    custom_value=False,
+                    custom_value=True,
                     mode=selector.SelectSelectorMode.DROPDOWN,
                 )
             ),
@@ -232,7 +263,7 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
                 selector.SelectSelectorConfig(
                     options=ALERT_TYPES_LIST,
                     multiple=True,
-                    custom_value=False,
+                    custom_value=True,
                     mode=selector.SelectSelectorMode.DROPDOWN,
                 )
             ),
@@ -253,7 +284,7 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
                 selector.SelectSelectorConfig(
                     options=ALERT_TYPES_LIST,
                     multiple=True,
-                    custom_value=False,
+                    custom_value=True,
                     mode=selector.SelectSelectorMode.DROPDOWN,
                 )
             ),
