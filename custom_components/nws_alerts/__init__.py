@@ -18,6 +18,7 @@ from .const import (
     API_ENDPOINT,
     CONF_GPS_LOC,
     CONF_INTERVAL,
+    CONF_SEND_ALERTS,
     CONF_TIMEOUT,
     CONF_TRACKER,
     CONF_ZONE_ID,
@@ -145,7 +146,9 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
         self.timeout = the_timeout
         self.config = config
         self.hass = hass
-        self._send_nwsalerts = Send_NWSAlerts(hass, config)
+        self._send_nwsalerts = None
+        if config.get(CONF_SEND_ALERTS, False):
+            self._send_nwsalerts = Send_NWSAlerts(hass, config)
 
         _LOGGER.debug("Data will be update every %s", self.interval)
 
@@ -162,7 +165,8 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
             except Exception as error:
                 raise UpdateFailed(error) from error
             else:
-                await self._send_nwsalerts.async_send(data)
+                if self._send_nwsalerts is not None:
+                    await self._send_nwsalerts.async_send(data)
             return data
 
     async def _get_tracker_gps(self):
@@ -173,10 +177,11 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
             return f"{entity.attributes['latitude']},{entity.attributes['longitude']}"
         return None
 
-    async def _removing_from_hass(self):
-        await self._hass.async_add_executor_job(
-            self._send_nwsalerts.async_removing_from_hass
-        )
+    async def async_removing_from_hass(self):
+        if self._send_nwsalerts is not None:
+            await self.hass.async_add_executor_job(
+                self._send_nwsalerts._removing_from_hass
+            )
 
 
 async def update_alerts(config, coords) -> dict:

@@ -190,9 +190,9 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
     if user_input is None:
         user_input = {}
 
-    def _get_default(key):
+    def _get_default(key: str, fallback_default: Any = None) -> None:
         """Gets default value for key."""
-        return user_input.get(key, default_dict.get(key))
+        return user_input.get(key, default_dict.get(key, fallback_default))
 
     NOTIFY_SERVICES_LIST = list(
         hass.services.async_services_for_domain("notify").keys()
@@ -211,7 +211,7 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
             ): selector.BooleanSelector(selector.BooleanSelectorConfig()),
             vol.Optional(
                 CONF_ANNOUNCE_CRITICAL_TYPES,
-                default=_get_default(CONF_ANNOUNCE_CRITICAL_TYPES),
+                default=_get_default(CONF_ANNOUNCE_CRITICAL_TYPES, []),
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     options=ALERT_TYPES_LIST,
@@ -222,7 +222,7 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
             ),
             vol.Optional(
                 CONF_ANNOUNCE_CRITICAL_SERVICES,
-                default=_get_default(CONF_ANNOUNCE_CRITICAL_SERVICES),
+                default=_get_default(CONF_ANNOUNCE_CRITICAL_SERVICES, []),
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     options=NOTIFY_SERVICES_LIST,
@@ -232,7 +232,7 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
                 )
             ),
             vol.Optional(
-                CONF_ANNOUNCE_TYPES, default=_get_default(CONF_ANNOUNCE_TYPES)
+                CONF_ANNOUNCE_TYPES, default=_get_default(CONF_ANNOUNCE_TYPES, [])
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     options=ALERT_TYPES_LIST,
@@ -242,7 +242,7 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
                 )
             ),
             vol.Optional(
-                CONF_ANNOUNCE_SERVICES, default=_get_default(CONF_ANNOUNCE_SERVICES)
+                CONF_ANNOUNCE_SERVICES, default=_get_default(CONF_ANNOUNCE_SERVICES, [])
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     options=NOTIFY_SERVICES_LIST,
@@ -258,7 +258,8 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
                 CONF_ANNOUNCE_END_TIME, default=_get_default(CONF_ANNOUNCE_END_TIME)
             ): selector.TimeSelector(selector.TimeSelectorConfig()),
             vol.Optional(
-                CONF_SEND_CRITICAL_TYPES, default=_get_default(CONF_SEND_CRITICAL_TYPES)
+                CONF_SEND_CRITICAL_TYPES,
+                default=_get_default(CONF_SEND_CRITICAL_TYPES, []),
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     options=ALERT_TYPES_LIST,
@@ -269,7 +270,7 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
             ),
             vol.Optional(
                 CONF_SEND_CRITICAL_SERVICES,
-                default=_get_default(CONF_SEND_CRITICAL_SERVICES),
+                default=_get_default(CONF_SEND_CRITICAL_SERVICES, []),
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     options=NOTIFY_SERVICES_LIST,
@@ -279,7 +280,7 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
                 )
             ),
             vol.Optional(
-                CONF_SEND_TYPES, default=_get_default(CONF_SEND_TYPES)
+                CONF_SEND_TYPES, default=_get_default(CONF_SEND_TYPES, [])
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     options=ALERT_TYPES_LIST,
@@ -289,7 +290,7 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
                 )
             ),
             vol.Optional(
-                CONF_SEND_SERVICES, default=_get_default(CONF_SEND_SERVICES)
+                CONF_SEND_SERVICES, default=_get_default(CONF_SEND_SERVICES, [])
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     options=NOTIFY_SERVICES_LIST,
@@ -581,7 +582,18 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
             self._data.update(user_input)
             _LOGGER.debug(f"self._data: {self._data}")
             return self.async_create_entry(title="", data=self._data)
-        return await self._show_options_form(user_input)
+        return await self._show_config_alerts(user_input)
+
+    async def _show_config_alerts(self, user_input):
+        """Show the configuration form to edit location data."""
+
+        _LOGGER.debug(f"Show Config Alerts. user_input: {user_input}")
+
+        return self.async_show_form(
+            step_id="alerts",
+            data_schema=_get_schema_alerts(self.hass, user_input, self._data),
+            errors=self._errors,
+        )
 
     async def _show_options_form(self, user_input):
         """Show the configuration form to edit location data."""
