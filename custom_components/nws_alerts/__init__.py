@@ -1,7 +1,7 @@
 """ NWS Alerts """
 
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import aiohttp
 from async_timeout import timeout
@@ -27,6 +27,23 @@ from .const import (
     DEFAULT_TIMEOUT,
     DOMAIN,
     ISSUE_URL,
+    NWS_CERTAINTY,
+    NWS_DESCRIPTION,
+    NWS_DISPLAY_DESC,
+    NWS_EVENT,
+    NWS_EVENT_EXPIRES,
+    NWS_EVENT_ID,
+    NWS_EVENT_ID_SHORT,
+    NWS_EVENT_SEVERITY,
+    NWS_EVENT_STATUS,
+    NWS_HEADLINE,
+    NWS_HEADLINE_LONG,
+    NWS_ID_PREFIX,
+    NWS_INSTRUCTION,
+    NWS_MESSAGE_TYPE,
+    NWS_PROPERTIES,
+    NWS_URL,
+    NWS_URL_PREFIX,
     PLATFORMS,
     USER_AGENT,
     VERSION,
@@ -161,12 +178,12 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
             coords = await self._get_tracker_gps()
         async with timeout(self.timeout):
             try:
-                data = await update_alerts(self.config, coords)
+                array, data = await update_alerts(self.config, coords)
             except Exception as error:
                 raise UpdateFailed(error) from error
             else:
                 if self._send_nwsalerts is not None:
-                    await self._send_nwsalerts.async_send(data)
+                    await self._send_nwsalerts.async_send(array)
             return data
 
     async def _get_tracker_gps(self):
@@ -189,8 +206,8 @@ async def update_alerts(config, coords) -> dict:
     This is the only method that should fetch new data for Home Assistant.
     """
 
-    data = await async_get_state(config, coords)
-    return data
+    array, data = await async_get_state(config, coords)
+    return (array, data)
 
 
 async def async_get_state(config, coords) -> dict:
@@ -201,15 +218,16 @@ async def async_get_state(config, coords) -> dict:
     url = "%s/alerts/active/count" % API_ENDPOINT
     values = {
         "state": 0,
-        "event": None,
-        "event_id": None,
-        "message_type": None,
-        "event_status": None,
-        "event_severity": None,
-        "event_expires": None,
-        "display_desc": None,
-        "spoken_desc": None,
+        NWS_EVENT: None,
+        NWS_EVENT_ID: None,
+        NWS_MESSAGE_TYPE: None,
+        NWS_EVENT_STATUS: None,
+        NWS_EVENT_SEVERITY: None,
+        NWS_EVENT_EXPIRES: None,
+        NWS_DISPLAY_DESC: None,
+        NWS_HEADLINE: None,
     }
+    array = []
     headers = {"User-Agent": USER_AGENT, "Accept": "application/ld+json"}
     data = None
 
@@ -235,13 +253,13 @@ async def async_get_state(config, coords) -> dict:
         if "zones" in data and zone_id != "":
             for zone in zone_id.split(","):
                 if zone in data["zones"]:
-                    values = await async_get_alerts(zone_id=zone_id)
+                    array, values = await async_get_alerts(zone_id=zone_id)
                     break
         else:
-            values = await async_get_alerts(gps_loc=gps_loc)
+            array, values = await async_get_alerts(gps_loc=gps_loc)
 
     # _LOGGER.debug(f"values: {values}")
-    return values
+    return (array, values)
 
 
 async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
@@ -250,15 +268,16 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
     url = ""
     values = {
         "state": 0,
-        "event": None,
-        "event_id": None,
-        "message_type": None,
-        "event_status": None,
-        "event_severity": None,
-        "event_expires": None,
-        "display_desc": None,
-        "spoken_desc": None,
+        NWS_EVENT: None,
+        NWS_EVENT_ID: None,
+        NWS_MESSAGE_TYPE: None,
+        NWS_EVENT_STATUS: None,
+        NWS_EVENT_SEVERITY: None,
+        NWS_EVENT_EXPIRES: None,
+        NWS_DISPLAY_DESC: None,
+        NWS_HEADLINE: None,
     }
+    array = []
     headers = {"User-Agent": USER_AGENT, "Accept": "application/geo+json"}
     data = None
 
@@ -277,8 +296,7 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
                 _LOGGER.error("Problem updating NWS data: (%s) - %s", r.status, r.body)
 
     if data is not None:
-        events = []
-        headlines = []
+        event = ""
         event_id = ""
         message_type = ""
         event_status = ""
@@ -286,34 +304,95 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
         event_expires = ""
         display_desc = ""
         spoken_desc = ""
-        features = data["features"]
+        features = data.get("features", {})
+        events = 0
         for alert in features:
-            event = alert["properties"]["event"]
-            if "NWSheadline" in alert["properties"]["parameters"]:
-                headline = alert["properties"]["parameters"]["NWSheadline"][0]
+            alert_dict = {}
+            events += 1
+            event_name = alert.get(NWS_PROPERTIES)[NWS_EVENT]
+            if "NWSheadline" in alert.get(NWS_PROPERTIES).get("parameters", None):
+                headline = (
+                    alert.get(NWS_PROPERTIES)
+                    .get("parameters")
+                    .get("NWSheadline", None)[0]
+                )
             else:
-                headline = event
+                headline = event_name
 
-            id = alert["id"]
-            type = alert["properties"]["messageType"]
-            status = alert["properties"]["status"]
-            description = alert["properties"]["description"]
-            instruction = alert["properties"]["instruction"]
-            severity = alert["properties"]["severity"]
-            certainty = alert["properties"]["certainty"]
-            expires = alert["properties"]["expires"]
+            if headline.isupper():
+                headline = headline.title().replace('"', "").strip()
+            else:
+                headline = headline.replace('"', "").strip()
 
-            # if event in events:
-            #    continue
+            if (
+                "headline" in alert.get(NWS_PROPERTIES)
+                and alert.get(NWS_PROPERTIES).get("headline", None) is not None
+            ):
+                headline_long = alert.get(NWS_PROPERTIES).get("headline", None)
+            else:
+                headline_long = headline
 
-            events.append(event)
-            headlines.append(headline)
+            if headline_long.isupper():
+                headline_long = headline_long.title().replace('"', "").strip()
+            else:
+                headline_long = headline_long.replace('"', "").strip()
+
+            url = alert.get("id", None)
+            if url is not None:
+                url = url.replace('"', "").strip()
+            type = alert.get(NWS_PROPERTIES).get("messageType", None)
+            if type is not None:
+                type = type.replace('"', "").strip()
+            status = alert.get(NWS_PROPERTIES).get("status", None)
+            description = alert.get(NWS_PROPERTIES).get(NWS_DESCRIPTION, None)
+            if description is not None:
+                if description.isupper():
+                    description = (
+                        description.title()
+                        .replace("\n\n", "<00temp00>")
+                        .replace("\n", " ")
+                        .replace("<00temp00>", "\n")
+                        .replace('"', "")
+                        .strip()
+                    )
+                else:
+                    description = (
+                        description.replace("\n\n", "<00temp00>")
+                        .replace("\n", " ")
+                        .replace("<00temp00>", "\n")
+                        .replace('"', "")
+                        .strip()
+                    )
+
+            instruction = alert.get(NWS_PROPERTIES).get(NWS_INSTRUCTION, None)
+            if instruction is not None:
+                instruction = (
+                    instruction.replace("\n\n", "<00temp00>")
+                    .replace("\n", " ")
+                    .replace("<00temp00>", "\n")
+                    .replace('"', "")
+                    .strip()
+                )
+            severity = alert.get(NWS_PROPERTIES).get("severity", None)
+            if severity is not None:
+                severity = severity.replace('"', "").strip()
+            certainty = alert.get(NWS_PROPERTIES).get(NWS_CERTAINTY, None)
+            if certainty is not None:
+                certainty = certainty.replace('"', "").strip()
+            expires = alert.get(NWS_PROPERTIES).get("expires", None)
+            if expires is not None:
+                expires = expires.replace('"', "").strip()
+
+            if event != "":
+                event += " - "
+            event += event_name
+            alert_dict.update({NWS_EVENT: event_name})
 
             if display_desc != "":
                 display_desc += "\n\n-\n\n"
 
-            display_desc += (
-                "\n>\nHeadline: %s\nStatus: %s\nMessage Type: %s\nSeverity: %s\nCertainty: %s\nExpires: %s\nDescription: %s\nInstruction: %s"
+            display = (
+                "\n>\nHeadline: %s\nStatus: %s\nMessage Type: %s\nSeverity: %s\nCertainty: %s\nExpires: %s\nDescription: %s\n\nInstruction: %s"
                 % (
                     headline,
                     status,
@@ -325,60 +404,63 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
                     instruction,
                 )
             )
+            display_desc += display
+            alert_dict.update({NWS_DISPLAY_DESC: display})
 
             if event_id != "":
                 event_id += " - "
-
-            event_id += id
+            event_id += url
+            alert_dict.update({NWS_URL: url})
 
             if message_type != "":
                 message_type += " - "
-
             message_type += type
+            alert_dict.update({NWS_MESSAGE_TYPE: type})
 
             if event_status != "":
                 event_status += " - "
-
             event_status += status
+            alert_dict.update({NWS_EVENT_STATUS: status})
 
             if event_severity != "":
                 event_severity += " - "
-
             event_severity += severity
+            alert_dict.update({NWS_EVENT_SEVERITY: severity})
 
             if event_expires != "":
                 event_expires += " - "
-
             event_expires += expires
+            if expires is not None:
+                expires = datetime.fromisoformat(expires)
+            alert_dict.update({NWS_EVENT_EXPIRES: expires})
 
-        if headlines:
-            num_headlines = len(headlines)
-            i = 0
-            for headline in headlines:
-                i += 1
-                if spoken_desc != "":
-                    if i == num_headlines:
-                        spoken_desc += "\n\n-\n\n"
-                    else:
-                        spoken_desc += "\n\n-\n\n"
+            if spoken_desc != "":
+                spoken_desc += "\n\n-\n\n"
+            spoken_desc += headline
+            alert_dict.update({NWS_HEADLINE: headline})
 
-                spoken_desc += headline
+            id = url.replace(NWS_URL_PREFIX, "")
+            alert_dict.update({NWS_EVENT_ID: id})
+            id_short = id.replace(NWS_ID_PREFIX, "").replace(".", "")
+            alert_dict.update({NWS_EVENT_ID_SHORT: id_short})
 
-        if len(events) > 0:
-            event_str = ""
-            for item in events:
-                if event_str != "":
-                    event_str += " - "
-                event_str += item
+            alert_dict.update({NWS_HEADLINE_LONG: headline_long})
+            alert_dict.update({NWS_DESCRIPTION: description})
+            alert_dict.update({NWS_CERTAINTY: certainty})
+            alert_dict.update({NWS_INSTRUCTION: instruction})
 
-            values["state"] = len(events)
-            values["event"] = event_str
-            values["event_id"] = event_id
-            values["message_type"] = message_type
-            values["event_status"] = event_status
-            values["event_severity"] = event_severity
-            values["event_expires"] = event_expires
-            values["display_desc"] = display_desc
-            values["spoken_desc"] = spoken_desc
+            array.append(alert_dict)
 
-    return values
+        if events > 0:
+
+            values["state"] = events
+            values[NWS_EVENT] = event
+            values[NWS_EVENT_ID] = event_id
+            values[NWS_MESSAGE_TYPE] = message_type
+            values[NWS_EVENT_STATUS] = event_status
+            values[NWS_EVENT_SEVERITY] = event_severity
+            values[NWS_EVENT_EXPIRES] = event_expires
+            values[NWS_DISPLAY_DESC] = display_desc
+            values[NWS_HEADLINE] = spoken_desc
+    # _LOGGER.debug(f"array: {array}")
+    return (array, values)

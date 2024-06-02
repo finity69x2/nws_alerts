@@ -26,22 +26,23 @@ from .const import (
     CONF_TRACKER,
     CONF_ZONE_ID,
     DOMAIN,
+    NWS_CERTAINTY,
+    NWS_DESCRIPTION,
+    NWS_DISPLAY_DESC,
+    NWS_EVENT,
+    NWS_EVENT_EXPIRES,
+    NWS_EVENT_ID,
+    NWS_EVENT_ID_SHORT,
+    NWS_EVENT_SEVERITY,
+    NWS_EVENT_STATUS,
+    NWS_HEADLINE,
+    NWS_HEADLINE_LONG,
+    NWS_INSTRUCTION,
+    NWS_MESSAGE_TYPE,
+    NWS_URL,
 )
 
 _LOGGER = logging.getLogger(__name__)
-NWS_PREFIX_TO_CLEAR = "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0."
-
-NWS_EVENT = "event"
-NWS_URL = "url"
-NWS_EVENT_ID = "event_id"
-NWS_MESSAGE_TYPE = "message_type"
-NWS_EVENT_STATUS = "event_status"
-NWS_EVENT_SEVERITY = "event_severity"
-NWS_EVENT_EXPIRES = "event_expires"
-NWS_DISPLAY_DESC = "display_desc"
-NWS_CERTAINTY = "certainty"
-NWS_DESCRIPTION = "description"
-NWS_SPOKEN_DESC = "spoken_desc"
 
 
 class Send_NWSAlerts:
@@ -66,28 +67,27 @@ class Send_NWSAlerts:
         )
         # _LOGGER.debug(f"Send_NWSAlerts: name: {self._name}, config: {self._config}")
 
-    async def async_send(self, data):
+    async def async_send(self, array):
         _LOGGER.debug("Send_NWSAlerts async_send")
         if not self._history_imported:
             self._history_imported = True
             await self._hass.async_add_executor_job(self._load_json)
-        # _LOGGER.debug(f"Send_NWSAlerts async_send: data: {data}")
+        # _LOGGER.debug(f"Send_NWSAlerts async_send: array: {array}")
 
         # Clear any expired alerts or alerts no longer in the NWS feed
         # _LOGGER.debug(f"Initial self._history: {self._history}")
-        await self._async_clear_expired_or_removed_alerts(data)
+        await self._async_clear_expired_or_removed_alerts(array)
         # _LOGGER.debug(f"Updated self._history: {self._history}")
 
-        if data.get("state", 0) == 0:
+        if len(array) == 0:
             return
 
-        # _LOGGER.debug(f"Parsing {data.get('state', 0)}  alerts.")
-        for count in range(data.get("state", 0)):
-            nwsalert = await self._async_parse_alert(count, data)
+        _LOGGER.debug(f"Parsing {len(array)}  alerts.")
+        for count, nwsalert in enumerate(array):
             # _LOGGER.debug(f"nwsalert: {nwsalert}")
 
             # Skip if already alerted or already expired. If not, add to alert history and proceed.
-            if nwsalert.get(NWS_EVENT_ID, None) in self._history.keys():
+            if nwsalert.get(NWS_EVENT_ID_SHORT, None) in self._history.keys():
                 _LOGGER.debug(
                     f"Already Alerted: {nwsalert.get(NWS_EVENT, None)}, Count: {count}"
                 )
@@ -103,7 +103,7 @@ class Send_NWSAlerts:
             else:
                 self._history.update(
                     {
-                        nwsalert.get(NWS_EVENT_ID, None): nwsalert.get(
+                        nwsalert.get(NWS_EVENT_ID_SHORT, None): nwsalert.get(
                             NWS_EVENT_EXPIRES, None
                         )
                     }
@@ -142,96 +142,6 @@ class Send_NWSAlerts:
 
         await self._hass.async_add_executor_job(self._save_json)
 
-    async def _async_parse_alert(self, count, data):
-        nwsalert = {}
-
-        nwsalert[NWS_EVENT] = (
-            data.get(NWS_EVENT, "").split(" - ")[count].replace('"', "")
-        )
-        _LOGGER.debug(
-            f"Parse Alert: count: {count}, event: {nwsalert.get(NWS_EVENT, None)}"
-        )
-        nwsalert[NWS_URL] = (
-            data.get(NWS_EVENT_ID, "").split(" - ")[count].replace('"', "")
-        )
-        # _LOGGER.debug(f"url: {nwsalert['url']}")
-
-        nwsalert[NWS_EVENT_ID] = (
-            data.get(NWS_EVENT_ID, "")
-            .split(" - ")[count]
-            .replace('"', "")
-            .replace(NWS_PREFIX_TO_CLEAR, "")
-            .replace(".", "")
-        )
-        # _LOGGER.debug(f"event_id: {nwsalert[NWS_EVENT_ID]}")
-        nwsalert[NWS_MESSAGE_TYPE] = (
-            data.get(NWS_MESSAGE_TYPE, "").split(" - ")[count].replace('"', "")
-        )
-        # _LOGGER.debug(f"message_type: {nwsalert[NWS_MESSAGE_TYPE]}")
-        nwsalert[NWS_EVENT_STATUS] = (
-            data.get(NWS_EVENT_STATUS, "").split(" - ")[count].replace('"', "")
-        )
-        # _LOGGER.debug(f"event_status: {nwsalert[NWS_EVENT_STATUS]}")
-        nwsalert[NWS_EVENT_SEVERITY] = (
-            data.get(NWS_EVENT_SEVERITY, "").split(" - ")[count].replace('"', "")
-        )
-        # _LOGGER.debug(f"event_severity: {nwsalert[NWS_EVENT_SEVERITY]}")
-        event_expires_str = (
-            data.get(NWS_EVENT_EXPIRES, "").split(" - ")[count].replace('"', "")
-        )
-        # 2024-05-29T22:30:00-05:00
-        # event_expires = datetime.strptime(event_expires_str, "%Y-%m-%dT%H:%M:%s%z")
-        nwsalert[NWS_EVENT_EXPIRES] = datetime.fromisoformat(event_expires_str)
-        # _LOGGER.debug(f"event_expires: {nwsalert[NWS_EVENT_EXPIRES]}")
-
-        nwsalert[NWS_DISPLAY_DESC] = (
-            data.get(NWS_DISPLAY_DESC, "")
-            .split("\n\n-\n\n")[count]
-            .replace('"', "")
-            .replace("\n>\n", "")
-            .strip()
-        )
-        headline = nwsalert[NWS_DISPLAY_DESC][
-            nwsalert[NWS_DISPLAY_DESC].find("Headline: ")
-            + len("Headline: "): nwsalert[NWS_DISPLAY_DESC].find("\nStatus:")
-        ].strip()
-        if headline.isupper():
-            nwsalert[NWS_DISPLAY_DESC] = (
-                nwsalert[NWS_DISPLAY_DESC][
-                    : nwsalert[NWS_DISPLAY_DESC].find("Headline: ") + len("Headline: ")
-                ]
-                + headline.title()
-                + nwsalert[NWS_DISPLAY_DESC][
-                    nwsalert[NWS_DISPLAY_DESC].find("\nStatus:"):
-                ]
-            )
-
-        nwsalert[NWS_CERTAINTY] = nwsalert[NWS_DISPLAY_DESC][
-            nwsalert[NWS_DISPLAY_DESC].find("Certainty: ")
-            + len("Certainty: "): nwsalert[NWS_DISPLAY_DESC].find("\nExpires:")
-        ].strip()
-        # _LOGGER.debug(f"certainty: {nwsalert[NWS_CERTAINTY]}")
-
-        nwsalert[NWS_DESCRIPTION] = (
-            nwsalert[NWS_DISPLAY_DESC][
-                nwsalert[NWS_DISPLAY_DESC].find("Description: ")
-                + len("Description: "):
-            ]
-            .replace("\n\n", "<00temp00>")
-            .replace("\n", " ")
-            .replace("<00temp00>", "\n\n")
-            .strip()
-        )
-        # _LOGGER.debug(f"description: {nwsalert[NWS_DESCRIPTION]}")
-
-        nwsalert[NWS_SPOKEN_DESC] = (
-            data.get(NWS_SPOKEN_DESC, "").split("\n\n-\n\n")[count].replace('"', "")
-        )
-        if nwsalert[NWS_SPOKEN_DESC].isupper():
-            nwsalert[NWS_SPOKEN_DESC] = nwsalert[NWS_SPOKEN_DESC].title()
-        # _LOGGER.debug(f"spoken_desc: {nwsalert[NWS_SPOKEN_DESC]}")
-        return nwsalert
-
     async def _async_send_persistent_notification(self, count, nwsalert):
         _LOGGER.debug(
             f"Send Persistent Notification: count: {
@@ -241,9 +151,9 @@ class Send_NWSAlerts:
             "persistent_notification",
             "create",
             service_data={
-                "message": f"{nwsalert.get(NWS_DISPLAY_DESC, None)}\n\n{nwsalert.get(NWS_EVENT_ID, None)}",
+                "message": f"{nwsalert.get(NWS_DISPLAY_DESC, None)}\n\n{nwsalert.get(NWS_EVENT_ID_SHORT, None)}",
                 "title": nwsalert.get(NWS_EVENT, None),
-                "notification_id": nwsalert.get(NWS_EVENT_ID, None),
+                "notification_id": nwsalert.get(NWS_EVENT_ID_SHORT, None),
             },
         )
 
@@ -281,10 +191,10 @@ class Send_NWSAlerts:
                 "notify",
                 service,
                 service_data={
-                    "message": f"{nwsalert.get(NWS_SPOKEN_DESC, None)}\n\n{nwsalert.get(NWS_EVENT_ID, None)}",
+                    "message": f"{nwsalert.get(NWS_HEADLINE, None)}\n\n{nwsalert.get(NWS_EVENT_ID_SHORT, None)}",
                     "title": nwsalert.get(NWS_EVENT, None),
                     "data": {
-                        "tag": nwsalert.get(NWS_EVENT_ID, None),
+                        "tag": nwsalert.get(NWS_EVENT_ID_SHORT, None),
                         "push": {
                             "sound": {"name": "default", "critical": 1, "volume": 1.0}
                         },
@@ -317,10 +227,10 @@ class Send_NWSAlerts:
                 "notify",
                 service,
                 service_data={
-                    "message": f"{nwsalert.get(NWS_SPOKEN_DESC, None)}\n\n{nwsalert.get(NWS_EVENT_ID, None)}",
+                    "message": f"{nwsalert.get(NWS_HEADLINE, None)}\n\n{nwsalert.get(NWS_EVENT_ID_SHORT, None)}",
                     "title": nwsalert.get(NWS_EVENT, None),
                     "data": {
-                        "tag": nwsalert.get(NWS_EVENT_ID, None),
+                        "tag": nwsalert.get(NWS_EVENT_ID_SHORT, None),
                     },
                 },
             )
@@ -347,19 +257,13 @@ class Send_NWSAlerts:
                 },
             )
 
-    async def _async_clear_expired_or_removed_alerts(self, data):
+    async def _async_clear_expired_or_removed_alerts(self, array):
         _LOGGER.debug("Clearing Expired Alerts or Alerts no longer in the Feed")
         expnow = datetime.now(tz=dt_util.get_default_time_zone())
-        event_ids_full = []
-        if data.get(NWS_EVENT_ID, None) is not None:
-            event_ids_full = data.get(NWS_EVENT_ID, "").split(" - ")
         event_ids = []
-        for full_id in event_ids_full:
-            event_ids.append(
-                full_id.replace('"', "")
-                .replace(NWS_PREFIX_TO_CLEAR, "")
-                .replace(".", "")
-            )
+        if len(array) > 0:
+            event_ids = [nwsalert.get(NWS_EVENT_ID_SHORT) for nwsalert in array]
+
         for id, expires in self._history.copy().items():
             if id not in event_ids or expires < expnow:
                 _LOGGER.debug(f"Removing: {id}")
@@ -371,7 +275,7 @@ class Send_NWSAlerts:
                     and len(self._config.get(CONF_SEND_CRITICAL_SERVICES, [])) > 0
                 ):
                     await self._async_clear_sent_notification(
-                        self, id, self._config.get(CONF_SEND_CRITICAL_SERVICES, [])
+                        id, self._config.get(CONF_SEND_CRITICAL_SERVICES, [])
                     )
 
                 if (
@@ -379,7 +283,7 @@ class Send_NWSAlerts:
                     and len(self._config.get(CONF_SEND_SERVICES, [])) > 0
                 ):
                     await self._async_clear_sent_notification(
-                        self, id, self._config.get(CONF_SEND_SERVICES, [])
+                        id, self._config.get(CONF_SEND_SERVICES, [])
                     )
                 self._history.pop(id, None)
             # else:
@@ -453,7 +357,6 @@ class Send_NWSAlerts:
             hour=int(begin_time_str.split(":")[0]),
             minute=int(begin_time_str.split(":")[1]),
             second=int(begin_time_str.split(":")[2]),
-            # dt_util.get_time_zone(self._hass.config.time_zone),
             tzinfo=dt_util.get_default_time_zone(),
         )
         end_time = time(
@@ -483,8 +386,4 @@ class Send_NWSAlerts:
                 f"({self._json_filename}): {e.__class__.__qualname__}: {e}"
             )
         else:
-            _LOGGER.info(
-                "JSON alert history file removed: "
-                f"{
-                    self._json_filename}"
-            )
+            _LOGGER.info(f"JSON alert history file removed: {self._json_filename}")
