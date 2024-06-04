@@ -1,6 +1,7 @@
 """ NWS Alerts """
 
 import logging
+import re
 from datetime import datetime, timedelta
 
 import aiohttp
@@ -262,6 +263,42 @@ async def async_get_state(config, coords) -> dict:
     return (array, values)
 
 
+def _upper_to_title_case(title_string):
+    title_string = title_string.title().replace('"', "").strip()
+    title_string = re.sub(
+        r"(\s)([A-Z][ds]t)(\s)",
+        lambda pat: f"{pat.group(1)}{pat.group(2).upper()}{pat.group(3)}",
+        title_string,
+    )
+    return re.sub(
+        r"(\d\s?)([AP]m)(\s)",
+        lambda pat: f"{pat.group(1)}{pat.group(2).upper()}{pat.group(3)}",
+        title_string,
+    )
+
+
+def _string_cleanup(clean_string):
+    if clean_string is None:
+        return None
+    if clean_string.isupper():
+        return (
+            _upper_to_title_case(clean_string)
+            .replace("\n\n", "<00temp00>")
+            .replace("\n", " ")
+            .replace("<00temp00>", "\n")
+            .replace('"', "")
+            .strip()
+        )
+    else:
+        return (
+            clean_string.replace("\n\n", "<00temp00>")
+            .replace("\n", " ")
+            .replace("<00temp00>", "\n")
+            .replace('"', "")
+            .strip()
+        )
+
+
 async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
     """Query API for Alerts."""
 
@@ -318,12 +355,7 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
                 )
             else:
                 headline = event_name
-
-            if headline.isupper():
-                headline = headline.title().replace('"', "").strip()
-            else:
-                headline = headline.replace('"', "").strip()
-
+            headline = _string_cleanup(headline)
             if (
                 "headline" in alert.get(NWS_PROPERTIES)
                 and alert.get(NWS_PROPERTIES).get("headline", None) is not None
@@ -331,57 +363,22 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
                 headline_long = alert.get(NWS_PROPERTIES).get("headline", None)
             else:
                 headline_long = headline
+            headline_long = _string_cleanup(headline_long)
 
-            if headline_long.isupper():
-                headline_long = headline_long.title().replace('"', "").strip()
-            else:
-                headline_long = headline_long.replace('"', "").strip()
-
-            url = alert.get("id", None)
-            if url is not None:
-                url = url.replace('"', "").strip()
-            type = alert.get(NWS_PROPERTIES).get("messageType", None)
-            if type is not None:
-                type = type.replace('"', "").strip()
-            status = alert.get(NWS_PROPERTIES).get("status", None)
-            description = alert.get(NWS_PROPERTIES).get(NWS_DESCRIPTION, None)
-            if description is not None:
-                if description.isupper():
-                    description = (
-                        description.title()
-                        .replace("\n\n", "<00temp00>")
-                        .replace("\n", " ")
-                        .replace("<00temp00>", "\n")
-                        .replace('"', "")
-                        .strip()
-                    )
-                else:
-                    description = (
-                        description.replace("\n\n", "<00temp00>")
-                        .replace("\n", " ")
-                        .replace("<00temp00>", "\n")
-                        .replace('"', "")
-                        .strip()
-                    )
-
-            instruction = alert.get(NWS_PROPERTIES).get(NWS_INSTRUCTION, None)
-            if instruction is not None:
-                instruction = (
-                    instruction.replace("\n\n", "<00temp00>")
-                    .replace("\n", " ")
-                    .replace("<00temp00>", "\n")
-                    .replace('"', "")
-                    .strip()
-                )
-            severity = alert.get(NWS_PROPERTIES).get("severity", None)
-            if severity is not None:
-                severity = severity.replace('"', "").strip()
-            certainty = alert.get(NWS_PROPERTIES).get(NWS_CERTAINTY, None)
-            if certainty is not None:
-                certainty = certainty.replace('"', "").strip()
-            expires = alert.get(NWS_PROPERTIES).get("expires", None)
-            if expires is not None:
-                expires = expires.replace('"', "").strip()
+            url = _string_cleanup(alert.get("id", None))
+            mtype = _string_cleanup(alert.get(NWS_PROPERTIES).get("messageType", None))
+            status = _string_cleanup(alert.get(NWS_PROPERTIES).get("status", None))
+            description = _string_cleanup(
+                alert.get(NWS_PROPERTIES).get(NWS_DESCRIPTION, None)
+            )
+            instruction = _string_cleanup(
+                alert.get(NWS_PROPERTIES).get(NWS_INSTRUCTION, None)
+            )
+            severity = _string_cleanup(alert.get(NWS_PROPERTIES).get("severity", None))
+            certainty = _string_cleanup(
+                alert.get(NWS_PROPERTIES).get(NWS_CERTAINTY, None)
+            )
+            expires = _string_cleanup(alert.get(NWS_PROPERTIES).get("expires", None))
 
             if event != "":
                 event += " - "
@@ -396,7 +393,7 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
                 % (
                     headline,
                     status,
-                    type,
+                    mtype,
                     severity,
                     certainty,
                     expires,
@@ -414,8 +411,8 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
 
             if message_type != "":
                 message_type += " - "
-            message_type += type
-            alert_dict.update({NWS_MESSAGE_TYPE: type})
+            message_type += mtype
+            alert_dict.update({NWS_MESSAGE_TYPE: mtype})
 
             if event_status != "":
                 event_status += " - "

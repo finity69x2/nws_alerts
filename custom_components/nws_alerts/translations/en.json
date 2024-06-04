@@ -49,9 +49,9 @@
         "data": {
           "display_persistent_notifictions": "Display Persistent Notifications",
           "announce_critical_alert_types": "Select Critical Alert Types to Announce",
-          "announce_critical_alert_services": "What Services to Call to Announce Critical Alerts",
+          "announce_critical_entities": "What Entities to Announce Critical Alerts On",
           "announce_alert_types": "Select Alert Types to Announce",
-          "announce_alert_services": "What Services to Call to Announce Alerts",
+          "announce_entities": "What Entities to Announce Alerts On",
           "announce_alert_start_time": "Start Time to Announce Alerts",
           "announce_alert_end_time": "End Time to Announce Alerts",
           "send_critical_alert_types": "Select Critical Alert Types to Send",
@@ -60,6 +60,12 @@
           "send_alert_services": "What Services to Call to Send Alerts",
           "send_alert_start_time": "Start Time to Send Alerts",
           "send_alert_end_time": "End Time to Send Alerts"
+        },
+        "data_description": {
+          "display_persistent_notifictions": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_",
+          "announce_critical_entities": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_",
+          "announce_alert_end_time": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_",
+          "send_critical_alert_services": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_"
         },
         "description": "Select what alerts and notifications to send."
       }
@@ -115,9 +121,9 @@
         "data": {
           "display_persistent_notifictions": "Display Persistent Notifications",
           "announce_critical_alert_types": "Select Critical Alert Types to Announce",
-          "announce_critical_alert_services": "What Services to Call to Announce Critical Alerts",
+          "announce_critical_entities": "What Entities to Announce Critical Alerts On",
           "announce_alert_types": "Select Alert Types to Announce",
-          "announce_alert_services": "What Services to Call to Announce Alerts",
+          "announce_entities": "What Entities to Announce Alerts On",
           "announce_alert_start_time": "Start Time to Announce Alerts",
           "announce_alert_end_time": "End Time to Announce Alerts",
           "send_critical_alert_types": "Select Critical Alert Types to Send",
@@ -126,6 +132,12 @@
           "send_alert_services": "What Services to Call to Send Alerts",
           "send_alert_start_time": "Start Time to Send Alerts",
           "send_alert_end_time": "End Time to Send Alerts"
+        },
+        "data_description": {
+          "display_persistent_notifictions": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_",
+          "announce_critical_entities": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_",
+          "announce_alert_end_time": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_",
+          "send_critical_alert_services": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_"
         },
         "description": "Select what alerts and notifications to send."
       }

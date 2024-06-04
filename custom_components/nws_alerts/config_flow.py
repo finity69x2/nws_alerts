@@ -9,17 +9,18 @@ import aiohttp
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.components.device_tracker import DOMAIN as TRACKER_DOMAIN
-from homeassistant.const import CONF_NAME
+from homeassistant.const import CONF_FRIENDLY_NAME, CONF_NAME, Platform
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import selector
 
 from .const import (
     API_ENDPOINT,
-    CONF_ANNOUNCE_CRITICAL_SERVICES,
+    CONF_ANNOUNCE_CRITICAL_ENTITIES,
     CONF_ANNOUNCE_CRITICAL_TYPES,
     CONF_ANNOUNCE_END_TIME,
-    CONF_ANNOUNCE_SERVICES,
+    CONF_ANNOUNCE_ENTITIES,
     CONF_ANNOUNCE_START_TIME,
     CONF_ANNOUNCE_TYPES,
     CONF_GPS_LOC,
@@ -56,6 +57,7 @@ _LOGGER = logging.getLogger(__name__)
 MENU_OPTIONS = ["zone", "gps"]
 MENU_GPS = ["gps_loc", "gps_tracker"]
 ALERT_TYPES_LIST = [
+    "Air Quality Alert",
     "Blizzard Warning",
     "Coastal Flood Advisory",
     "Coastal Flood Warning",
@@ -87,6 +89,7 @@ ALERT_TYPES_LIST = [
     "Severe Thunderstorm Watch",
     "Small Craft Advisory",
     "Special Marine Warning",
+    "Special Weather Statement",
     "Storm Warning",
     "Tornado Warning",
     "Tornado Watch",
@@ -100,6 +103,31 @@ ALERT_TYPES_LIST = [
     "Winter Weather Advisory",
 ]
 ALERT_TYPES_LIST.sort()
+ANNOUNCE_MEDIA_PLAYER_INTEGRATION_LIST = ["alexa_media"]
+
+
+async def _async_get_announce_media_player_entities(hass: HomeAssistant):
+    """Get the list of media players"""
+    media_player_list = []
+    entity_registry = er.async_get(hass)
+    for ent in hass.states.async_all(Platform.MEDIA_PLAYER):
+        er_ent = entity_registry.async_get(ent.entity_id)
+        # _LOGGER.debug(f"Entity ID: {ent.entity_id}, Platform: {er_ent.platform}")
+        if er_ent.platform in ANNOUNCE_MEDIA_PLAYER_INTEGRATION_LIST:
+            media_player_list.append(
+                selector.SelectOptionDict(
+                    value=str(ent.entity_id),
+                    label=f"{ent.attributes.get(CONF_FRIENDLY_NAME)} ({er_ent.platform})",
+                )
+            )
+    if media_player_list:
+        media_player_list_sorted = sorted(
+            media_player_list, key=lambda d: d["label"].casefold()
+        )
+    else:
+        media_player_list_sorted = []
+    # _LOGGER.debug(f"Media Player List: {media_player_list_sorted}")
+    return media_player_list_sorted
 
 
 def _get_schema_zone(hass: Any, user_input: list, default_dict: list) -> Any:
@@ -165,7 +193,7 @@ def _get_schema_tracker(hass: Any, user_input: list, default_dict: list) -> Any:
 
 
 def _add_alert_options_to_schema(
-    hass: Any, user_input: list, default_dict: list, schema
+    hass: HomeAssistant, user_input: list, default_dict: list, schema
 ) -> Any:
     """Gets a schema using the default_dict as a backup."""
     if user_input is None:
@@ -185,7 +213,9 @@ def _add_alert_options_to_schema(
     return schema
 
 
-def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
+async def _async_get_schema_alerts(
+    hass: HomeAssistant, user_input: list, default_dict: list
+) -> Any:
     """Gets a schema using the default_dict as a backup."""
     if user_input is None:
         user_input = {}
@@ -194,13 +224,14 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
         """Gets default value for key."""
         return user_input.get(key, default_dict.get(key, fallback_default))
 
-    NOTIFY_SERVICES_LIST = list(
-        hass.services.async_services_for_domain("notify").keys()
-    )
+    _LOGGER.debug(f"hass.data['mobile_app']: {hass.data['mobile_app']}")
+
+    # NOTIFY_SERVICES_LIST = list(hass.services.async_services_for_domain("notify").keys())
+    NOTIFY_SERVICES_LIST = []
+    for service in hass.services.async_services_for_domain("notify").keys():
+        if service.startswith("mobile_app"):
+            NOTIFY_SERVICES_LIST.append(service)
     NOTIFY_SERVICES_LIST.sort()
-    # NOTIFY_SERVICES_LIST.remove('notify')
-    # NOTIFY_SERVICES_LIST.remove('send_message')
-    # NOTIFY_SERVICES_LIST.remove('persistent_notification')
     _LOGGER.debug(f"NOTIFY_SERVICES_LIST: {NOTIFY_SERVICES_LIST}")
 
     return vol.Schema(
@@ -221,11 +252,11 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
                 )
             ),
             vol.Optional(
-                CONF_ANNOUNCE_CRITICAL_SERVICES,
-                default=_get_default(CONF_ANNOUNCE_CRITICAL_SERVICES, []),
+                CONF_ANNOUNCE_CRITICAL_ENTITIES,
+                default=_get_default(CONF_ANNOUNCE_CRITICAL_ENTITIES, []),
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
-                    options=NOTIFY_SERVICES_LIST,
+                    options=await _async_get_announce_media_player_entities(hass),
                     multiple=True,
                     custom_value=False,
                     mode=selector.SelectSelectorMode.DROPDOWN,
@@ -242,10 +273,11 @@ def _get_schema_alerts(hass: Any, user_input: list, default_dict: list) -> Any:
                 )
             ),
             vol.Optional(
-                CONF_ANNOUNCE_SERVICES, default=_get_default(CONF_ANNOUNCE_SERVICES, [])
+                CONF_ANNOUNCE_ENTITIES,
+                default=_get_default(CONF_ANNOUNCE_ENTITIES, []),
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
-                    options=NOTIFY_SERVICES_LIST,
+                    options=await _async_get_announce_media_player_entities(hass),
                     multiple=True,
                     custom_value=False,
                     mode=selector.SelectSelectorMode.DROPDOWN,
@@ -510,7 +542,7 @@ class NWSAlertsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="alerts",
-            data_schema=_get_schema_alerts(self.hass, user_input, defaults),
+            data_schema=await _async_get_schema_alerts(self.hass, user_input, defaults),
             errors=self._errors,
         )
 
@@ -591,7 +623,9 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
 
         return self.async_show_form(
             step_id="alerts",
-            data_schema=_get_schema_alerts(self.hass, user_input, self._data),
+            data_schema=await _async_get_schema_alerts(
+                self.hass, user_input, self._data
+            ),
             errors=self._errors,
         )
 
