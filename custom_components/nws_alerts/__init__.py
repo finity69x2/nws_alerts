@@ -1,10 +1,11 @@
 """ NWS Alerts """
+
 import logging
-from datetime import timedelta
+import re
+from datetime import datetime, timedelta
 
 import aiohttp
 from async_timeout import timeout
-from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
@@ -18,6 +19,7 @@ from .const import (
     API_ENDPOINT,
     CONF_GPS_LOC,
     CONF_INTERVAL,
+    CONF_SEND_ALERTS,
     CONF_TIMEOUT,
     CONF_TRACKER,
     CONF_ZONE_ID,
@@ -26,10 +28,28 @@ from .const import (
     DEFAULT_TIMEOUT,
     DOMAIN,
     ISSUE_URL,
+    NWS_CERTAINTY,
+    NWS_DESCRIPTION,
+    NWS_DISPLAY_DESC,
+    NWS_EVENT,
+    NWS_EVENT_EXPIRES,
+    NWS_EVENT_ID,
+    NWS_EVENT_ID_SHORT,
+    NWS_EVENT_SEVERITY,
+    NWS_EVENT_STATUS,
+    NWS_HEADLINE,
+    NWS_HEADLINE_LONG,
+    NWS_ID_PREFIX,
+    NWS_INSTRUCTION,
+    NWS_MESSAGE_TYPE,
+    NWS_PROPERTIES,
+    NWS_URL,
+    NWS_URL_PREFIX,
     PLATFORMS,
     USER_AGENT,
     VERSION,
 )
+from .send_nwsalerts import Send_NWSAlerts
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -144,6 +164,9 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
         self.timeout = the_timeout
         self.config = config
         self.hass = hass
+        self._send_nwsalerts = None
+        if config.get(CONF_SEND_ALERTS, False):
+            self._send_nwsalerts = Send_NWSAlerts(hass, config)
 
         _LOGGER.debug("Data will be update every %s", self.interval)
 
@@ -156,9 +179,12 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
             coords = await self._get_tracker_gps()
         async with timeout(self.timeout):
             try:
-                data = await update_alerts(self.config, coords)
+                array, data = await update_alerts(self.config, coords)
             except Exception as error:
                 raise UpdateFailed(error) from error
+            else:
+                if self._send_nwsalerts is not None:
+                    await self._send_nwsalerts.async_send(array)
             return data
 
     async def _get_tracker_gps(self):
@@ -169,14 +195,20 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
             return f"{entity.attributes['latitude']},{entity.attributes['longitude']}"
         return None
 
+    async def async_removing_from_hass(self):
+        if self._send_nwsalerts is not None:
+            await self.hass.async_add_executor_job(
+                self._send_nwsalerts._removing_from_hass
+            )
+
 
 async def update_alerts(config, coords) -> dict:
     """Fetch new state data for the sensor.
     This is the only method that should fetch new data for Home Assistant.
     """
 
-    data = await async_get_state(config, coords)
-    return data
+    array, data = await async_get_state(config, coords)
+    return (array, data)
 
 
 async def async_get_state(config, coords) -> dict:
@@ -187,15 +219,16 @@ async def async_get_state(config, coords) -> dict:
     url = "%s/alerts/active/count" % API_ENDPOINT
     values = {
         "state": 0,
-        "event": None,
-        "event_id": None,
-        "message_type": None,
-        "event_status": None,
-        "event_severity": None,
-        "event_expires": None,
-        "display_desc": None,
-        "spoken_desc": None,
+        NWS_EVENT: None,
+        NWS_EVENT_ID: None,
+        NWS_MESSAGE_TYPE: None,
+        NWS_EVENT_STATUS: None,
+        NWS_EVENT_SEVERITY: None,
+        NWS_EVENT_EXPIRES: None,
+        NWS_DISPLAY_DESC: None,
+        NWS_HEADLINE: None,
     }
+    array = []
     headers = {"User-Agent": USER_AGENT, "Accept": "application/ld+json"}
     data = None
 
@@ -215,18 +248,55 @@ async def async_get_state(config, coords) -> dict:
                 data = await r.json()
             else:
                 _LOGGER.error("Problem updating NWS data: (%s) - %s", r.status, r.body)
-
+    # _LOGGER.debug(f"state data: {data}")
     if data is not None:
         # Reset values before reassigning
         if "zones" in data and zone_id != "":
             for zone in zone_id.split(","):
                 if zone in data["zones"]:
-                    values = await async_get_alerts(zone_id=zone_id)
+                    array, values = await async_get_alerts(zone_id=zone_id)
                     break
         else:
-            values = await async_get_alerts(gps_loc=gps_loc)
+            array, values = await async_get_alerts(gps_loc=gps_loc)
 
-    return values
+    # _LOGGER.debug(f"values: {values}")
+    return (array, values)
+
+
+def _upper_to_title_case(title_string):
+    title_string = title_string.title().replace('"', "").strip()
+    title_string = re.sub(
+        r"(\s)([A-Z][ds]t)(\s)",
+        lambda pat: f"{pat.group(1)}{pat.group(2).upper()}{pat.group(3)}",
+        title_string,
+    )
+    return re.sub(
+        r"(\d\s?)([AP]m)(\s)",
+        lambda pat: f"{pat.group(1)}{pat.group(2).upper()}{pat.group(3)}",
+        title_string,
+    )
+
+
+def _string_cleanup(clean_string):
+    if clean_string is None:
+        return None
+    if clean_string.isupper():
+        return (
+            _upper_to_title_case(clean_string)
+            .replace("\n\n", "<00temp00>")
+            .replace("\n", " ")
+            .replace("<00temp00>", "\n")
+            .replace('"', "")
+            .strip()
+        )
+    else:
+        return (
+            clean_string.replace("\n\n", "<00temp00>")
+            .replace("\n", " ")
+            .replace("<00temp00>", "\n")
+            .replace('"', "")
+            .strip()
+        )
 
 
 async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
@@ -235,15 +305,16 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
     url = ""
     values = {
         "state": 0,
-        "event": None,
-        "event_id": None,
-        "message_type": None,
-        "event_status": None,
-        "event_severity": None,
-        "event_expires": None,
-        "display_desc": None,
-        "spoken_desc": None,
+        NWS_EVENT: None,
+        NWS_EVENT_ID: None,
+        NWS_MESSAGE_TYPE: None,
+        NWS_EVENT_STATUS: None,
+        NWS_EVENT_SEVERITY: None,
+        NWS_EVENT_EXPIRES: None,
+        NWS_DISPLAY_DESC: None,
+        NWS_HEADLINE: None,
     }
+    array = []
     headers = {"User-Agent": USER_AGENT, "Accept": "application/geo+json"}
     data = None
 
@@ -262,8 +333,7 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
                 _LOGGER.error("Problem updating NWS data: (%s) - %s", r.status, r.body)
 
     if data is not None:
-        events = []
-        headlines = []
+        event = ""
         event_id = ""
         message_type = ""
         event_status = ""
@@ -271,38 +341,59 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
         event_expires = ""
         display_desc = ""
         spoken_desc = ""
-        features = data["features"]
+        features = data.get("features", {})
+        events = 0
         for alert in features:
-            event = alert["properties"]["event"]
-            if "NWSheadline" in alert["properties"]["parameters"]:
-                headline = alert["properties"]["parameters"]["NWSheadline"][0]
+            alert_dict = {}
+            events += 1
+            event_name = alert.get(NWS_PROPERTIES)[NWS_EVENT]
+            if "NWSheadline" in alert.get(NWS_PROPERTIES).get("parameters", None):
+                headline = (
+                    alert.get(NWS_PROPERTIES)
+                    .get("parameters")
+                    .get("NWSheadline", None)[0]
+                )
             else:
-                headline = event
+                headline = event_name
+            headline = _string_cleanup(headline)
+            if (
+                "headline" in alert.get(NWS_PROPERTIES)
+                and alert.get(NWS_PROPERTIES).get("headline", None) is not None
+            ):
+                headline_long = alert.get(NWS_PROPERTIES).get("headline", None)
+            else:
+                headline_long = headline
+            headline_long = _string_cleanup(headline_long)
 
-            id = alert["id"]
-            type = alert["properties"]["messageType"]
-            status = alert["properties"]["status"]
-            description = alert["properties"]["description"]
-            instruction = alert["properties"]["instruction"]
-            severity = alert["properties"]["severity"]
-            certainty = alert["properties"]["certainty"]
-            expires = alert["properties"]["expires"]
+            url = _string_cleanup(alert.get("id", None))
+            mtype = _string_cleanup(alert.get(NWS_PROPERTIES).get("messageType", None))
+            status = _string_cleanup(alert.get(NWS_PROPERTIES).get("status", None))
+            description = _string_cleanup(
+                alert.get(NWS_PROPERTIES).get(NWS_DESCRIPTION, None)
+            )
+            instruction = _string_cleanup(
+                alert.get(NWS_PROPERTIES).get(NWS_INSTRUCTION, None)
+            )
+            severity = _string_cleanup(alert.get(NWS_PROPERTIES).get("severity", None))
+            certainty = _string_cleanup(
+                alert.get(NWS_PROPERTIES).get(NWS_CERTAINTY, None)
+            )
+            expires = _string_cleanup(alert.get(NWS_PROPERTIES).get("expires", None))
 
-            # if event in events:
-            #    continue
-
-            events.append(event)
-            headlines.append(headline)
+            if event != "":
+                event += " - "
+            event += event_name
+            alert_dict.update({NWS_EVENT: event_name})
 
             if display_desc != "":
                 display_desc += "\n\n-\n\n"
 
-            display_desc += (
-                "\n>\nHeadline: %s\nStatus: %s\nMessage Type: %s\nSeverity: %s\nCertainty: %s\nExpires: %s\nDescription: %s\nInstruction: %s"
+            display = (
+                "\n>\nHeadline: %s\nStatus: %s\nMessage Type: %s\nSeverity: %s\nCertainty: %s\nExpires: %s\nDescription: %s\n\nInstruction: %s"
                 % (
                     headline,
                     status,
-                    type,
+                    mtype,
                     severity,
                     certainty,
                     expires,
@@ -310,60 +401,63 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
                     instruction,
                 )
             )
+            display_desc += display
+            alert_dict.update({NWS_DISPLAY_DESC: display})
 
             if event_id != "":
                 event_id += " - "
-
-            event_id += id
+            event_id += url
+            alert_dict.update({NWS_URL: url})
 
             if message_type != "":
                 message_type += " - "
-
-            message_type += type
+            message_type += mtype
+            alert_dict.update({NWS_MESSAGE_TYPE: mtype})
 
             if event_status != "":
                 event_status += " - "
-
             event_status += status
+            alert_dict.update({NWS_EVENT_STATUS: status})
 
             if event_severity != "":
                 event_severity += " - "
-
             event_severity += severity
+            alert_dict.update({NWS_EVENT_SEVERITY: severity})
 
             if event_expires != "":
                 event_expires += " - "
-
             event_expires += expires
+            if expires is not None:
+                expires = datetime.fromisoformat(expires)
+            alert_dict.update({NWS_EVENT_EXPIRES: expires})
 
-        if headlines:
-            num_headlines = len(headlines)
-            i = 0
-            for headline in headlines:
-                i += 1
-                if spoken_desc != "":
-                    if i == num_headlines:
-                        spoken_desc += "\n\n-\n\n"
-                    else:
-                        spoken_desc += "\n\n-\n\n"
+            if spoken_desc != "":
+                spoken_desc += "\n\n-\n\n"
+            spoken_desc += headline
+            alert_dict.update({NWS_HEADLINE: headline})
 
-                spoken_desc += headline
+            id = url.replace(NWS_URL_PREFIX, "")
+            alert_dict.update({NWS_EVENT_ID: id})
+            id_short = id.replace(NWS_ID_PREFIX, "").replace(".", "")
+            alert_dict.update({NWS_EVENT_ID_SHORT: id_short})
 
-        if len(events) > 0:
-            event_str = ""
-            for item in events:
-                if event_str != "":
-                    event_str += " - "
-                event_str += item
+            alert_dict.update({NWS_HEADLINE_LONG: headline_long})
+            alert_dict.update({NWS_DESCRIPTION: description})
+            alert_dict.update({NWS_CERTAINTY: certainty})
+            alert_dict.update({NWS_INSTRUCTION: instruction})
 
-            values["state"] = len(events)
-            values["event"] = event_str
-            values["event_id"] = event_id
-            values["message_type"] = message_type
-            values["event_status"] = event_status
-            values["event_severity"] = event_severity
-            values["event_expires"] = event_expires
-            values["display_desc"] = display_desc
-            values["spoken_desc"] = spoken_desc
+            array.append(alert_dict)
 
-    return values
+        if events > 0:
+
+            values["state"] = events
+            values[NWS_EVENT] = event
+            values[NWS_EVENT_ID] = event_id
+            values[NWS_MESSAGE_TYPE] = message_type
+            values[NWS_EVENT_STATUS] = event_status
+            values[NWS_EVENT_SEVERITY] = event_severity
+            values[NWS_EVENT_EXPIRES] = event_expires
+            values[NWS_DISPLAY_DESC] = display_desc
+            values[NWS_HEADLINE] = spoken_desc
+    # _LOGGER.debug(f"array: {array}")
+    return (array, values)
