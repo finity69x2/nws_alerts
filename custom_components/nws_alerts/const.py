@@ -52,6 +52,7 @@ NWS_EVENT_ID_SHORT = "event_id_short"
 NWS_PROPERTIES = "properties"
 NWS_URL_PREFIX = "https://api.weather.gov/alerts/"
 NWS_ID_PREFIX = "urn:oid:2.49.0.1.840.0."
+NWS_HUMAN_URL_PREFIX = "https://alerts.weather.gov/search?id="
 
 # Misc
 ZONE_ID = ""

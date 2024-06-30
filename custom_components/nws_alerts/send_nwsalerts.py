@@ -32,10 +32,12 @@ from .const import (
     NWS_DESCRIPTION,
     NWS_EVENT,
     NWS_EVENT_EXPIRES,
+    NWS_EVENT_ID,
     NWS_EVENT_ID_SHORT,
     NWS_EVENT_SEVERITY,
     NWS_HEADLINE,
     NWS_HEADLINE_LONG,
+    NWS_HUMAN_URL_PREFIX,
     NWS_INSTRUCTION,
 )
 
@@ -305,6 +307,8 @@ class Send_NWSAlerts:
                 service_data.update(
                     {
                         "data": {
+                            "url": f"{NWS_HUMAN_URL_PREFIX}{slugify(nwsalert.get(NWS_EVENT_ID, ''))}",
+                            "clickAction": f"{NWS_HUMAN_URL_PREFIX}{slugify(nwsalert.get(NWS_EVENT_ID, ''))}",
                             "tag": nwsalert.get(NWS_EVENT_ID_SHORT, None),
                             "push": {
                                 "sound": {
@@ -321,7 +325,13 @@ class Send_NWSAlerts:
                 )
             else:
                 service_data.update(
-                    {"data": {"tag": nwsalert.get(NWS_EVENT_ID_SHORT, None)}}
+                    {
+                        "data": {
+                            "url": f"{NWS_HUMAN_URL_PREFIX}{slugify(nwsalert.get(NWS_EVENT_ID, ''))}",
+                            "clickAction": f"{NWS_HUMAN_URL_PREFIX}{slugify(nwsalert.get(NWS_EVENT_ID, ''))}",
+                            "tag": nwsalert.get(NWS_EVENT_ID_SHORT, None),
+                        }
+                    }
                 )
             await self._hass.services.async_call(
                 "notify",
