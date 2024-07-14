@@ -21,16 +21,18 @@
           "name": "Friendly Name",
           "tracker": "Device to track",
           "interval": "Update Interval (in minutes)",
-          "timeout":"Update Timeout (in seconds)"
+          "timeout":"Update Timeout (in seconds)",
+          "send_alerts": "Send Alerts"
         }
-      },      
+      },
       "gps_loc": {
         "description": "Please enter your latitude and longitude, by default your coordinates from Home Assistant are used.",
         "data": {
           "name": "Friendly Name",
           "gps_loc": "Your GPS coordinates",
           "interval": "Update Interval (in minutes)",
-          "timeout":"Update Timeout (in seconds)"
+          "timeout":"Update Timeout (in seconds)",
+          "send_alerts": "Send Alerts"
         }
       },
       "zone": {
@@ -38,9 +40,34 @@
           "name": "Friendly Name",
           "zone_id": "Zone ID(s)",
           "interval": "Update Interval (in minutes)",
-          "timeout": "Update Timeout (in seconds)"
+          "timeout": "Update Timeout (in seconds)",
+          "send_alerts": "Send Alerts"
         },
         "description": "You can find your Zone or County ID by going to https://alerts.weather.gov/,\nscroll down to your state and click on the 'zone list' and/or 'county list' then look for the entry for your county.\nSeperate multiple zones with commas ie: PAC049,WVC031\n\nZones closest to you will be populated automatically."
+      },
+      "alerts": {
+        "data": {
+          "display_persistent_notifictions": "Display Persistent Notifications",
+          "announce_critical_alert_types": "Select Critical Alert Types to Announce",
+          "announce_critical_entities": "What Entities to Announce Critical Alerts On",
+          "announce_alert_types": "Select Alert Types to Announce",
+          "announce_entities": "What Entities to Announce Alerts On",
+          "announce_alert_start_time": "Start Time to Announce Alerts",
+          "announce_alert_end_time": "End Time to Announce Alerts",
+          "send_critical_alert_types": "Select Critical Alert Types to Send",
+          "send_critical_alert_services": "What Services to Call to Send Critical Alerts",
+          "send_alert_types": "Select Alert Types to Send",
+          "send_alert_services": "What Services to Call to Send Alerts",
+          "send_alert_start_time": "Start Time to Send Alerts",
+          "send_alert_end_time": "End Time to Send Alerts"
+        },
+        "data_description": {
+          "display_persistent_notifictions": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_",
+          "announce_critical_entities": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_",
+          "announce_alert_end_time": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_",
+          "send_critical_alert_services": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_"
+        },
+        "description": "Select what alerts and notifications to send."
       }
     }
   },
@@ -59,33 +86,60 @@
           "gps_loc": "Using your Home Assistant location",
           "gps_tracker": "Using a device tracker"
         }
-      },      
+      },
       "gps_tracker": {
         "description": "Select the device you'd like to track for alerts.",
         "data": {
           "name": "Friendly Name",
           "tracker": "Device to track",
           "interval": "Update Interval (in minutes)",
-          "timeout":"Update Timeout (in seconds)"
+          "timeout":"Update Timeout (in seconds)",
+          "send_alerts": "Send Alerts"
         }
-      },        
+      },
       "gps_loc": {
         "description": "Please enter your latitude and longitude, by default your coordinates from Home Assistant are used.",
         "data": {
           "name": "Friendly Name",
           "gps_loc": "Your GPS coordinates",
           "interval": "Update Interval (in minutes)",
-          "timeout":"Update Timeout (in seconds)"
+          "timeout":"Update Timeout (in seconds)",
+          "send_alerts": "Send Alerts"
         }
-      },      
+      },
       "zone": {
         "data": {
           "name": "Friendly Name",
           "zone_id": "Zone ID(s)",
           "interval": "Update Interval (in minutes)",
-          "timeout": "Update Timeout (in seconds)"
+          "timeout": "Update Timeout (in seconds)",
+          "send_alerts": "Send Alerts"
         },
         "description": "You can find your Zone or County ID by going to https://alerts.weather.gov/,\nscroll down to your state and click on the 'zone list' and/or 'county list' then look for the entry for your county.\nSeperate multiple zones with commas ie: PAC049,WVC031"
+      },
+      "alerts": {
+        "data": {
+          "display_persistent_notifictions": "Display Persistent Notifications",
+          "announce_critical_alert_types": "Select Critical Alert Types to Announce",
+          "announce_critical_entities": "What Entities to Announce Critical Alerts On",
+          "announce_alert_types": "Select Alert Types to Announce",
+          "announce_entities": "What Entities to Announce Alerts On",
+          "announce_alert_start_time": "Start Time to Announce Alerts",
+          "announce_alert_end_time": "End Time to Announce Alerts",
+          "send_critical_alert_types": "Select Critical Alert Types to Send",
+          "send_critical_alert_services": "What Services to Call to Send Critical Alerts",
+          "send_alert_types": "Select Alert Types to Send",
+          "send_alert_services": "What Services to Call to Send Alerts",
+          "send_alert_start_time": "Start Time to Send Alerts",
+          "send_alert_end_time": "End Time to Send Alerts"
+        },
+        "data_description": {
+          "display_persistent_notifictions": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_",
+          "announce_critical_entities": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_",
+          "announce_alert_end_time": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_",
+          "send_critical_alert_services": "‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_‾-_"
+        },
+        "description": "Select what alerts and notifications to send."
       }
     }
   }

@@ -1,9 +1,8 @@
 import logging
-import uuid
 
 import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
@@ -58,7 +57,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         elif CONF_GPS_LOC in config:
             config.entry_id = slugify(f"{config.get(CONF_GPS_LOC)}")
         elif CONF_TRACKER in config:
-            config.entry_id = slugify(f"{config.get(CONF_TRACKER)}")            
+            config.entry_id = slugify(f"{config.get(CONF_TRACKER)}")
         else:
             raise ValueError("GPS, Zone or Device Tracker needs to be configured.")
         config.data = config
@@ -102,26 +101,10 @@ class NWSAlertSensor(CoordinatorEntity):
         """Initialize the sensor."""
         super().__init__(hass.data[DOMAIN][entry.entry_id][COORDINATOR])
         self._config = entry
-        self._name = entry.data[CONF_NAME]
-        self._icon = DEFAULT_ICON
+        self._attr_name = entry.data[CONF_NAME]
+        self._attr_unique_id = f"{slugify(self._attr_name)}_{self._config.entry_id}"
+        self._attr_icon = DEFAULT_ICON
         self.coordinator = hass.data[DOMAIN][entry.entry_id][COORDINATOR]
-
-    @property
-    def unique_id(self):
-        """
-        Return a unique, Home Assistant friendly identifier for this entity.
-        """
-        return f"{slugify(self._name)}_{self._config.entry_id}"
-
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return self._name
-
-    @property
-    def icon(self):
-        """Return the icon to use in the frontend, if any."""
-        return self._icon
 
     @property
     def state(self):
@@ -166,3 +149,7 @@ class NWSAlertSensor(CoordinatorEntity):
             manufacturer="NWS",
             name="NWS Alerts",
         )
+
+    async def async_will_remove_from_hass(self) -> None:
+        """Run when entity will be removed from hass."""
+        await self.coordinator.async_removing_from_hass()
