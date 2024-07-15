@@ -5,7 +5,7 @@ cards:
     type: grid
     cards:
       - type: tile
-        entity: sensor.nws_alerts_test
+        entity: sensor.nws_alerts
         name: National Weather Service Alerts
         show_entity_picture: false
         hide_state: false
@@ -21,7 +21,7 @@ cards:
           - type: conditional
             conditions:
               - condition: numeric_state
-                entity: sensor.nws_alerts_test
+                entity: sensor.nws_alerts
                 above: 0
             card:
               type: markdown
@@ -30,17 +30,17 @@ cards:
 
                 ---
 
-                {% if (states('sensor.nws_alerts_test')) | int > 0 %}
+                {% if (states('sensor.nws_alerts')) | int > 0 %}
 
-                ## {{ states.sensor.nws_alerts_test.attributes.title.split(' - ')[0] }}
+                ## {{ states.sensor.nws_alerts.attributes.title.split(' - ')[0] }}
 
-                {{ state_attr('sensor.nws_alerts_test','display_desc').split('\n\n-\n\n')[0] }}
+                {{ state_attr('sensor.nws_alerts','display_desc').split('\n\n-\n\n')[0] }}
 
                 {% endif -%}
           - type: conditional
             conditions:
               - condition: numeric_state
-                entity: sensor.nws_alerts_test
+                entity: sensor.nws_alerts
                 above: 1
             card:
               type: markdown
@@ -49,17 +49,17 @@ cards:
 
                 ---
 
-                {% if (states('sensor.nws_alerts_test')) | int > 1 %}
+                {% if (states('sensor.nws_alerts')) | int > 1 %}
 
-                ## {{ states.sensor.nws_alerts_test.attributes.title.split(' - ')[1] }}
+                ## {{ states.sensor.nws_alerts.attributes.title.split(' - ')[1] }}
 
-                {{ state_attr('sensor.nws_alerts_test','display_desc').split('\n\n-\n\n')[1] }}
+                {{ state_attr('sensor.nws_alerts','display_desc').split('\n\n-\n\n')[1] }}
 
                 {% endif -%}
           - type: conditional
             conditions:
               - condition: numeric_state
-                entity: sensor.nws_alerts_test
+                entity: sensor.nws_alerts
                 above: 2
             card:
               type: markdown
@@ -68,17 +68,17 @@ cards:
 
                 ---
 
-                {% if (states('sensor.nws_alerts_test')) | int > 2 %}
+                {% if (states('sensor.nws_alerts')) | int > 2 %}
 
-                ## {{ states.sensor.nws_alerts_test.attributes.title.split(' - ')[2] }}
+                ## {{ states.sensor.nws_alerts.attributes.title.split(' - ')[2] }}
 
-                {{ state_attr('sensor.nws_alerts_test','display_desc').split('\n\n-\n\n')[2] }}
+                {{ state_attr('sensor.nws_alerts','display_desc').split('\n\n-\n\n')[2] }}
 
                 {% endif -%}
           - type: conditional
             conditions:
               - condition: numeric_state
-                entity: sensor.nws_alerts_test
+                entity: sensor.nws_alerts
                 above: 3
             card:
               type: markdown
@@ -87,17 +87,17 @@ cards:
 
                 ---
 
-                {% if (states('sensor.nws_alerts_test')) | int > 3 %}
+                {% if (states('sensor.nws_alerts')) | int > 3 %}
 
-                ## {{ states.sensor.nws_alerts_test.attributes.title.split(' - ')[3] }}
+                ## {{ states.sensor.nws_alerts.attributes.title.split(' - ')[3] }}
 
-                {{ state_attr('sensor.nws_alerts_test','display_desc').split('\n\n-\n\n')[3] }}
+                {{ state_attr('sensor.nws_alerts','display_desc').split('\n\n-\n\n')[3] }}
 
                 {% endif -%}
           - type: conditional
             conditions:
               - condition: numeric_state
-                entity: sensor.nws_alerts_test
+                entity: sensor.nws_alerts
                 above: 4
             card:
               type: markdown
@@ -106,11 +106,11 @@ cards:
 
                 ---
 
-                {% if (states('sensor.nws_alerts_test')) | int > 4 %}
+                {% if (states('sensor.nws_alerts')) | int > 4 %}
 
-                ## {{ states.sensor.nws_alerts_test.attributes.title.split(' - ')[5] }}
+                ## {{ states.sensor.nws_alerts.attributes.title.split(' - ')[5] }}
 
-                {{ state_attr('sensor.nws_alerts_test','display_desc').split('\n\n-\n\n')[5] }}
+                {{ state_attr('sensor.nws_alerts','display_desc').split('\n\n-\n\n')[5] }}
 
                 {% endif -%}
     title: Severe Weather Alerts
