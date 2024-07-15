@@ -189,6 +189,7 @@ async def async_get_state(config, coords) -> dict:
         "message_type": None,
         "event_status": None,
         "event_severity": None,
+        "event_onset": None,
         "event_expires": None,
         "display_desc": None,
         "spoken_desc": None,
@@ -237,6 +238,7 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
         "message_type": None,
         "event_status": None,
         "event_severity": None,
+        "event_onset": None,
         "event_expires": None,
         "display_desc": None,
         "spoken_desc": None,
@@ -265,6 +267,7 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
         message_type = ""
         event_status = ""
         event_severity = ""
+        event_onset = ""
         event_expires = ""
         display_desc = ""
         spoken_desc = ""
@@ -283,6 +286,7 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
             instruction = alert["properties"]["instruction"]
             severity = alert["properties"]["severity"]
             certainty = alert["properties"]["certainty"]
+            onset = alert["properties"]["onset"]
             expires = alert["properties"]["expires"]
 
             # if event in events:
@@ -295,13 +299,14 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
                 display_desc += "\n\n-\n\n"
 
             display_desc += (
-                "\n>\nHeadline: %s\nStatus: %s\nMessage Type: %s\nSeverity: %s\nCertainty: %s\nExpires: %s\nDescription: %s\nInstruction: %s"
+                "\n>\nHeadline: %s\nStatus: %s\nMessage Type: %s\nSeverity: %s\nCertainty: %s\nOnset: %s\nExpires: %s\nDescription: %s\nInstruction: %s"
                 % (
                     headline,
                     status,
                     type,
                     severity,
                     certainty,
+                    onset,
                     expires,
                     description,
                     instruction,
@@ -327,6 +332,11 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
                 event_severity += " - "
 
             event_severity += severity
+
+            if event_onset != "":
+                event_onset += " - "
+
+            event_onset += onset
 
             if event_expires != "":
                 event_expires += " - "
@@ -359,6 +369,7 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
             values["message_type"] = message_type
             values["event_status"] = event_status
             values["event_severity"] = event_severity
+            values["event_onset"] = event_onset
             values["event_expires"] = event_expires
             values["display_desc"] = display_desc
             values["spoken_desc"] = spoken_desc
