@@ -1,3 +1,10 @@
+## The following custom plugins are used in the example below:
+## custom:vertical-layout: https://github.com/thomasloven/lovelace-layout-card
+## custom:stack-in-card: https://github.com/ofekashery/vertical-stack-in-card
+## custom:entity-attributes-card: https://github.com/custom-cards/entity-attributes-card
+
+## all of them can be inbstalled via HACS
+
 title: "Alerts"
 visible: false
 type: custom:vertical-layout
