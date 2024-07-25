@@ -1,0 +1,92 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Please select your NWS lookup method.\n\nFor a brief explanation of the advantages and disadvantages of each method please see [here](https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.md).\n\nIf you don't know which is better for your situation, you should probably select the Zone ID version.",
+        "menu_options": {
+          "zone": "Zone ID (more generalized location - includes County ID if applicable)",
+          "gps": "GPS Location (precise location)"
+        }
+      },
+      "gps": {
+        "description": "Please choose a GPS method.",
+        "menu_options": {
+          "gps_loc": "Using your Home Assistant location",
+          "gps_tracker": "Using a device tracker"
+        }
+      },
+      "gps_tracker": {
+        "description": "Select the device you'd like to track for alerts.",
+        "data": {
+          "name": "Friendly Name",
+          "tracker": "Device to track",
+          "interval": "Update Interval (in minutes)",
+          "timeout":"Update Timeout (in seconds)"
+        }
+      },      
+      "gps_loc": {
+        "description": "Please enter your latitude and longitude, by default your coordinates from Home Assistant are used.",
+        "data": {
+          "name": "Friendly Name",
+          "gps_loc": "Your GPS coordinates",
+          "interval": "Update Interval (in minutes)",
+          "timeout":"Update Timeout (in seconds)"
+        }
+      },
+      "zone": {
+        "data": {
+          "name": "Friendly Name",
+          "zone_id": "Zone ID(s)",
+          "interval": "Update Interval (in minutes)",
+          "timeout": "Update Timeout (in seconds)"
+        },
+        "description": "You can find your Zone or County ID by going to https://alerts.weather.gov/,\nscroll down to your state and click on the 'zone list' and/or 'county list' then look for the entry for your county.\nSeperate multiple zones with commas ie: PAC049,WVC031\n\nZones closest to you will be populated automatically."
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "user": {
+        "description": "Please select your NWS lookup method.\n\nFor a brief explanation of the advantages and disadvantages of each method please see [here](https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.md).\n\nIf you don't know which is better for your situation, you should probably select the Zone ID version.",
+        "menu_options": {
+          "zone": "Zone ID (more generalized location - includes County ID if applicable)",
+          "gps": "GPS Location (precise location)"
+        }
+      },
+      "gps": {
+        "description": "Please choose a GPS method.",
+        "menu_options": {
+          "gps_loc": "Using your Home Assistant location",
+          "gps_tracker": "Using a device tracker"
+        }
+      },      
+      "gps_tracker": {
+        "description": "Select the device you'd like to track for alerts.",
+        "data": {
+          "name": "Friendly Name",
+          "tracker": "Device to track",
+          "interval": "Update Interval (in minutes)",
+          "timeout":"Update Timeout (in seconds)"
+        }
+      },        
+      "gps_loc": {
+        "description": "Please enter your latitude and longitude, by default your coordinates from Home Assistant are used.",
+        "data": {
+          "name": "Friendly Name",
+          "gps_loc": "Your GPS coordinates",
+          "interval": "Update Interval (in minutes)",
+          "timeout":"Update Timeout (in seconds)"
+        }
+      },      
+      "zone": {
+        "data": {
+          "name": "Friendly Name",
+          "zone_id": "Zone ID(s)",
+          "interval": "Update Interval (in minutes)",
+          "timeout": "Update Timeout (in seconds)"
+        },
+        "description": "You can find your Zone or County ID by going to https://alerts.weather.gov/,\nscroll down to your state and click on the 'zone list' and/or 'county list' then look for the entry for your county.\nSeperate multiple zones with commas ie: PAC049,WVC031"
+      }
+    }
+  }
+}
