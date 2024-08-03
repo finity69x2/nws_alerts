@@ -1,51 +1,23 @@
 #########################################################################################
-title: "Alerts Test"
+title: "Alerts"
 visible: false
 panel: true
 cards:
   - type: vertical-stack
     cards:
-      - type: entities
-        title: Severe Weather Alerts Test
-        show_header_toggle: false
-        entities:
-          - sensor.nws_alerts
-          - sensor.de_kalb
       - type: conditional
         conditions:
-          - entity: sensor.nws_alerts_test
+          - entity: sensor.nws_alerts
             state_not: "0"
         card:
           type: markdown
           content: |
-            {% set num_alerts = states('sensor.nws_alerts_test') | int  %}
+            {% set num_alerts = states('sensor.nws_alerts') | int  %}
             {% for alert_num in range(num_alerts) %}
             ---
-            # NWS Test Alert {{ alert_num + 1 }}
+            # NWS Alert {{ alert_num + 1 }}
             
-            ## {{ state_attr('sensor.nws_alerts_test', 'Alerts')[alert_num].Event }}
+            ## {{ state_attr('sensor.nws_alerts', 'Alerts')[alert_num].Event }}
             
-              {{ state_attr('sensor.nws_alerts_test', 'Alerts')[alert_num].Description }}
+              {{ state_attr('sensor.nws_alerts', 'Alerts')[alert_num].Description }}
             {% endfor %}
-      
-      - type: entities
-        title: NWS Test Alerts History
-        show_header_toggle: false
-        state_color: true
-        entities:
-          - type: custom:entity-attributes-card
-            heading_name: Name
-            heading_state: State
-            entity: sensor.nws_alerts_event_ids
-            filter:
-              include:
-                - sensor.nws_alerts_test_event_ids.history_1
-                - sensor.nws_alerts_test_event_ids.history_2
-                - sensor.nws_alerts_test_event_ids.history_3
-                - sensor.nws_alerts_test_event_ids.history_4
-                - sensor.nws_alerts_test_event_ids.history_5
-                - sensor.nws_alerts_test_event_ids.history_6
-                - sensor.nws_alerts_test_event_ids.history_7
-                - sensor.nws_alerts_test_event_ids.history_8
-                - sensor.nws_alerts_test_event_ids.history_9
-                - sensor.nws_alerts_test_event_ids.history_10
