@@ -1,5 +1,15 @@
 # Alerts from the US National Weather Service  (nws_alerts)
 
+## BREAKING CHANGES IN V5.0
+
+This is a pretty much complete rewrite of the integration to better organize the data for the alerts. All of the data provided by the older versions is still included but it's laid out very differently and as such none of the associated automations package or dashboard examples will continue to function as there currently are.
+
+I have done extensive testing to ensure that the new updated package examplews work as desired but of course I caouldn't test every situation.
+
+<b>Use at your own risk!</b>
+
+## Description:
+
 An updated version of the nws_alerts custom integration for Home Assistant originally found at github.com/eracknaphobia/nws_custom_component
 
 This integration retrieves updated weather alerts every minute from the US NWS API (by default but it can be changed in the config options).
@@ -11,8 +21,6 @@ The integration presents the number of currently active alerts as the state of t
 The sensor that is created is used in my "NWS Alerts" package: https://github.com/finity69x2/nws_alerts/blob/master/packages/nws_alerts_package.yaml
 
 You can also display the generated alerts in your frontend. For example usage see: https://github.com/finity69x2/nws_alerts/blob/master/lovelace/alerts_tab
-
-(note: this frontend example uses a custom card but it's not necessary for it's use in the frontend. it's only an example and how I currently use it in my HA)
 
 ## Installation:
 
