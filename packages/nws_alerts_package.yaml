@@ -388,6 +388,7 @@ automation:
     
   - alias: NWS Alerts Announce Weather Alert
     id: nws_alerts_announce_weather_alert
+    initial_state: 'on'
     trigger:
       - platform: state
         entity_id: sensor.nws_alerts_test
