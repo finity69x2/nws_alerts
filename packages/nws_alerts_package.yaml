@@ -33,7 +33,7 @@ binary_sensor:
 ## this uses the hass_variable custom integration.
 ## you can install thru HACS or manually from https://github.com/Wibias/hass-variables
 ## This custom integration isn't needed for the NWS Alerts integration to function 
-## but I use it for my automations so that I can keep track f which alerts have been notified and/or announced
+## but I use it for my automations so that I can keep track of which alerts have been notified and/or announced
 
 variable:
   nws_alerts_event_ids:
@@ -129,7 +129,6 @@ automation:
           
   ########################  PERSISTENT NOTIFICATIONS  ###########################################
 
-  ## description: 
   ## This will send up to 3 persistent notifications for alerts. 
   ## If there are more than 3 alerts there will be a fourth notification to check the NWS for further information.
               
@@ -245,7 +244,6 @@ automation:
 
 ##########################  NOTIFICATIONS  ##########################################################################
   
-  ## description: 
   ## This will send up to 3 notifications for alerts. 
   ## If there are more than 3 alerts there will be a fouth notification to check the NWS for further information.
   
@@ -376,7 +374,7 @@ automation:
           
   ##############################  ANNOUNCEMENTS  ##############################################################
     
-## this where you will determine which alerts are announced instead of simply being sent to a notification.
+## this is where you will determine which alerts are announced instead of simply being sent to a notification.
 ## it will announce every new alert that matches the criteria in the "test_list" even if there are more than one of the same type of alert
 ## (i.e. if there are two tornado warnings issued at the same time then you will get two announcements in a row for a tornado warning).
 ## I only typically trigger announcements for dangerous weather (tornadoes & severe thunderstorms) but I've included others as examples.
@@ -384,7 +382,7 @@ automation:
 
 ## also I am using the Alexa Media Player custom integration to play the announcement. If you don't use that integration you may have to adjust the service call for your system.
 
-## lastly, I am calling tgwo different scripts for announcements - one for very dangedrous weather that will play throughtout the house including the bedrooms
+## lastly, I am calling two different scripts for announcements - one for very dangedrous weather (i.e. tornoados) that will play throughtout the house including the bedrooms
 ## and a different one for everything else that won't wake people up for, for example, a heat advisory.
 ## modify this to your desired requirements.
     
@@ -673,7 +671,7 @@ script:
           message: "{{ message }}"
           title: '{{ title }}'
 
-## you will need to modify the following two scripts for your systyem media players and if you use the provided example alert tone
+## you will need to modify the following two scripts for your system media players and if you use the provided example alert tone
 
   nws_alerts_announce_tornado_warning:
     alias: NWS Alerts Announce Tornado Warning
