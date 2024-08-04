@@ -1,6 +1,8 @@
 """ NWS Alerts """
 
+import hashlib
 import logging
+import uuid
 from datetime import timedelta
 
 import aiohttp
@@ -156,6 +158,7 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
                 data = await update_alerts(self.config, coords)
             except Exception as error:
                 raise UpdateFailed(error) from error
+            _LOGGER.debug("Data: %s", data)
             return data
 
     async def _get_tracker_gps(self):
@@ -231,18 +234,7 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
     """Query API for Alerts."""
 
     url = ""
-    values = {
-        "state": 0,
-        "event": None,
-        "event_id": None,
-        "message_type": None,
-        "event_status": None,
-        "event_severity": None,
-        "event_onset": None,
-        "event_expires": None,
-        "display_desc": None,
-        "spoken_desc": None,
-    }
+    alerts = {}
     headers = {"User-Agent": USER_AGENT, "Accept": "application/geo+json"}
     data = None
 
@@ -261,117 +253,42 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
                 _LOGGER.error("Problem updating NWS data: (%s) - %s", r.status, r.body)
 
     if data is not None:
-        events = []
-        headlines = []
-        event_id = ""
-        message_type = ""
-        event_status = ""
-        event_severity = ""
-        event_onset = ""
-        event_expires = ""
-        display_desc = ""
-        spoken_desc = ""
         features = data["features"]
+        alert_list = []
         for alert in features:
+
+            tmp_dict = {}
+
+            # Generate stable Alert ID
+            id = await generate_id(alert["id"])
+
+            tmp_dict["Event"] =  alert["properties"]["event"]
+            tmp_dict["ID"] = id
+            tmp_dict["URL"] = alert["id"]
+
             event = alert["properties"]["event"]
             if "NWSheadline" in alert["properties"]["parameters"]:
-                headline = alert["properties"]["parameters"]["NWSheadline"][0]
+                tmp_dict["Headline"] = alert["properties"]["parameters"]["NWSheadline"][0]
             else:
-                headline = event
+                tmp_dict["Headline"] = event
+            
+            tmp_dict["Type"] = alert["properties"]["messageType"]
+            tmp_dict["Status"] = alert["properties"]["status"]
+            tmp_dict["Severity"] = alert["properties"]["severity"]
+            tmp_dict["Certainty"] = alert["properties"]["certainty"]
+            tmp_dict["Onset"] = alert["properties"]["onset"]
+            tmp_dict["Expires"] = alert["properties"]["expires"]
+            tmp_dict["Description"] = alert["properties"]["description"]
+            tmp_dict["Instruction"] = alert["properties"]["instruction"]
 
-            id = alert["id"]
-            type = alert["properties"]["messageType"]
-            status = alert["properties"]["status"]
-            description = alert["properties"]["description"]
-            instruction = alert["properties"]["instruction"]
-            severity = alert["properties"]["severity"]
-            certainty = alert["properties"]["certainty"]
-            onset = alert["properties"]["onset"]
-            expires = alert["properties"]["expires"]
+            alert_list.append(tmp_dict)
 
-            # if event in events:
-            #    continue
+        alerts["state"] = len(features)
+        alerts["alerts"] = alert_list
 
-            events.append(event)
-            headlines.append(headline)
+    return alerts
 
-            if display_desc != "":
-                display_desc += "\n\n-\n\n"
 
-            display_desc += (
-                "\n>\nHeadline: %s\nStatus: %s\nMessage Type: %s\nSeverity: %s\nCertainty: %s\nOnset: %s\nExpires: %s\nDescription: %s\nInstruction: %s"
-                % (
-                    headline,
-                    status,
-                    type,
-                    severity,
-                    certainty,
-                    onset,
-                    expires,
-                    description,
-                    instruction,
-                )
-            )
-
-            if event_id != "":
-                event_id += " - "
-
-            event_id += id
-
-            if message_type != "":
-                message_type += " - "
-
-            message_type += type
-
-            if event_status != "":
-                event_status += " - "
-
-            event_status += status
-
-            if event_severity != "":
-                event_severity += " - "
-
-            event_severity += severity
-
-            if event_onset != "":
-                event_onset += " - "
-
-            event_onset += onset
-
-            if event_expires != "":
-                event_expires += " - "
-
-            event_expires += expires
-
-        if headlines:
-            num_headlines = len(headlines)
-            i = 0
-            for headline in headlines:
-                i += 1
-                if spoken_desc != "":
-                    if i == num_headlines:
-                        spoken_desc += "\n\n-\n\n"
-                    else:
-                        spoken_desc += "\n\n-\n\n"
-
-                spoken_desc += headline
-
-        if len(events) > 0:
-            event_str = ""
-            for item in events:
-                if event_str != "":
-                    event_str += " - "
-                event_str += item
-
-            values["state"] = len(events)
-            values["event"] = event_str
-            values["event_id"] = event_id
-            values["message_type"] = message_type
-            values["event_status"] = event_status
-            values["event_severity"] = event_severity
-            values["event_onset"] = event_onset
-            values["event_expires"] = event_expires
-            values["display_desc"] = display_desc
-            values["spoken_desc"] = spoken_desc
-
-    return values
+async def generate_id(val: str) -> str:
+    hex_string = hashlib.md5(val.encode("UTF-8")).hexdigest()
+    return str(uuid.UUID(hex=hex_string))

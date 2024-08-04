@@ -1,6 +1,6 @@
 # Alerts from the US National Weather Service  (nws_alerts)
 
-## Possible Breaking Change
+## Breaking Change for V5.0
 
 Modified the format of the list of event_id in the attributes
 
@@ -24,36 +24,10 @@ Clone the Repository and copy the "nws_alerts" directory to your "custom_compone
 
 You can find your Zone or County ID by going to https://alerts.weather.gov/, scroll down to your state and click on the “zone list” and/or "county list" then look for the entry for your county.
 
-There are two ways to configure this integration.
+The intergration is configured via the "Configuration->Integrations" section of the Home Assistant UI.
 
-Manually via an entry in your configuration.yaml file:
+Look for the integration labeled "NWS Alerts" and follow the on-screen prompts.
 
-To create a sensor instance add the following configuration to your sensor definitions using the zone_id found above:
+Using the configuration example above by default the sensor will then be called "sensor.nws_alerts".
 
-```
-- platform: nws_alerts
-  zone_id: 'PAC049'
-```
-
-or enter comma separated values for multiple zones:
-
-```
-- platform: nws_alerts
-  zone_id: 'PAC049,WVC031'
-```
-
-After you restart Home Assistant then you should have a new sensor called "sensor.nws_alerts" in your system.
-
-You can overide the sensor default name ("sensor.nws_alerts") to one of your choosing by setting the "name:" option:
-
-```
-- platform: nws_alerts
-  zone_id: 'INZ009,INC033'
-  name: My NWS Alerts Sensor
-```
-
-Using the configuration example above the sensor will then be called "sensor.my_nws_alerts_sensor"
-
-Or you can configure the integration via the "Configuration->Integrations" section of the Home Assistant UI.
-
-Look for the integration labeled "NWS Alerts"
+If desired you can modify the sensor name via the UI in the initial configuration or later in the entity configuration dialogue box.

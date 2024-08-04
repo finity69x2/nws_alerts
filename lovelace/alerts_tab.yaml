@@ -1,24 +1,10 @@
-## The following custom plugins are used in the example below:
-## custom:vertical-layout: https://github.com/thomasloven/lovelace-layout-card
-## custom:stack-in-card: https://github.com/ofekashery/vertical-stack-in-card
-## custom:entity-attributes-card: https://github.com/custom-cards/entity-attributes-card
-
-## all of them can be inbstalled via HACS
-
+#########################################################################################
 title: "Alerts"
 visible: false
-type: custom:vertical-layout
-layout:
-  max_cols: 4
+panel: true
 cards:
-
-  - type: custom:stack-in-card
+  - type: vertical-stack
     cards:
-      - type: entities
-        title: Severe Weather Alerts
-        show_header_toggle: false
-        entities:
-          - sensor.nws_alerts
       - type: conditional
         conditions:
           - entity: sensor.nws_alerts
@@ -30,33 +16,8 @@ cards:
             {% for alert_num in range(num_alerts) %}
             ---
             # NWS Alert {{ alert_num + 1 }}
-              {% if state_attr('sensor.nws_alerts', 'title').split(' - ')[alert_num] is defined %}
-              ## {{ states.sensor.nws_alerts.attributes.title.split(' - ')[alert_num] }}
-                {{ state_attr('sensor.nws_alerts', 'display_desc').split('\n\n-\n\n')[alert_num] }}
-              {% else %}
-              none
-              {% endif %}
+            
+            ## {{ state_attr('sensor.nws_alerts', 'Alerts')[alert_num].Event }}
+            
+              {{ state_attr('sensor.nws_alerts', 'Alerts')[alert_num].Description }}
             {% endfor %}
-
-      - type: entities
-        title: NWS Alerts History
-        show_header_toggle: false
-        state_color: true
-        entities:
-          - sensor.nws_alerts_event_ids
-          - type: custom:entity-attributes-card
-            heading_name: Name
-            heading_state: State
-            entity: sensor.nws_alerts_event_ids
-            filter:
-              include:
-                - sensor.nws_alerts_event_ids.history_1
-                - sensor.nws_alerts_event_ids.history_2
-                - sensor.nws_alerts_event_ids.history_3
-                - sensor.nws_alerts_event_ids.history_4
-                - sensor.nws_alerts_event_ids.history_5
-                - sensor.nws_alerts_event_ids.history_6
-                - sensor.nws_alerts_event_ids.history_7
-                - sensor.nws_alerts_event_ids.history_8
-                - sensor.nws_alerts_event_ids.history_9
-                - sensor.nws_alerts_event_ids.history_10          
