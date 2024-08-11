@@ -4,9 +4,15 @@
 
 This is a pretty much complete rewrite of the integration to better organize the data for the alerts. All of the data provided by the older versions is still included but it's laid out very differently and as such none of the associated automations package or dashboard examples will continue to function as there currently are.
 
-I have done extensive testing to ensure that the new updated package examplews work as desired but of course I caouldn't test every situation.
+There are newly updated code examples in this repo "packages" and "dashboard" folders. I have done extensive testing to ensure that the new updated package examples work as desired but of course I couldn't test every situation.
 
-<b>Use at your own risk!</b>
+For further support and actual attribute examples please go to the "official" integration thread on the HA forum. The information about the update starts at post #545:
+
+https://community.home-assistant.io/t/severe-weather-alerts-from-the-us-national-weather-service/71853/545
+
+<s><b>Use at your own risk!</b></s>
+
+That was probably overly fatalistic. I just wanted people to understand that there could be unforseen bugs in the integratoin or more likely the code examples and to be aware of that.
 
 ## Description:
 
