@@ -391,14 +391,14 @@ automation:
     initial_state: 'on'
     trigger:
       - platform: state
-        entity_id: sensor.nws_alerts_test
+        entity_id: sensor.nws_alerts
     condition:
       - "{{states('sensor.nws_alerts') | int > 0}}"
       - condition: template
         value_template: >
           {% set ns = namespace(ids=[]) %}
           {% for x in range(0,states('sensor.nws_alerts')|int ) %}
-            {% set id = state_attr('sensor.nws_alerts_test', 'Alerts')[x].ID %}
+            {% set id = state_attr('sensor.nws_alerts', 'Alerts')[x].ID %}
             {% set ns.ids = ns.ids + [id] %}
           {% endfor -%}
           {% set current_id_list = set(ns.ids) %}
