@@ -58,7 +58,7 @@ Click on "+ Add Integration" buuton in the bottom right corner.
 
 Search for "NWS Alerts" in the list of integrations and follow the UI prompts to configure the sensor.
 
-You can find your Zone or County ID by going to https://alerts.weather.gov/, scroll down to your state and click on the “zone list” and/or "county list" then look for the entry for your county.
+You can find your Zone or County ID by going to https://alerts.weather.gov/, click on "Land areas with zones", scroll down to your state, then click on either "public zones" or "county zones". Then scroll to find your location (county) from the list(s). The desired zone or county code (depending on which link you used) will be listed above the location
 
 There are a few configuration method options to select from. 
 
