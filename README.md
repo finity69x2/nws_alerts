@@ -12,7 +12,7 @@ https://community.home-assistant.io/t/severe-weather-alerts-from-the-us-national
 
 <s><b>Use at your own risk!</b></s>
 
-That was probably overly fatalistic. I just wanted people to understand that there could be unforseen bugs in the integratoin or more likely the code examples and to be aware of that.
+That was probably overly fatalistic. I just wanted people to understand that there could be unforseen bugs in the integration or more likely the code examples and to be aware of that.
 
 ## Description:
 
@@ -69,3 +69,11 @@ https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.md
 If you select the "Using a device tracker" option under the "GPS Location" option then HA will use the GPS coordinates provided by that tracker to query for alerts so you should follow the same recommendations for using GPS coordinates when using that option.
 
 After you restart Home Assistant then you should have a new sensor (by default) called "sensor.nws_alerts" in your system.
+
+## Testing
+
+If there are currently no active alerts for your location but you want to do testing you can use any manually configured location ID that has an active alert.
+
+To find those locations go to: https://api.weather.gov/alerts/active/count you will see a list of all areas with active alerts and how many alerts are active for each area.
+
+You can use the given code(s) in your config to get the alerts for the selected zones in the integration.
