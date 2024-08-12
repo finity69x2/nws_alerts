@@ -44,7 +44,7 @@ Click the "+ Explore & Download Repositories" button in the bottom right corner.
 
 In the window that opens search for "NWS Alerts".
 
-In the window that opens when you select it click om "Install This Repository in HACS"
+In the window that opens when you select it click on "Install This Repository in HACS"
 
 After installing the integration you can then configure it using the instructions in the following section.
   
