@@ -268,7 +268,7 @@ automation:
                   entity_id: script.notification_pushover_message
                   data:
                     variables:
-                      target: Jeffs_phone
+                      target: my_phone
                       message: >
                         "NWS: {{ state_attr('sensor.nws_alerts', 'Alerts')[0].Event }}"
                       sound: echo
@@ -282,7 +282,7 @@ automation:
                   entity_id: script.notification_pushover_message
                   data:
                     variables:
-                      target: Jeffs_phone
+                      target: my_phone
                       message: >
                         "NWS: {{ state_attr('sensor.nws_alerts', 'Alerts')[1].Event }}"
                       sound: echo
@@ -296,7 +296,7 @@ automation:
                   entity_id: script.notification_pushover_message
                   data:
                     variables:
-                      target: Jeffs_phone
+                      target: my_phone
                       message: >
                         "NWS: {{ state_attr('sensor.nws_alerts', 'Alerts')[2].Event }}"
                       sound: echo
@@ -311,7 +311,7 @@ automation:
                   entity_id: script.notification_pushover_message
                   data:
                     variables:
-                      target: Jeffs_phone
+                      target: my_phone
                       message: >
                         "NWS: {{ state_attr('sensor.nws_alerts', 'Alerts')[0].Event }}"
                       sound: echo
@@ -325,7 +325,7 @@ automation:
                   entity_id: script.notification_pushover_message
                   data:
                     variables:
-                      target: Jeffs_phone
+                      target: my_phone
                       message: >
                         "NWS: {{ state_attr('sensor.nws_alerts', 'Alerts')[1].Event }}"
                       sound: echo
@@ -340,7 +340,7 @@ automation:
                   entity_id: script.notification_pushover_message
                   data:
                     variables:
-                      target: Jeffs_phone
+                      target: my_phone
                       message: >
                         "NWS: {{ state_attr('sensor.nws_alerts', 'Alerts')[0].Event }}"
                       sound: echo
@@ -367,7 +367,7 @@ automation:
         entity_id: script.notification_pushover_message
         data:
           variables:
-            target: Jeffs_phone
+            target: my_phone
             message: "NWS: More Than 3 New Alerts! Check your local National Weather Service for all current alerts!"
             sound: echo
 
