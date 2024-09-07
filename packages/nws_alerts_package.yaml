@@ -167,7 +167,7 @@ script:
       - delay: '00:00:15'
       - service: notify.alexa_media
         data:
-          message: "<audio src='https://h7a3u8r0lt405rwrar1rcgi8ep9a1gez.ui.nabu.casa/local/mp3/nws_alert_tone.mp3' />"
+          message: "<audio src='https://your_remote_access.ui.nabu.casa/local/mp3/nws_alert_tone.mp3' />"
           target: 
             - media_player.basement_dot
             - media_player.bedroom_2_dot
@@ -219,7 +219,7 @@ script:
       - delay: '00:00:15'
       - service: notify.alexa_media
         data:
-          message: "<audio src='https://h7a3u8r0lt405rwrar1rcgi8ep9a1gez.ui.nabu.casa/local/mp3/nws_alert_tone.mp3' />"
+          message: "<audio src='https://your_remote_access.ui.nabu.casa/local/mp3/nws_alert_tone.mp3' />"
           target: 
             - media_player.basement_dot
             - media_player.computer_room_dot
