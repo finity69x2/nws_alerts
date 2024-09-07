@@ -136,6 +136,17 @@ automation:
 #################################  SCRIPT  ###################################
 
 script:
+  nws_alerts_persistent_notification:
+    alias: NWS Alerts Persistent Notifications
+    sequence:
+      - service: >
+          {% if states('sensor.nws_alerts') != '0' %}
+            persistent_notification.create
+          {% endif %}
+        data:
+          notification_id: "{{ notification_id }}"
+          message: "{{ message }}"
+          title: '{{ title }}'
 
   nws_alerts_announce_tornado_warning:
     alias: NWS Alerts Announce Tornado Warning
