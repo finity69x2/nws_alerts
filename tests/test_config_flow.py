@@ -1,13 +1,15 @@
 """Test for config flow"""
-from tests.const import CONFIG_DATA
+
 from unittest.mock import patch
+
 import pytest
 from homeassistant import config_entries, data_entry_flow, setup
 from homeassistant.const import CONF_NAME
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 from homeassistant.data_entry_flow import FlowResult, FlowResultType
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.nws_alerts.const import CONF_ZONE_ID, DOMAIN
+from tests.const import CONFIG_DATA
 
 pytestmark = pytest.mark.asyncio
 

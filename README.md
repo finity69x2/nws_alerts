@@ -4,7 +4,7 @@
 
 This is a pretty much complete rewrite of the integration to better organize the data for the alerts. All of the data provided by the older versions is still included but it's laid out very differently and as such none of the associated automations package or dashboard examples will continue to function as there currently are.
 
-There are newly updated code examples in this repo "packages" and "dashboard" folders. I have done extensive testing to ensure that the new updated package examples work as desired but of course I couldn't test every situation.
+There are newly updated code examples in this repo "packages" and "lovelace" folders. I have done extensive testing to ensure that the new updated package examples work as desired but of course I couldn't test every situation.
 
 For further support and actual attribute examples please go to the "official" integration thread on the HA forum. The information about the update starts at post #545:
 
@@ -26,7 +26,7 @@ The integration presents the number of currently active alerts as the state of t
 
 The sensor that is created is used in my "NWS Alerts" package: https://github.com/finity69x2/nws_alerts/blob/master/packages/nws_alerts_package.yaml
 
-You can also display the generated alerts in your frontend. For example usage see: https://github.com/finity69x2/nws_alerts/blob/master/lovelace/alerts_tab
+You can also display the generated alerts in your frontend. For example usage see: https://github.com/finity69x2/nws_alerts/blob/master/lovelace/alerts_tab.yaml
 
 ## Installation:
 

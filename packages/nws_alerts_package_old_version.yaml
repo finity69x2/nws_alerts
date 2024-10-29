@@ -801,5 +801,3 @@ script:
           data:
             type: tts
           message: "{{ message }}"
-
-

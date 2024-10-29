@@ -195,6 +195,8 @@ async def async_get_state(config, coords) -> dict:
         "event_sent": None,
         "event_onset": None,
         "event_expires": None,
+        "event_ends": None,
+        "areas_affected": None,
         "display_desc": None,
         "spoken_desc": None,
     }
@@ -280,6 +282,8 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
             tmp_dict["Sent"] = alert["properties"]["sent"]
             tmp_dict["Onset"] = alert["properties"]["onset"]
             tmp_dict["Expires"] = alert["properties"]["expires"]
+            tmp_dict["Ends"] = alert["properties"]["ends"]
+            tmp_dict["AreasAffected"] = alert["properties"]["areaDesc"]
             tmp_dict["Description"] = alert["properties"]["description"]
             tmp_dict["Instruction"] = alert["properties"]["instruction"]
 
