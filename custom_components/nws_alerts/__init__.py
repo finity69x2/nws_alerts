@@ -286,6 +286,7 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
             tmp_dict["Ends"] = alert["properties"]["ends"]
             tmp_dict["AreasAffected"] = alert["properties"]["areaDesc"]
             tmp_dict["Description"] = alert["properties"]["description"]
+            tmp_dict["Instruction"] = alert["properties"]["instruction"]
             tmp_dict["Category"] = alert["properties"]["category"]
             tmp_dict["Urgency"] = alert["properties"]["urgency"]
             tmp_dict["Response"] = alert["properties"]["response"]
