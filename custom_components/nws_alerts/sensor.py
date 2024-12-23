@@ -4,7 +4,7 @@ from typing import Final
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntityDescription
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_ATTRIBUTION
+from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceEntryType
 from homeassistant.helpers.entity import DeviceInfo
@@ -55,7 +55,7 @@ class NWSAlertSensor(CoordinatorEntity):
         self._key = sensor_description.key
 
         self._attr_icon = sensor_description.icon
-        self._attr_name = sensor_description.name
+        self._attr_name = f'{entry.data[CONF_NAME]} {sensor_description.name}'
         self._attr_device_class = sensor_description.device_class
 
     @property
