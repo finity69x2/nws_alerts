@@ -3,7 +3,7 @@
 import hashlib
 import logging
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import aiohttp
 from async_timeout import timeout
@@ -23,6 +23,7 @@ from .const import (
     CONF_TIMEOUT,
     CONF_TRACKER,
     CONF_ZONE_ID,
+    CONFIG_VERSION,
     COORDINATOR,
     DEFAULT_INTERVAL,
     DEFAULT_TIMEOUT,
@@ -124,11 +125,10 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         if CONF_TIMEOUT not in updated_config.keys():
             updated_config[CONF_TIMEOUT] = DEFAULT_TIMEOUT
 
-        if updated_config != config_entry.data:
-            hass.config_entries.async_update_entry(config_entry, data=updated_config)
+    if updated_config != config_entry.data:
+        hass.config_entries.async_update_entry(config_entry, data=updated_config)
 
-        config_entry.version = 2
-        _LOGGER.debug("Migration to version %s complete", config_entry.version)
+        _LOGGER.debug("Migration to version %s complete", CONFIG_VERSION)
 
     return True
 
@@ -157,7 +157,9 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
             try:
                 data = await update_alerts(self.config, coords)
             except AttributeError:
-                _LOGGER.debug("Error fetching most recent data from NWS Alerts API; will continue trying")
+                _LOGGER.debug(
+                    "Error fetching most recent data from NWS Alerts API; will continue trying"
+                )
                 data = "AttributeError"
             except Exception as error:
                 raise UpdateFailed(error) from error
@@ -268,16 +270,18 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
             # Generate stable Alert ID
             id = await generate_id(alert["id"])
 
-            tmp_dict["Event"] =  alert["properties"]["event"]
+            tmp_dict["Event"] = alert["properties"]["event"]
             tmp_dict["ID"] = id
             tmp_dict["URL"] = alert["id"]
 
             event = alert["properties"]["event"]
             if "NWSheadline" in alert["properties"]["parameters"]:
-                tmp_dict["Headline"] = alert["properties"]["parameters"]["NWSheadline"][0]
+                tmp_dict["Headline"] = alert["properties"]["parameters"]["NWSheadline"][
+                    0
+                ]
             else:
                 tmp_dict["Headline"] = event
-            
+
             tmp_dict["Type"] = alert["properties"]["messageType"]
             tmp_dict["Status"] = alert["properties"]["status"]
             tmp_dict["Severity"] = alert["properties"]["severity"]
@@ -294,6 +298,7 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
 
         alerts["state"] = len(features)
         alerts["alerts"] = alert_list
+        alerts["last_updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     return alerts
 

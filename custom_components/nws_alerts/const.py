@@ -26,3 +26,4 @@ PLATFORM = "sensor"
 ATTRIBUTION = "Data provided by Weather.gov"
 COORDINATOR = "coordinator"
 PLATFORMS = [Platform.SENSOR]
+CONFIG_VERSION = 2  # Config flow version
