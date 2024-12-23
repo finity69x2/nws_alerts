@@ -57,13 +57,7 @@ class NWSAlertSensor(CoordinatorEntity):
         self._attr_icon = sensor_description.icon
         self._attr_name = f'{entry.data[CONF_NAME]} {sensor_description.name}'
         self._attr_device_class = sensor_description.device_class
-
-    @property
-    def unique_id(self):
-        """
-        Return a unique, Home Assistant friendly identifier for this entity.
-        """
-        return f"{slugify(self._attr_name)}_{self._config.entry_id}"
+        self._attr_unique_id = f"{slugify(self._attr_name)}_{entry.entry_id}"
 
     @property
     def state(self) -> int | None:
