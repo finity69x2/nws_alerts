@@ -1,11 +1,10 @@
 """Fixtures for tests"""
 
-import pytest
-from aioresponses import aioresponses
-
+import os
 from unittest.mock import patch
 
-import os
+import pytest
+from aioresponses import aioresponses
 
 pytest_plugins = "pytest_homeassistant_custom_component"
 

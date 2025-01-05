@@ -20,6 +20,7 @@ from .const import (
     CONF_TIMEOUT,
     CONF_TRACKER,
     CONF_ZONE_ID,
+    CONFIG_VERSION,
     DEFAULT_INTERVAL,
     DEFAULT_NAME,
     DEFAULT_TIMEOUT,
@@ -150,7 +151,7 @@ async def _get_zone_list(self) -> list | None:
 class NWSAlertsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for NWS Alerts."""
 
-    VERSION = 2
+    VERSION = CONFIG_VERSION
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
     def __init__(self):
