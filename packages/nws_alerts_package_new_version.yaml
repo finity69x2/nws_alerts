@@ -28,7 +28,7 @@ binary_sensor:
       
 
 ########################  AUTOMATION  ###########################################
-```
+
 automation:
 
   - alias: NWS - Mobile App Notifications
