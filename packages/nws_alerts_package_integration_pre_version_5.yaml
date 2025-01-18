@@ -2,6 +2,8 @@
 #
 #   This is the package for NWS ALERTS USING THE CUSTOM COMPONENT
 #
+#   This is for use with the default sensor entity_id created with the integration version 4 or earlier 
+#
 #################################################################################
 
 ## For testing the API
