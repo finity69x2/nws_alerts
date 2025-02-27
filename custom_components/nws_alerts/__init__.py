@@ -275,12 +275,33 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
             tmp_dict["URL"] = alert["id"]
 
             event = alert["properties"]["event"]
+
+            # Use NWSheadline if it exists otherwise use the name of the event
+            #
+            # NWSheadline:
+            #   "FLOOD WARNING NOW IN EFFECT UNTIL LATE TOMORROW EVENING"
+            #
+            # event:
+            #   "Flood Warning"
+            #
             if "NWSheadline" in alert["properties"]["parameters"]:
                 tmp_dict["Headline"] = alert["properties"]["parameters"]["NWSheadline"][
                     0
                 ]
             else:
                 tmp_dict["Headline"] = event
+
+            # Set HeadlineAlt to the human-readable headline key in the alert
+            # if possible, otherwise use the value of tmp_dict["Headline"]
+            #
+            # headline:
+            #   "Flood Warning issued February 26 at 3:07PM PST until
+            #   February 27 at 11:12PM PST by NWS Portland OR"
+            #
+            if "headline" in alert["properties"]:
+                tmp_dict["HeadlineAlt"] = alert["properties"]["headline"]
+            else:
+                tmp_dict["HeadlineAlt"] = tmp_dict["Headline"]
 
             tmp_dict["Type"] = alert["properties"]["messageType"]
             tmp_dict["Status"] = alert["properties"]["status"]
