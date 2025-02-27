@@ -1,23 +1,22 @@
-#########################################################################################
-title: "Alerts"
-visible: false
+# Example of using a vertical-stack of cards to display NWS alerts
+# on the condition that sensor.nws_alerts_alerts is not "0"
+#
+type: vertical-stack
 panel: true
 cards:
-  - type: vertical-stack
-    cards:
-      - type: conditional
-        conditions:
-          - entity: sensor.nws_alerts
-            state_not: "0"
-        card:
-          type: markdown
-          content: |
-            {% set num_alerts = states('sensor.nws_alerts') | int  %}
-            {% for alert_num in range(num_alerts) %}
-            ---
-            # NWS Alert {{ alert_num + 1 }}
-            
-            ## {{ state_attr('sensor.nws_alerts', 'Alerts')[alert_num].Event }}
-            
-              {{ state_attr('sensor.nws_alerts', 'Alerts')[alert_num].Description }}
-            {% endfor %}
+  - type: conditional
+    conditions:
+      - entity: sensor.nws_alerts_alerts
+        state_not: "0"
+    card:
+      type: markdown
+      content: >
+        {% set num_alerts = states('sensor.nws_alerts_alerts') | int  %}
+        {% for alert_num in range(num_alerts) %}
+        # NWS Alert {{ alert_num + 1 }}
+
+        ## {{ state_attr('sensor.nws_alerts_alerts', 'Alerts')[alert_num].Event }}
+
+          {{ state_attr('sensor.nws_alerts_alerts', 'Alerts')[alert_num].Description }}
+        ---
+        {% endfor %}
