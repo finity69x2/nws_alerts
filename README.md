@@ -24,9 +24,9 @@ You can configure the integration to use your NWS Zone, your precise location vi
 
 The integration presents the number of currently active alerts as the state of the sensor and lists many alert details as a list in the attributes of the sensor.
 
-The sensor that is created is used in my "NWS Alerts" package: https://github.com/finity69x2/nws_alerts/blob/master/packages/nws_alerts_package.yaml
+The sensor that is created is used in my ["NWS Alerts" package](https://github.com/finity69x2/nws_alerts/tree/a31ed70c568f942bb09306ee3580d25ba9811d5a/packages). Use the package appropriate for your version.
 
-You can also display the generated alerts in your frontend. For example usage see: https://github.com/finity69x2/nws_alerts/blob/master/lovelace/alerts_tab.yaml
+You can also display the generated alerts in your frontend. For example usage see [here](https://github.com/finity69x2/nws_alerts/blob/a31ed70c568f942bb09306ee3580d25ba9811d5a/lovelace/alerts_tab.yaml)
 
 ## Installation:
 
