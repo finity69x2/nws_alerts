@@ -288,6 +288,10 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
             else:
                 tmp_dict["Headline"] = event
 
+            # Valid Time Event Coding (https://www.weather.gov/bmx/vtec)
+            if "VTEC" in alert["properties"]["parameters"]:
+                tmp_dict["VTEC"] = alert["properties"]["parameters"]["VTEC"][0]
+
             tmp_dict["Type"] = alert["properties"]["messageType"]
             tmp_dict["Status"] = alert["properties"]["status"]
             tmp_dict["Severity"] = alert["properties"]["severity"]
@@ -299,6 +303,11 @@ async def async_get_alerts(zone_id: str = "", gps_loc: str = "") -> dict:
             tmp_dict["AreasAffected"] = alert["properties"]["areaDesc"]
             tmp_dict["Description"] = alert["properties"]["description"]
             tmp_dict["Instruction"] = alert["properties"]["instruction"]
+
+            # eventCode.SAME and eventCode.NationalWeatherService are always included
+            # code list: https://vlab.noaa.gov/web/nws-common-alerting-protocol/cap-documentation#_eventcode_inclusion-16
+            tmp_dict["SAMEEventCode"] = alert["properties"]["eventCode"]["SAME"][0]
+            tmp_dict["NWSEventCode"] = alert["properties"]["eventCode"]["NationalWeatherService"][0]
 
             alert_list.append(tmp_dict)
 
