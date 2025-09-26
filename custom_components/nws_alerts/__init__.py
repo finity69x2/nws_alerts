@@ -1,4 +1,4 @@
-""" NWS Alerts """
+"""NWS Alerts"""
 
 import hashlib
 import logging
@@ -146,7 +146,13 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
 
         _LOGGER.debug("Data will be update every %s", self.interval)
 
-        super().__init__(hass, _LOGGER, name=self.name, update_interval=self.interval)
+        super().__init__(
+            hass,
+            _LOGGER,
+            config_entry=config,
+            name=self.name,
+            update_interval=self.interval,
+        )
 
     async def _async_update_data(self):
         """Fetch data"""

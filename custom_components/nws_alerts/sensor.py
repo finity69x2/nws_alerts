@@ -55,7 +55,7 @@ class NWSAlertSensor(CoordinatorEntity):
         self._key = sensor_description.key
 
         self._attr_icon = sensor_description.icon
-        self._attr_name = f'{entry.data[CONF_NAME]} {sensor_description.name}'
+        self._attr_name = f"{entry.data[CONF_NAME]} {sensor_description.name}"
         self._attr_device_class = sensor_description.device_class
         self._attr_unique_id = f"{slugify(self._attr_name)}_{entry.entry_id}"
 
