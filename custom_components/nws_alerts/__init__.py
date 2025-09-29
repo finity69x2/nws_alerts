@@ -68,12 +68,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     config_entry.add_update_listener(update_listener)
 
     # Setup the data coordinator
-    coordinator = AlertsDataUpdateCoordinator(
-        hass,
-        config_entry.data,
-        config_entry.data.get(CONF_TIMEOUT),
-        config_entry.data.get(CONF_INTERVAL),
-    )
+    coordinator = AlertsDataUpdateCoordinator(hass, config_entry)
 
     # Fetch initial data so we have data when entities subscribe
     await coordinator.async_refresh()
@@ -136,12 +131,13 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching NWS Alert data."""
 
-    def __init__(self, hass, config, the_timeout: int, interval: int):
+    def __init__(self, hass, config_entry: ConfigEntry):
         """Initialize."""
-        self.interval = timedelta(minutes=interval)
-        self.name = config[CONF_NAME]
-        self.timeout = the_timeout
-        self.config = config
+
+        self.interval = timedelta(minutes=config_entry.data.get(CONF_INTERVAL))
+        self.name = config_entry.data[CONF_NAME]
+        self.timeout = config_entry.data.get(CONF_TIMEOUT)
+        self.config = config_entry.data
         self.hass = hass
 
         _LOGGER.debug("Data will be update every %s", self.interval)
@@ -149,7 +145,7 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
         super().__init__(
             hass,
             _LOGGER,
-            config_entry=config,
+            config_entry=config_entry,
             name=self.name,
             update_interval=self.interval,
         )
