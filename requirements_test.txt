@@ -1,6 +1,12 @@
-black
-isort
-pytest
-pytest-cov
 pytest-homeassistant-custom-component
+black
+flake8
+mypy
+pydocstyle
+isort
+pylint
+tox
+pytest
 aioresponses
+ruff
+types-PyYAML

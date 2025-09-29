@@ -1,11 +1,12 @@
+"""nws_alert sensors."""
+
 import logging
-import uuid
 from typing import Final
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_ATTRIBUTION, CONF_NAME
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceEntryType
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -34,7 +35,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Setup the sensor platform."""
+    """Sensor platform setup."""
     sensors = [NWSAlertSensor(hass, entry, sensor) for sensor in SENSOR_TYPES.values()]
     async_add_entities(sensors, True)
 
@@ -64,7 +65,7 @@ class NWSAlertSensor(CoordinatorEntity):
         """Return the state of the sensor."""
         if self.coordinator.data is None:
             return None
-        elif self._key in self.coordinator.data.keys():
+        if self._key in self.coordinator.data:
             return self.coordinator.data[self._key]
         return None
 
@@ -89,9 +90,3 @@ class NWSAlertSensor(CoordinatorEntity):
             manufacturer="NWS",
             name="NWS Alerts",
         )
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        if self.coordinator.data != "AttributeError":
-            self.async_write_ha_state()

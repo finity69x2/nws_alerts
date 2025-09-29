@@ -1,0 +1,1 @@
+"""nws_alerts tests."""

@@ -1,3 +1,5 @@
+"""Consts for nws_alerts."""
+
 from homeassistant.const import Platform
 
 # API
