@@ -45,7 +45,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
     # Strip spaces from manually entered GPS locations
     if CONF_GPS_LOC in updated_config:
-        updated_config[CONF_GPS_LOC].replace(" ", "")
+        updated_config[CONF_GPS_LOC] = updated_config[CONF_GPS_LOC].replace(" ", "")
 
     if updated_config != config_entry.data:
         hass.config_entries.async_update_entry(config_entry, data=updated_config)
