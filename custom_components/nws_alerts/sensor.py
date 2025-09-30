@@ -12,7 +12,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import slugify
 
-from .const import ATTRIBUTION, COORDINATOR, DOMAIN
+from .const import ATTRIBUTION, CONF_GPS_LOC, CONF_TRACKER, CONF_ZONE_ID, COORDINATOR, DOMAIN
 
 SENSOR_TYPES: Final[dict[str, SensorEntityDescription]] = {
     "state": SensorEntityDescription(key="state", name="Alerts", icon="mdi:alert"),
@@ -78,9 +78,8 @@ class NWSAlertSensor(CoordinatorEntity):
             attrs["Alerts"] = self.coordinator.data["alerts"]
 
         # Add configuration information for diagnostics
-        from .const import CONF_ZONE_ID, CONF_GPS_LOC, CONF_TRACKER
         config_data = self._config.data
-        
+
         if CONF_ZONE_ID in config_data:
             attrs["configuration_type"] = "Zone ID"
             attrs["zone_id"] = config_data[CONF_ZONE_ID]
@@ -97,30 +96,37 @@ class NWSAlertSensor(CoordinatorEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device registry information."""
-        from .const import CONF_ZONE_ID, CONF_GPS_LOC, CONF_TRACKER
         config_data = self._config.data
-        
+
         # Create a more descriptive device name based on configuration
         if CONF_ZONE_ID in config_data:
             zone_id = config_data[CONF_ZONE_ID]
-            device_name = f"NWS Alerts (Zone: {zone_id[:20]}...)" if len(zone_id) > 20 else f"NWS Alerts (Zone: {zone_id})"
+            device_name = (
+                f"NWS Alerts (Zone: {zone_id[:20]}...)"
+                if len(zone_id) > 20
+                else f"NWS Alerts (Zone: {zone_id})"
+            )
         elif CONF_GPS_LOC in config_data:
             # Truncate GPS to 4 decimal places for readability (~11 meter precision)
             gps = config_data[CONF_GPS_LOC]
             try:
-                parts = gps.replace(" ", "").split(',')
+                parts = gps.replace(" ", "").split(",")
                 lat = f"{float(parts[0]):.4f}"
                 lon = f"{float(parts[1]):.4f}"
                 device_name = f"NWS Alerts (GPS: {lat},{lon})"
             except (ValueError, IndexError):
                 # Fallback if parsing fails
-                device_name = f"NWS Alerts (GPS: {gps[:25]}...)" if len(gps) > 25 else f"NWS Alerts (GPS: {gps})"
+                device_name = (
+                    f"NWS Alerts (GPS: {gps[:25]}...)"
+                    if len(gps) > 25
+                    else f"NWS Alerts (GPS: {gps})"
+                )
         elif CONF_TRACKER in config_data:
-            tracker_name = config_data[CONF_TRACKER].split('.')[-1]  # Get entity name part
+            tracker_name = config_data[CONF_TRACKER].split(".")[-1]  # Get entity name part
             device_name = f"NWS Alerts (Tracker: {tracker_name})"
         else:
             device_name = "NWS Alerts"
-        
+
         return DeviceInfo(
             entry_type=DeviceEntryType.SERVICE,
             identifiers={(DOMAIN, self._config.entry_id)},

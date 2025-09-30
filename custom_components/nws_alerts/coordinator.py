@@ -55,15 +55,9 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
             try:
                 data = await self.update_alerts(coords)
             except AttributeError as error:
-                _LOGGER.warning(
-                    "AttributeError fetching NWS Alerts data: %s. Will retry.", error
-                )
+                _LOGGER.warning("AttributeError fetching NWS Alerts data: %s. Will retry.", error)
                 # Return valid structure instead of None
-                return {
-                    "state": 0,
-                    "alerts": [],
-                    "last_updated": datetime.now().isoformat()
-                }
+                return {"state": 0, "alerts": [], "last_updated": datetime.now().isoformat()}
             except Exception as error:
                 raise UpdateFailed(error) from error
             _LOGGER.debug("Data: %s", data)
@@ -77,9 +71,7 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
             # Check that latitude and longitude actually exist
             if "latitude" in entity.attributes and "longitude" in entity.attributes:
                 return f"{entity.attributes['latitude']},{entity.attributes['longitude']}"
-            _LOGGER.warning(
-                "Tracker %s found but missing latitude/longitude attributes", tracker
-            )
+            _LOGGER.warning("Tracker %s found but missing latitude/longitude attributes", tracker)
         return None
 
     async def update_alerts(self, coords) -> dict:
@@ -95,12 +87,7 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
 
         zone_id = ""
         gps_loc = ""
-        values = {
-            "state": 0,
-            "alerts": [],
-            "last_updated": datetime.now().isoformat()
-        }
-        headers = {"User-Agent": USER_AGENT, "Accept": "application/ld+json"}
+        values = {"state": 0, "alerts": [], "last_updated": datetime.now().isoformat()}
 
         if CONF_ZONE_ID in self._config.data:
             zone_id = self._config.data[CONF_ZONE_ID]
@@ -115,7 +102,7 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
             else:
                 _LOGGER.warning("Tracker configured but no GPS coordinates available")
                 return values
-            
+
             _LOGGER.debug("Fetching alerts for GPS location: %s", gps_loc)
             values = await self.async_get_alerts(gps_loc=gps_loc)
 
@@ -128,7 +115,7 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
         alerts: dict[str, Any] = {
             "state": 0,
             "alerts": [],
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
         headers = {"User-Agent": USER_AGENT, "Accept": "application/geo+json"}
         data = None
