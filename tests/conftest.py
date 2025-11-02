@@ -1,10 +1,10 @@
-"""Fixtures for tests"""
+"""Fixtures for tests."""
 
-import os
+import pathlib
 from unittest.mock import patch
 
-import pytest
 from aioresponses import aioresponses
+import pytest
 
 pytest_plugins = "pytest_homeassistant_custom_component"
 
@@ -19,7 +19,7 @@ POINT_URL = "https://api.weather.gov/alerts/active?point=123,-456"
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations):
     """Enable custom integration tests."""
-    yield
+    return
 
 
 # This fixture is used to prevent HomeAssistant from attempting to create and dismiss persistent
@@ -28,8 +28,9 @@ def auto_enable_custom_integrations(enable_custom_integrations):
 @pytest.fixture(name="skip_notifications", autouse=True)
 def skip_notifications_fixture():
     """Skip notification calls."""
-    with patch("homeassistant.components.persistent_notification.async_create"), patch(
-        "homeassistant.components.persistent_notification.async_dismiss"
+    with (
+        patch("homeassistant.components.persistent_notification.async_create"),
+        patch("homeassistant.components.persistent_notification.async_dismiss"),
     ):
         yield
 
@@ -56,11 +57,20 @@ def mock_aioclient():
         yield m
 
 
-def load_fixture(filename):
+def get_fixture_path(filename: str, integration: str | None = None) -> pathlib.Path:
+    """Get path of fixture."""
+    if integration is None and "/" in filename and not filename.startswith("helpers/"):
+        integration, filename = filename.split("/", 1)
+
+    if integration is None:
+        return pathlib.Path(__file__).parent.joinpath("fixtures", filename)
+
+    return pathlib.Path(__file__).parent.joinpath("components", integration, "fixtures", filename)
+
+
+def load_fixture(filename: str, integration: str | None = None) -> str:
     """Load a fixture."""
-    path = os.path.join(os.path.dirname(__file__), "fixtures", filename)
-    with open(path, encoding="utf-8") as fptr:
-        return fptr.read()
+    return get_fixture_path(filename, integration).read_text(encoding="utf8")
 
 
 @pytest.fixture(name="mock_api")
@@ -84,4 +94,4 @@ def mock_api(mock_aioclient):
         body=load_fixture("count_reply.json"),
         repeat=True,
     )
-    yield mock_aioclient
+    return mock_aioclient

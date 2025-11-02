@@ -1,20 +1,20 @@
-"""Test NWS Alerts Sensors"""
+"""Test NWS Alerts Sensors."""
 
 import pytest
-from homeassistant.helpers import entity_registry as er
-from homeassistant.util import slugify
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.nws_alerts.const import DOMAIN
-from tests.const import CONFIG_DATA, CONFIG_DATA_2, CONFIG_DATA_BAD
+from homeassistant.helpers import entity_registry as er
+from tests.const import CONFIG_DATA
 
 pytestmark = pytest.mark.asyncio
 
-NWS_SENSOR = "sensor.alerts"
+NWS_SENSOR = "sensor.nws_alerts_alerts"
 NWS_SENSOR_2 = "sensor.nws_alerts_yaml"
 
 
 async def test_sensor(hass, mock_api):
+    """Test sensors."""
     entry = MockConfigEntry(
         domain=DOMAIN,
         title="NWS Alerts",
@@ -67,4 +67,4 @@ async def test_sensor(hass, mock_api):
     ]
     assert state.attributes["Alerts"][0]["ID"] == "7681487b-41c6-0308-1a00-3cade72982c1"
     entity_registry = er.async_get(hass)
-    entity = entity_registry.async_get(NWS_SENSOR)
+    assert entity_registry.async_get(NWS_SENSOR)

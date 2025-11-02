@@ -7,27 +7,64 @@ on:
     - cron: "0 7 1-28/7 * *"
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  validate:
+    runs-on: "ubuntu-latest"
+    name: Validate
+    steps:
+        - name: 📥 Checkout the repository
+          uses: actions/checkout@v4
+
+        - name: HACS validation
+          uses: "hacs/action@main"
+          with:
+            category: "integration"
+
+        - name: Hassfest validation
+          uses: "home-assistant/actions/hassfest@master"
+
+  tests:
+    runs-on: "ubuntu-latest"
+    name: Run tests
     strategy:
       matrix:
-        python-version: [3.8, 3.9]
+        python-version:
+          - "3.13"
 
     steps:
-      - uses: actions/checkout@v2
+      - name: 📥 Checkout the repository
+        uses: actions/checkout@v4
+      - name: 🛠️ Set up Python
+        uses: actions/setup-python@v5
+        with:
+          fetch-depth: 2      
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+      - name: 📦 Install requirements
         run: |
+          pip install tox tox-gh-actions          
+      - name: 🏃 Test with tox
+        run: tox
+      - name: 📤 Upload coverage to Codecov
+        uses: "actions/upload-artifact@v4"
+        with:
+          name: coverage-data
+          path: "coverage.xml"
 
-          python -m pip install --upgrade pip
-          pip install -r requirements_test.txt
-      - name: Generate coverage report
-        run: |
-          python -m pytest
-          pip install pytest-cov
-          pytest ./tests/ --cov=custom_components/nws_alerts/ --cov-report=xml
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+  coverage:
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+      - name: 📥 Checkout the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: 📥 Download coverage data
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-data
+      - name: 📤 Upload coverage report
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

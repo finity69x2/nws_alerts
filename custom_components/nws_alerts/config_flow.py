@@ -3,15 +3,16 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, List
+from typing import Any
 
 import aiohttp
 import voluptuous as vol
+
 from homeassistant import config_entries
 from homeassistant.components.device_tracker import DOMAIN as TRACKER_DOMAIN
+from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.data_entry_flow import FlowResult
 
 from .const import (
     API_ENDPOINT,
@@ -37,13 +38,13 @@ MENU_OPTIONS = ["zone", "gps"]
 MENU_GPS = ["gps_loc", "gps_tracker"]
 
 
-def _get_schema_zone(hass: Any, user_input: list, default_dict: list) -> Any:
-    """Gets a schema using the default_dict as a backup."""
+def _get_schema_zone(hass: Any, user_input: dict, default_dict: dict) -> Any:
+    """Get a schema using the default_dict as a backup."""
     if user_input is None:
         user_input = {}
 
     def _get_default(key):
-        """Gets default value for key."""
+        """Get default value for key."""
         return user_input.get(key, default_dict.get(key))
 
     return vol.Schema(
@@ -56,13 +57,13 @@ def _get_schema_zone(hass: Any, user_input: list, default_dict: list) -> Any:
     )
 
 
-def _get_schema_gps(hass: Any, user_input: list, default_dict: list) -> Any:
-    """Gets a schema using the default_dict as a backup."""
+def _get_schema_gps(hass: Any, user_input: dict, default_dict: dict) -> Any:
+    """Get a schema using the default_dict as a backup."""
     if user_input is None:
         user_input = {}
 
     def _get_default(key):
-        """Gets default value for key."""
+        """Get default value for key."""
         return user_input.get(key, default_dict.get(key))
 
     return vol.Schema(
@@ -75,20 +76,20 @@ def _get_schema_gps(hass: Any, user_input: list, default_dict: list) -> Any:
     )
 
 
-def _get_schema_tracker(hass: Any, user_input: list, default_dict: list) -> Any:
-    """Gets a schema using the default_dict as a backup."""
+def _get_schema_tracker(hass: Any, user_input: dict, default_dict: dict) -> Any:
+    """Get a schema using the default_dict as a backup."""
     if user_input is None:
         user_input = {}
 
-    def _get_default(key: str, fallback_default: Any = None) -> None:
-        """Gets default value for key."""
+    def _get_default(key: str, fallback_default: Any = None) -> str | None:
+        """Get default value for key."""
         return user_input.get(key, default_dict.get(key, fallback_default))
 
     return vol.Schema(
         {
-            vol.Required(
-                CONF_TRACKER, default=_get_default(CONF_TRACKER, "(none)")
-            ): vol.In(_get_entities(hass, TRACKER_DOMAIN)),
+            vol.Required(CONF_TRACKER, default=_get_default(CONF_TRACKER, "(none)")): vol.In(
+                _get_entities(hass, TRACKER_DOMAIN)
+            ),
             vol.Optional(CONF_NAME, default=_get_default(CONF_NAME)): str,
             vol.Optional(CONF_INTERVAL, default=_get_default(CONF_INTERVAL)): int,
             vol.Optional(CONF_TIMEOUT, default=_get_default(CONF_TIMEOUT)): int,
@@ -99,9 +100,9 @@ def _get_schema_tracker(hass: Any, user_input: list, default_dict: list) -> Any:
 def _get_entities(
     hass: HomeAssistant,
     domain: str,
-    search: List[str] = None,
-    extra_entities: List[str] = None,
-) -> List[str]:
+    search: list[str] = [],
+    extra_entities: list[str] = [],
+) -> list[str]:
     data = ["(none)"]
     if domain not in hass.data:
         return data
@@ -117,8 +118,8 @@ def _get_entities(
     return data
 
 
-async def _get_zone_list(self) -> list | None:
-    """Return list of zone by lat/lon"""
+async def _get_zone_list(self) -> str | None:
+    """Return list of zone by lat/lon."""
 
     data = None
     lat = self.hass.config.latitude
@@ -126,13 +127,12 @@ async def _get_zone_list(self) -> list | None:
 
     headers = {"User-Agent": USER_AGENT, "Accept": "application/geo+json"}
 
-    url = API_ENDPOINT + "/zones?point=%s,%s" % (lat, lon)
+    url = f"{API_ENDPOINT}/zones?point={lat},{lon}"
 
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, headers=headers) as r:
-            _LOGGER.debug("getting zone list for %s,%s from %s" % (lat, lon, url))
-            if r.status == 200:
-                data = await r.json()
+    async with aiohttp.ClientSession() as session, session.get(url, headers=headers) as r:
+        _LOGGER.debug("getting zone list for %s,%s from %s", lat, lon, url)
+        if r.status == 200:
+            data = await r.json()
 
     zone_list = []
     if data is not None:
@@ -142,8 +142,7 @@ async def _get_zone_list(self) -> list | None:
                 zone_list.append(data[JSON_FEATURES][x][JSON_PROPERTIES][JSON_ID])
                 x += 1
             _LOGGER.debug("Zones list: %s", zone_list)
-            zone_list = ",".join(str(x) for x in zone_list)  # convert list to str
-            return zone_list
+            return ",".join(str(x) for x in zone_list)  # convert list to str
     return None
 
 
@@ -168,15 +167,11 @@ class NWSAlertsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     #         return self.async_abort(reason=next(iter(errors.values())))
     #     return result
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle the flow initialized by the user."""
         return self.async_show_menu(step_id="user", menu_options=MENU_OPTIONS)
 
-    async def async_step_gps(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_gps(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle the flow initialized by the user."""
         return self.async_show_menu(step_id="gps", menu_options=MENU_GPS)
 
@@ -263,6 +258,7 @@ class NWSAlertsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
+        """Display options flow."""
         return NWSAlertsOptionsFlow(config_entry)
 
 
@@ -318,15 +314,16 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
                 data_schema=_get_schema_gps(self.hass, user_input, self._data),
                 errors=self._errors,
             )
-        elif CONF_ZONE_ID in self.config.data:
+        if CONF_ZONE_ID in self.config.data:
             return self.async_show_form(
                 step_id="zone",
                 data_schema=_get_schema_zone(self.hass, user_input, self._data),
                 errors=self._errors,
             )
-        elif CONF_TRACKER in self.config.data:
+        if CONF_TRACKER in self.config.data:
             return self.async_show_form(
                 step_id="gps_tracker",
                 data_schema=_get_schema_tracker(self.hass, user_input, self._data),
                 errors=self._errors,
             )
+        return None
