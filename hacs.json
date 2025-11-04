@@ -1,6 +1,4 @@
 {
     "name": "NWS Alerts",
-    "domains": [ "sensor" ],
-    "homeassistant": "0.95.4",
-    "iot_class": "Cloud Polling"
+    "homeassistant": "0.95.4"
 }
