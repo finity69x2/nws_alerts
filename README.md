@@ -1,74 +1,86 @@
-# Alerts from the US National Weather Service  (nws_alerts)
-
-## BREAKING CHANGES IN V5.0
-
-This is a pretty much complete rewrite of the integration to better organize the data for the alerts. All of the data provided by the older versions is still included but it's laid out very differently and as such none of the associated automations package or dashboard examples will continue to function as there currently are.
-
-There are newly updated code examples in this repo "packages" and "lovelace" folders. I have done extensive testing to ensure that the new updated package examples work as desired but of course I couldn't test every situation.
-
-For further support and actual attribute examples please go to the "official" integration thread on the HA forum. The information about the update starts at post #545:
-
-https://community.home-assistant.io/t/severe-weather-alerts-from-the-us-national-weather-service/71853/545
-
-<s><b>Use at your own risk!</b></s>
-
-That was probably overly fatalistic. I just wanted people to understand that there could be unforseen bugs in the integration or more likely the code examples and to be aware of that.
+# Alerts from the US National Weather Service (nws_alerts)
 
 ## Description:
 
-An updated version of the nws_alerts custom integration for Home Assistant originally found at github.com/eracknaphobia/nws_custom_component
+This is an updated version of the nws_alerts custom integration for Home Assistant originally found at github.com/eracknaphobia/nws_custom_component
 
 This integration retrieves updated weather alerts every minute from the US NWS API (by default but it can be changed in the config options).
 
-You can configure the integration to use your NWS Zone, your precise location via GPS coordinates or you can get dynamic location alerts by configuring the integration to use a device_tracker entity from HA as long as that device tracker provides GPS coordinates.
+You can configure the integration to use your NWS Zone or County ID, your precise location via GPS coordinates or you can get dynamic location alerts by configuring the integration to use a device_tracker entity from HA as long as that device tracker provides GPS coordinates.
 
 The integration presents the number of currently active alerts as the state of the sensor and lists many alert details as a list in the attributes of the sensor.
 
-The sensor that is created is used in my ["NWS Alerts" package](https://github.com/finity69x2/nws_alerts/tree/a31ed70c568f942bb09306ee3580d25ba9811d5a/packages). Use the package appropriate for your version.
+The sensor that is created can be used in my ["NWS Alerts" package](https://github.com/finity69x2/nws_alerts/tree/a31ed70c568f942bb09306ee3580d25ba9811d5a/packages). Use the package appropriate for your version.
 
 You can also display the generated alerts in your frontend. For example usage see [here](https://github.com/finity69x2/nws_alerts/blob/a31ed70c568f942bb09306ee3580d25ba9811d5a/lovelace/alerts_tab.yaml)
 
 ## Installation:
 
-<b>Manually:</b>
+### HACS:
 
-Clone the Repository and copy the "nws_alerts" directory to your "custom_components" directory in your config directory
+- Open the HACS section of Home Assistant.
 
-```<config directory>/custom_components/nws_alerts/...```
-  
-<b>HACS:</b>
+- Enter "NWS Alerts" into the search bar.
 
-open the HACS section of Home Assistant.
+- Look for "NWS Alerts" in the integrations section.
 
-Click the "+ Explore & Download Repositories" button in the bottom right corner.
+- Click on the entry and then click the "Download" at the bottom right corner.
 
-In the window that opens search for "NWS Alerts".
+### Manually:
 
-In the window that opens when you select it click on "Install This Repository in HACS"
+- Clone the Repository and copy the "nws_alerts" directory from the downloaded directory into your "custom_components" directory in your config directory.
 
-After installing the integration you can then configure it using the instructions in the following section.
+- ```<config directory>/custom_components/nws_alerts/...```
+
+
+After installing the integration into Home Assistant either manually or via HACS you can then configure it using the instructions in the following section.
   
 ## Configuration:
 
-<b>NOTE: As of HA versoin 2024.5.x the yaml configuration option is broken. I don't know if it will ever be fixed so the only viable config option is via the UI</b>
+Go to "Settings" > "Devices & Services" and in the "Integrations" tab click on "+Add Integration" in the bottom right corner
 
-<b>You can configure the integration via the "Configuration->Integrations" section of the Home Assistant UI:</b>
+Search for "NWS Alerts" in the list of integrations and follow the UI prompts to configure the integration.
 
-Click on "+ Add Integration" buuton in the bottom right corner.
+*** There are a few configuration method options to select from. Please see the following link to help you decide which option to use: https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.md
 
-Search for "NWS Alerts" in the list of integrations and follow the UI prompts to configure the sensor.
 
-You can find your Zone or County ID by going to https://alerts.weather.gov/, click on "Land areas with zones", scroll down to your state, then click on either "public zones" or "county zones". Then scroll to find your location (county) from the list(s). The desired zone or county code (depending on which link you used) will be listed above the location
+### If using use either a Zone or County Code:
 
-There are a few configuration method options to select from. 
+1. Zone:
 
-Please see the following link to help you decide which option to use:
+    * Open [NWS GIS Viewer](https://viewer.weather.noaa.gov). This is an interactive GIS map. 
+   
+    * When the map loads find the 'Layers' button toward the top right of the browser window. I recommend using the 'Clear Layers' button first.f
 
-https://github.com/finity69x2/nws_alerts/blob/master/lookup_options.md
+    * Enable 'Reference Layers' -> 'Surface Weather Forecast Zones' -> 'Public Weather Forecast Zones'
+	
+	* Find your zone ID on the map.
+	
+	* To use the zone id code you will need to modify it as follows:
+	  
+	  - The state abbreviation from the zone id followed by 'Z' then the three digit numerical portion of the zone id.
+	  - For example if the zone id is IN009 the code you will use is INZ009
+	  
+2. County
 
-If you select the "Using a device tracker" option under the "GPS Location" option then HA will use the GPS coordinates provided by that tracker to query for alerts so you should follow the same recommendations for using GPS coordinates when using that option.
+   * Go to https://www.weather.gov/pimar/FIPSCodes
+   
+   * Find your state then click on the 'jpg' link in the far right column
+   
+   * Look in the map to find your county.
+   
+   * To use the county id code you will need to modify it as follows:
+	  
+	  - Use the two letter USPS state abbreviation followed by 'C' then the last three digits of the county id.
+	  - For example if the county id is 18033 the code you will use is INC033 (18 is the state code for indiana)
 
-After you restart Home Assistant then you should have a new sensor (by default) called "sensor.nws_alerts" in your system.
+### If using either GPS coordinates or a device tracker
+
+   * If you choose to use the GPS option then the location used by your Home Assistant installation will be entered by default. You can change those GPS coordinates to any that you desire.
+
+   * If you select the "Using a device tracker" option under the "GPS Location" option then HA will use the GPS coordinates provided by that tracker to query for alerts so you should follow the same recommendations for using GPS coordinates when using that option.
+
+After you restart Home Assistant then you should have a new sensor (by default) called "sensor.nws_alerts_alerts" in your system.
 
 ## Testing
 
