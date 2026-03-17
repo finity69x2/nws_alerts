@@ -82,7 +82,7 @@ Search for "NWS Alerts" in the list of integrations and follow the UI prompts to
 
 After you restart Home Assistant then you should have a new sensor (by default) called "sensor.nws_alerts_alerts" in your system.
 
-## Testing
+## Testing:
 
 If there are currently no active alerts for your location but you want to do testing you can use any manually configured location ID that has an active alert.
 
