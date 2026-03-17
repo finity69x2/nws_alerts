@@ -61,7 +61,7 @@ Search for "NWS Alerts" in the list of integrations and follow the UI prompts to
 	  - The state abbreviation from the zone id followed by 'Z' then the three digit numerical portion of the zone id.
 	  - For example if the zone id is IN009 the code you will use is INZ009
 	  
-2. County
+2. County:
 
    * Go to https://www.weather.gov/pimar/FIPSCodes
    
@@ -74,7 +74,7 @@ Search for "NWS Alerts" in the list of integrations and follow the UI prompts to
 	  - Use the two letter USPS state abbreviation followed by 'C' then the last three digits of the county id.
 	  - For example if the county id is 18033 the code you will use is INC033 (18 is the state code for indiana)
 
-### If using either GPS coordinates or a device tracker
+### If using either GPS coordinates or a device tracker:
 
    * If you choose to use the GPS option then the location used by your Home Assistant installation will be entered by default. You can change those GPS coordinates to any that you desire.
 
