@@ -50,7 +50,7 @@ Search for "NWS Alerts" in the list of integrations and follow the UI prompts to
 
     * Open [NWS GIS Viewer](https://viewer.weather.noaa.gov). This is an interactive GIS map. 
    
-    * When the map loads find the 'Layers' button toward the top right of the browser window. I recommend using the 'Clear Layers' button first.f
+    * When the map loads find the 'Layers' button toward the top right of the browser window. I recommend using the 'Clear Layers' button first.
 
     * Enable 'Reference Layers' -> 'Surface Weather Forecast Zones' -> 'Public Weather Forecast Zones'
 	
