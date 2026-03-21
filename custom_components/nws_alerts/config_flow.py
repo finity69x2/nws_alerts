@@ -104,13 +104,13 @@ def _get_entities(
     extra_entities: list[str] = [],
 ) -> list[str]:
     data = ["(none)"]
-    if domain not in hass.data:
-        return data
+    
+    entities = hass.states.async_entity_ids(domain)
 
-    for entity in hass.data[domain].entities:
-        if search is not None and not any(map(entity.entity_id.__contains__, search)):
+    for entity_id in entities:
+        if search and not any(map(entity_id.__contains__, search)):
             continue
-        data.append(entity.entity_id)
+        data.append(entity_id)
 
     if extra_entities:
         data.extend(extra_entities)
