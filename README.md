@@ -89,3 +89,11 @@ If there are currently no active alerts for your location but you want to do tes
 To find those locations go to: https://api.weather.gov/alerts/active/count you will see a list of all areas with active alerts and how many alerts are active for each area.
 
 You can use the given code(s) in your config to get the alerts for the selected zones in the integration.
+
+## Additional Information:
+
+In release 6.6 I've added "NWSCode" to the Alert list as an additional way to filter alerts. It may make it easier to filter using the code than needing to search thru text strings as I do now in my example packages.
+
+For a full list of the NWS Even Codes see here:
+
+https://vlab.noaa.gov/web/nws-common-alerting-protocol/cap-documentation#_eventcode_inclusion-16
