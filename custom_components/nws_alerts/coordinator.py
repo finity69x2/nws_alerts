@@ -155,6 +155,7 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
                         tmp_dict["Headline"] = event
 
                     tmp_dict["Type"] = alert["properties"]["messageType"]
+                    tmp_dict["NWSCode"] = alert["properties"]["eventCode"]["NationalWeatherService"][0]
                     tmp_dict["Status"] = alert["properties"]["status"]
                     tmp_dict["Severity"] = alert["properties"]["severity"]
                     tmp_dict["Certainty"] = alert["properties"]["certainty"]
