@@ -14,7 +14,7 @@ The sensor that is created can be used in my ["NWS Alerts" package](https://gith
 
 You can also display the generated alerts in your frontend. For example usage see [here](https://github.com/finity69x2/nws_alerts/blob/a31ed70c568f942bb09306ee3580d25ba9811d5a/lovelace/alerts_tab.yaml)
 
-Additionally, there is a very nice dashboard card created by another user (@seevee) for use in displaying the sensor data in your frontend. The card is located [here](https://github.com/seevee/weather_alerts_card) and can be installed into Home Assistant via HACS. 
+Additionally, there is a very nice dashboard card created by another user (@seevee) for use in displaying the sensor data in your frontend. The card is located [here](https://github.com/seevee/weather_alerts_card) and can be installed into Home Assistant via HACS (search for "weather alerts card"). 
 
 And just to clarify, I'm not the creator or maintainer of that card so any issues or feature requests should be directed to their Github page and not here.
 
