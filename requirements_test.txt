@@ -1,11 +1,5 @@
 pytest-homeassistant-custom-component
-black
-flake8
 mypy
-pydocstyle
-isort
-pylint
-tox
 pytest
 aioresponses
 ruff
