@@ -77,9 +77,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
         if waited >= max_wait:
             _LOGGER.warning(
-                "Tracker %s not available after %s seconds, proceeding anyway",
-                tracker_id,
-                max_wait
+                "Tracker %s not available after %s seconds, proceeding anyway", tracker_id, max_wait
             )
 
     # Fetch initial data so we have data when entities subscribe

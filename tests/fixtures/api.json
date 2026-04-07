@@ -65,6 +65,11 @@
         "certainty": "Likely",
         "urgency": "Expected",
         "event": "Excessive Heat Warning",
+        "eventCode": {
+          "NationalWeatherService": [
+            "EHW"
+          ]
+        },
         "sender": "w-nws.webmaster@noaa.gov",
         "senderName": "NWS Phoenix AZ",
         "headline": "Excessive Heat Warning issued July 18 at 12:47PM MST until July 20 at 8:00PM MST by NWS Phoenix AZ",
@@ -128,6 +133,11 @@
         "certainty": "Unknown",
         "urgency": "Unknown",
         "event": "Air Quality Alert",
+        "eventCode": {
+          "NationalWeatherService": [
+            "AQA"
+          ]
+        },
         "sender": "w-nws.webmaster@noaa.gov",
         "senderName": "NWS Phoenix AZ",
         "headline": "Air Quality Alert issued July 18 at 8:13AM MST by NWS Phoenix AZ",
