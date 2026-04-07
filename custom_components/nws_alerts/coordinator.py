@@ -131,8 +131,9 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
             if r.status == 200:
                 data = await r.json()
             else:
-                _LOGGER.error("Problem updating NWS data: (%s) - %s", r.status, r.content)
-                raise UpdateFailed("Problem updating NWS data: (%s) - %s", r.status, r.content) from error
+                msg = f"Problem updating NWS data: ({r.status}) - {r.reason}"
+                _LOGGER.warning(msg)
+                raise UpdateFailed(msg)
 
         if data is not None and "features" in data:
             features = data["features"]
