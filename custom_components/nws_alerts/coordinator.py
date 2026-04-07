@@ -176,7 +176,7 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
                     continue
 
             alerts["state"] = len(alert_list)
-            alerts["alerts"] = sorted(alert_list, key=lambda x: x['ID'])
+            alerts["alerts"] = sorted(alert_list, key=lambda x: x["ID"])
             alerts["last_updated"] = datetime.now().isoformat()
 
         return alerts
