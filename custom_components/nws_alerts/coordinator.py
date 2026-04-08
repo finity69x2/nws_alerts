@@ -167,6 +167,11 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
                     tmp_dict["Expires"] = alert["properties"]["expires"]
                     tmp_dict["Ends"] = alert["properties"]["ends"]
                     tmp_dict["AreasAffected"] = alert["properties"]["areaDesc"]
+                    geocode = alert["properties"].get("geocode") or {}
+                    tmp_dict["Geocode"] = {
+                        "UGC": geocode.get("UGC", []),
+                        "SAME": geocode.get("SAME", []),
+                    }
                     tmp_dict["Description"] = alert["properties"]["description"]
                     tmp_dict["Instruction"] = alert["properties"]["instruction"]
 
