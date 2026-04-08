@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install ruff
-      - run: ruff format --check custom_components/ tests/
+      - run: ruff format --diff custom_components/ tests/
       - run: ruff check custom_components/ tests/
 
   typecheck:
