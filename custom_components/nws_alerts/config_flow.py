@@ -106,7 +106,7 @@ def _get_entities(
     extra_entities: list[str] = [],
 ) -> list[str]:
     data = ["(none)"]
-    
+
     entities = hass.states.async_entity_ids(domain)
 
     for entity_id in entities:
