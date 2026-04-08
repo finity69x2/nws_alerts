@@ -27,6 +27,8 @@ from .const import (
     DEFAULT_TIMEOUT,
     DOMAIN,
     USER_AGENT,
+    LOOKUP_URL,
+    ID_URL,
 )
 
 JSON_FEATURES = "features"
@@ -104,7 +106,7 @@ def _get_entities(
     extra_entities: list[str] = [],
 ) -> list[str]:
     data = ["(none)"]
-
+    
     entities = hass.states.async_entity_ids(domain)
 
     for entity_id in entities:
@@ -169,7 +171,7 @@ class NWSAlertsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle the flow initialized by the user."""
-        return self.async_show_menu(step_id="user", menu_options=MENU_OPTIONS)
+        return self.async_show_menu(step_id="user", menu_options=MENU_OPTIONS, description_placeholders={"lookup_url": LOOKUP_URL},)
 
     async def async_step_gps(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle the flow initialized by the user."""
@@ -253,6 +255,7 @@ class NWSAlertsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="zone",
             data_schema=_get_schema_zone(self.hass, user_input, defaults),
             errors=self._errors,
+            description_placeholders={"id_url": ID_URL},
         )
 
     @staticmethod
