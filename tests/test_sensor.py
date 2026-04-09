@@ -4,13 +4,11 @@ import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.nws_alerts.const import DOMAIN
+from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.helpers import entity_registry as er
 from tests.const import CONFIG_DATA
 
 pytestmark = pytest.mark.asyncio
-
-NWS_SENSOR = "sensor.nws_alerts_alerts"
-NWS_SENSOR_2 = "sensor.nws_alerts_yaml"
 
 
 async def test_sensor(hass, mock_api):
@@ -26,7 +24,12 @@ async def test_sensor(hass, mock_api):
     await hass.async_block_till_done()
 
     assert "nws_alerts" in hass.config.components
-    state = hass.states.get(NWS_SENSOR)
+
+    # Entity id is derived from the configured name, so look it up dynamically
+    # rather than hard-coding a fragile sensor.nws_alerts_alerts literal.
+    entity_ids = hass.states.async_entity_ids(SENSOR_DOMAIN)
+    alerts_entity_id = next(eid for eid in entity_ids if eid.endswith("_alerts"))
+    state = hass.states.get(alerts_entity_id)
     assert state
     assert state.state == "2"
     assert state.attributes["Alerts"] == [
@@ -69,4 +72,4 @@ async def test_sensor(hass, mock_api):
     ]
     assert state.attributes["Alerts"][0]["ID"] == "7681487b-41c6-0308-1a00-3cade72982c1"
     entity_registry = er.async_get(hass)
-    assert entity_registry.async_get(NWS_SENSOR)
+    assert entity_registry.async_get(alerts_entity_id)
