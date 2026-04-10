@@ -170,7 +170,6 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
                     geocode = alert["properties"].get("geocode") or {}
                     tmp_dict["Geocode"] = {
                         "UGC": geocode.get("UGC", []),
-                        "SAME": geocode.get("SAME", []),
                     }
                     tmp_dict["Description"] = alert["properties"]["description"]
                     tmp_dict["Instruction"] = alert["properties"]["instruction"]

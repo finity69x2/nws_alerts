@@ -62,7 +62,6 @@ async def test_sensor(hass, mock_api):
                     "AZZ550",
                     "AZZ551",
                 ],
-                "SAME": ["004013"],
             },
         },
         {
@@ -82,7 +81,7 @@ async def test_sensor(hass, mock_api):
             "Expires": "2024-07-19T21:00:00-07:00",
             "Description": "AQAPSR\n\nThe Arizona Department of Environmental Quality (ADEQ) has issued an\nOzone High Pollution Advisory for the Phoenix Metro Area through\nFriday.\n\nThis means that forecast weather conditions combined with existing\nozone levels are expected to result in local maximum 8-hour ozone\nconcentrations that pose a health risk. Adverse health effects\nincrease as air quality deteriorates.\n\nOzone is an air contaminant which can cause breathing difficulties\nfor children, older adults, as well as persons with respiratory\nproblems. A decrease in physical activity is recommended.\n\nYou are urged to car pool, telecommute or use mass transit.\nThe use of gasoline-powered equipment should be reduced or done late\nin the day.\n\nFor details on this High Pollution Advisory, visit the ADEQ internet\nsite at www.azdeq.gov/forecast/phoenix or call 602-771-2300.",
             "Instruction": None,
-            "Geocode": {"UGC": ["AZC013"], "SAME": ["004013"]},
+            "Geocode": {"UGC": ["AZC013"]},
         },
     ]
     assert state.attributes["Alerts"][0]["ID"] == "7681487b-41c6-0308-1a00-3cade72982c1"
