@@ -29,6 +29,7 @@ from .const import (
     DOMAIN,
     ID_URL,
     LOOKUP_URL,
+    USER_AGENT,
 )
 
 JSON_FEATURES = "features"
@@ -128,7 +129,7 @@ async def _get_zone_list(self) -> str | None:
     lon = self.hass.config.longitude
 
     instance_id = await async_get_instance_id(self.hass)
-    user_agent = f"nws_alerts homeassistant {instance_id}"
+    user_agent = USER_AGENT.format(instance_id)
     headers = {"User-Agent": user_agent, "Accept": "application/geo+json"}
 
     url = f"{API_ENDPOINT}/zones?point={lat},{lon}"

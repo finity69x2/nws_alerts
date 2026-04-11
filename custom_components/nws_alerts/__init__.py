@@ -21,6 +21,7 @@ from .const import (
     DOMAIN,
     ISSUE_URL,
     PLATFORMS,
+    USER_AGENT,
     VERSION,
 )
 from .coordinator import AlertsDataUpdateCoordinator
@@ -58,7 +59,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
     # Build per-installation User-Agent per NWS API guidelines
     instance_id = await async_get_instance_id(hass)
-    user_agent = f"nws_alerts homeassistant {instance_id}"
+    user_agent = USER_AGENT.format(instance_id)
     _LOGGER.debug("NWS User-Agent: %s", user_agent)
 
     # Setup the data coordinator
