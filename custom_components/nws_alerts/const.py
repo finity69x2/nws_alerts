@@ -4,7 +4,6 @@ from homeassistant.const import Platform
 
 # API
 API_ENDPOINT = "https://api.weather.gov"
-USER_AGENT = "Home Assistant"
 
 # Config
 CONF_TIMEOUT = "timeout"

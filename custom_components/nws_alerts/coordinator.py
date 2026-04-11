@@ -19,7 +19,6 @@ from .const import (
     CONF_TIMEOUT,
     CONF_TRACKER,
     CONF_ZONE_ID,
-    USER_AGENT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,12 +27,21 @@ _LOGGER = logging.getLogger(__name__)
 class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching NWS Alert data."""
 
-    def __init__(self, hass, config):
+    def __init__(
+        self,
+        hass,
+        config,
+        *,
+        session: aiohttp.ClientSession,
+        user_agent: str,
+    ):
         """Initialize."""
         self.interval = timedelta(minutes=config.data.get(CONF_INTERVAL))
         self.name = config.data.get(CONF_NAME)
         self.timeout = config.data.get(CONF_TIMEOUT)
         self._config = config
+        self._session = session
+        self._user_agent = user_agent
         self.hass = hass
 
         _LOGGER.debug("Data will be update every %s", self.interval)
@@ -117,7 +125,7 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
             "alerts": [],
             "last_updated": datetime.now().isoformat(),
         }
-        headers = {"User-Agent": USER_AGENT, "Accept": "application/geo+json"}
+        headers = {"User-Agent": self._user_agent, "Accept": "application/geo+json"}
         data = None
 
         if zone_id != "":
@@ -127,7 +135,7 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
             url = f"{API_ENDPOINT}/alerts/active?point={gps_loc}"
             _LOGGER.debug("getting alert for %s from %s", gps_loc, url)
 
-        async with aiohttp.ClientSession() as session, session.get(url, headers=headers) as r:
+        async with self._session.get(url, headers=headers) as r:
             if r.status == 200:
                 data = await r.json()
             else:
