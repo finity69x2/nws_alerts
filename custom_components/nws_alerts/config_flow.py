@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import aiohttp
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -13,6 +12,8 @@ from homeassistant.components.device_tracker import DOMAIN as TRACKER_DOMAIN
 from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.instance_id import async_get as async_get_instance_id
 
 from .const import (
     API_ENDPOINT,
@@ -26,9 +27,9 @@ from .const import (
     DEFAULT_NAME,
     DEFAULT_TIMEOUT,
     DOMAIN,
-    USER_AGENT,
-    LOOKUP_URL,
     ID_URL,
+    LOOKUP_URL,
+    USER_AGENT,
 )
 
 JSON_FEATURES = "features"
@@ -127,11 +128,14 @@ async def _get_zone_list(self) -> str | None:
     lat = self.hass.config.latitude
     lon = self.hass.config.longitude
 
-    headers = {"User-Agent": USER_AGENT, "Accept": "application/geo+json"}
+    instance_id = await async_get_instance_id(self.hass)
+    user_agent = USER_AGENT.format(instance_id)
+    headers = {"User-Agent": user_agent, "Accept": "application/geo+json"}
 
     url = f"{API_ENDPOINT}/zones?point={lat},{lon}"
 
-    async with aiohttp.ClientSession() as session, session.get(url, headers=headers) as r:
+    session = async_get_clientsession(self.hass)
+    async with session.get(url, headers=headers) as r:
         _LOGGER.debug("getting zone list for %s,%s from %s", lat, lon, url)
         if r.status == 200:
             data = await r.json()
