@@ -326,6 +326,7 @@ class NWSAlertsOptionsFlow(config_entries.OptionsFlow):
                 step_id="zone",
                 data_schema=_get_schema_zone(self.hass, user_input, self._data),
                 errors=self._errors,
+                description_placeholders={"id_url": ID_URL},
             )
         if CONF_TRACKER in self.config.data:
             return self.async_show_form(
