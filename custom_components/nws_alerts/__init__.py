@@ -5,7 +5,9 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_registry import async_entries_for_config_entry, async_get
+from homeassistant.helpers.instance_id import async_get as async_get_instance_id
 
 from .const import (
     CONF_GPS_LOC,
@@ -19,6 +21,7 @@ from .const import (
     DOMAIN,
     ISSUE_URL,
     PLATFORMS,
+    USER_AGENT,
     VERSION,
 )
 from .coordinator import AlertsDataUpdateCoordinator
@@ -54,10 +57,17 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
     config_entry.add_update_listener(update_listener)
 
+    # Build per-installation User-Agent per NWS API guidelines
+    instance_id = await async_get_instance_id(hass)
+    user_agent = USER_AGENT.format(instance_id)
+    _LOGGER.debug("NWS User-Agent: %s", user_agent)
+
     # Setup the data coordinator
     coordinator = AlertsDataUpdateCoordinator(
         hass,
         config_entry,
+        session=async_get_clientsession(hass),
+        user_agent=user_agent,
     )
 
     # Wait for device tracker to become available on startup
