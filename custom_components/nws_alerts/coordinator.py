@@ -62,10 +62,6 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
         async with timeout(self.timeout):
             try:
                 data = await self.update_alerts(coords)
-            except AttributeError as error:
-                _LOGGER.warning("AttributeError fetching NWS Alerts data: %s. Will retry.", error)
-                # Return valid structure instead of None
-                return {"state": 0, "alerts": [], "last_updated": datetime.now().isoformat()}
             except Exception as error:
                 raise UpdateFailed(error) from error
             _LOGGER.debug("Data: %s", data)
@@ -108,8 +104,7 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
             elif CONF_GPS_LOC in self._config.data:
                 gps_loc = self._config.data[CONF_GPS_LOC].replace(" ", "")
             else:
-                _LOGGER.warning("Tracker configured but no GPS coordinates available")
-                return values
+                raise UpdateFailed("Tracker configured but no GPS coordinates available")
 
             _LOGGER.debug("Fetching alerts for GPS location: %s", gps_loc)
             values = await self.async_get_alerts(gps_loc=gps_loc)
@@ -143,49 +138,58 @@ class AlertsDataUpdateCoordinator(DataUpdateCoordinator):
                 _LOGGER.warning(msg)
                 raise UpdateFailed(msg)
 
-        if data is not None and "features" in data:
-            features = data["features"]
-            alert_list: list[Any] = []
-            for alert in features:
-                try:
-                    tmp_dict: dict[str, Any] = {}
+        # NWS answers some failures with a problem+json body and a 200, which has no
+        # features and would otherwise read as "no alerts".
+        if not isinstance(data, dict) or data.get("type") != "FeatureCollection":
+            detail = (
+                data.get("title", data.get("type"))
+                if isinstance(data, dict)
+                else type(data).__name__
+            )
+            raise UpdateFailed(f"Unexpected NWS response, not a FeatureCollection: {detail}")
+        features = data.get("features")
+        if not isinstance(features, list):
+            raise UpdateFailed("Unexpected NWS response, FeatureCollection has no features list")
 
-                    # Generate stable Alert ID
-                    alert_id = await self.generate_id(alert["id"])
+        alert_list: list[Any] = []
+        for alert in features:
+            try:
+                tmp_dict: dict[str, Any] = {}
 
-                    tmp_dict["Event"] = alert["properties"]["event"]
-                    tmp_dict["ID"] = alert_id
-                    tmp_dict["URL"] = alert["id"]
+                # Generate stable Alert ID
+                alert_id = await self.generate_id(alert["id"])
 
-                    event = alert["properties"]["event"]
-                    if "NWSheadline" in alert["properties"]["parameters"]:
-                        tmp_dict["Headline"] = alert["properties"]["parameters"]["NWSheadline"][0]
-                    else:
-                        tmp_dict["Headline"] = event
+                tmp_dict["Event"] = alert["properties"]["event"]
+                tmp_dict["ID"] = alert_id
+                tmp_dict["URL"] = alert["id"]
 
-                    tmp_dict["Type"] = alert["properties"]["messageType"]
-                    tmp_dict["NWSCode"] = alert["properties"]["eventCode"][
-                        "NationalWeatherService"
-                    ][0]
-                    tmp_dict["Status"] = alert["properties"]["status"]
-                    tmp_dict["Severity"] = alert["properties"]["severity"]
-                    tmp_dict["Certainty"] = alert["properties"]["certainty"]
-                    tmp_dict["Sent"] = alert["properties"]["sent"]
-                    tmp_dict["Onset"] = alert["properties"]["onset"]
-                    tmp_dict["Expires"] = alert["properties"]["expires"]
-                    tmp_dict["Ends"] = alert["properties"]["ends"]
-                    tmp_dict["AreasAffected"] = alert["properties"]["areaDesc"]
-                    tmp_dict["Description"] = alert["properties"]["description"]
-                    tmp_dict["Instruction"] = alert["properties"]["instruction"]
+                event = alert["properties"]["event"]
+                if "NWSheadline" in alert["properties"]["parameters"]:
+                    tmp_dict["Headline"] = alert["properties"]["parameters"]["NWSheadline"][0]
+                else:
+                    tmp_dict["Headline"] = event
 
-                    alert_list.append(tmp_dict)
-                except (KeyError, TypeError) as error:
-                    _LOGGER.warning("Error parsing alert data: %s. Skipping this alert.", error)
-                    continue
+                tmp_dict["Type"] = alert["properties"]["messageType"]
+                tmp_dict["NWSCode"] = alert["properties"]["eventCode"]["NationalWeatherService"][0]
+                tmp_dict["Status"] = alert["properties"]["status"]
+                tmp_dict["Severity"] = alert["properties"]["severity"]
+                tmp_dict["Certainty"] = alert["properties"]["certainty"]
+                tmp_dict["Sent"] = alert["properties"]["sent"]
+                tmp_dict["Onset"] = alert["properties"]["onset"]
+                tmp_dict["Expires"] = alert["properties"]["expires"]
+                tmp_dict["Ends"] = alert["properties"]["ends"]
+                tmp_dict["AreasAffected"] = alert["properties"]["areaDesc"]
+                tmp_dict["Description"] = alert["properties"]["description"]
+                tmp_dict["Instruction"] = alert["properties"]["instruction"]
 
-            alerts["state"] = len(alert_list)
-            alerts["alerts"] = sorted(alert_list, key=lambda x: x["ID"])
-            alerts["last_updated"] = datetime.now().isoformat()
+                alert_list.append(tmp_dict)
+            except (KeyError, TypeError) as error:
+                _LOGGER.warning("Error parsing alert data: %s. Skipping this alert.", error)
+                continue
+
+        alerts["state"] = len(alert_list)
+        alerts["alerts"] = sorted(alert_list, key=lambda x: x["ID"])
+        alerts["last_updated"] = datetime.now().isoformat()
 
         return alerts
 
