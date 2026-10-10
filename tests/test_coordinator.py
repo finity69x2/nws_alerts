@@ -8,7 +8,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.nws_alerts.const import COORDINATOR, DOMAIN
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
-from tests.conftest import ZONE_URL
+from tests.conftest import ZONE_URL, load_fixture
 from tests.const import CONFIG_DATA
 
 pytestmark = pytest.mark.asyncio
@@ -90,6 +90,29 @@ async def test_empty_features_is_zero_alerts(hass, mock_api):
     assert coordinator.data["state"] == 0
     assert coordinator.data["alerts"] == []
     assert _alerts_state(hass) == "0"
+
+
+async def test_malformed_feature_is_skipped(hass, mock_api, caplog):
+    """One feature the parser can't read is dropped; the rest of the list still publishes."""
+    coordinator = await _setup(hass, CONFIG_DATA)
+    good = json.loads(load_fixture("api.json"))
+    body = {
+        "type": "FeatureCollection",
+        "features": [
+            good["features"][0],
+            {"id": "https://api.weather.gov/alerts/bad"},
+            good["features"][1],
+        ],
+    }
+    mock_api.clear()
+    mock_api.get(ZONE_URL, status=200, body=json.dumps(body))
+    await coordinator.async_refresh()
+    await hass.async_block_till_done()
+    assert coordinator.last_update_success is True
+    assert coordinator.data["state"] == 2
+    assert {a["URL"] for a in coordinator.data["alerts"]} == {f["id"] for f in good["features"]}
+    assert _alerts_state(hass) == "2"
+    assert "Skipping this alert" in caplog.text
 
 
 async def test_tracker_without_coordinates_fails_update(hass, mock_api):
