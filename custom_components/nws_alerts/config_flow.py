@@ -157,7 +157,6 @@ class NWSAlertsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for NWS Alerts."""
 
     VERSION = CONFIG_VERSION
-    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
     def __init__(self):
         """Initialize."""
